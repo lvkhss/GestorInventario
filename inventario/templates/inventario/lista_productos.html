@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Ensure the Ionicons library is correctly loaded -->
+
+    <title>Gestor de Inventario</title>
+    <title>Inventario</title>
+</head>
+<body>
+    <section class="sidebar">
+        <div class="sidebar-bg btn-toggle-menu"></div>
+        <div class="sidebar-body">
+          <div class="sidebar-logo text-center">
+            <span></span> Inventario
+          </div>
+          <figure class="sidebar-user">
+            <figcaption>
+              <span>
+                Usuario:<br>
+                <small>Admin</small>
+              </span>
+            </figcaption>
+          </figure>
+          <nav class="sidebar-nav">
+            <ul class="menu">
+              <li>
+                <a href="" class="menu-link">
+                  <span class="icon">🏠</span>
+                  <span class="text">HOME</span>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="" class="menu-link">
+                  <span class="icon">🚚</span>
+                  <span class="text">PROVEEDORES</span>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="" class="menu-link">
+                  <span class="icon">👤</span>
+                  <span class="text">USUARIOS</span>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="products.html" class="menu-link">
+                  <span class="icon">📦</span>
+                  <span class="text">PRODUCTS</span>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="sales.html" class="menu-link">
+                  <span class="icon">🛒</span>
+                  <span class="text">SALES</span>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="inventorio.html" class="menu-link">
+                  <span class="icon">🏬</span>
+                  <span class="text">INVENTORY</span>
+                </a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="#" class="menu-link">
+                  <span class="icon">⚙️</span>
+                  <span class="text">SETTINGS</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </section>
+      <div class="dashboard">
+        <div class="top-summary">
+          <div class="summary-card users"><div class="icon">👤</div> <div><span>1</span><br>Usuarios</div></div>
+          <div class="summary-card products"><div class="icon">🛒</div> <div><span>3</span><br>Productos</div></div>
+          <div class="summary-card sales"><div class="icon">💲</div> <div><span>7</span><br>Ventas</div></div>
+        </div>
+    
+        <div class="grids">
+          <!-- Más vendidos -->
+          <div class="card">
+            <h3>⚠️ PRODUCTOS CON MENOS STOCK</h3>
+            <table>
+              <tr><th>Título</th><th>Total vendido</th><th>Cantidad total</th></tr>
+              <tr><td>Silicona Gris 4e</td><td>3</td><td>4</td></tr>
+              <tr><td>Pestillo HT</td><td>2</td><td>2</td></tr>
+              <tr><td>Tirador Curvo</td><td>2</td><td>2</td></tr>
+            </table>
+          </div>
+    
+          <!-- Últimas ventas -->
+          <div class="card">
+            <h3>🕓 ÚLTIMAS VENTAS</h3>
+            <table>
+              <tr><th>#</th><th>Producto</th><th>Fecha</th><th>Venta total</th></tr>
+              <tr><td>1</td><td>Silicona Gris 4e</td><td>09-05-2025</td><td>$3.000</td></tr>
+              <tr><td>2</td><td>Pestillo HT</td><td>09-05-2025</td><td>$5.000</td></tr>
+              <tr><td>3</td><td>Tirador Curvo</td><td>09-05-2025</td><td>$12.000</td></tr>
+              <tr><td>4</td><td>Cuchillo Cartonero<td>09-05-2025</td><td>$8.000</td></tr>
+              <tr><td>5</td><td>Tornillo Autoperforante 1/2 8mm</td><td>09-05-2025</td><td>$10.000</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+</body>
+</html>
