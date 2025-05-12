@@ -1,7 +1,0 @@
-<h1>{{ accion }} Producto</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{{ accion }}</button>
-    <a href="{% url 'lista_productos' %}">Cancelar</a>
-</form>
