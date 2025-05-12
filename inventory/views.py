@@ -7,6 +7,9 @@ from .models import *
 from .forms import *
 
 
+def inventario(request):
+    return render(request, 'inv/inventario.html')
+
 def index(request):
     return render(request, 'inv/index.html')
 
@@ -16,7 +19,7 @@ def display_laptops(request):
         'items': items,
         'header': 'Laptops',
     }
-    return render(request, 'inv/index.html', context)
+    return render(request, 'inv/inventario.html', context)
 
 
 def display_desktops(request):
@@ -25,7 +28,7 @@ def display_desktops(request):
         'items': items,
         'header': 'Desktops',
     }
-    return render(request, 'inv/index.html', context)
+    return render(request, 'inv/inventario.html', context)
 
 
 def display_mobiles(request):
@@ -34,7 +37,7 @@ def display_mobiles(request):
         'items': items,
         'header': 'Mobiles',
     }
-    return render(request, 'inv/index.html', context)
+    return render(request, 'inv/inventario.html', context)
 
 def add_item(request, cls):
     if request.method == "POST":
@@ -42,7 +45,7 @@ def add_item(request, cls):
 
         if form.is_valid():
             form.save()
-            return redirect('index')
+            return redirect('inventario')
 
     else:
         form = cls()
@@ -68,7 +71,7 @@ def edit_item(request, pk, model, cls):
         form = cls(request.POST, instance=item)
         if form.is_valid():
             form.save()
-            return redirect('index')
+            return redirect('inventario')
     else:
         form = cls(instance=item)
 
@@ -90,7 +93,7 @@ def edit_mobile(request, pk):
 
 def delete_laptop(request, pk):
 
-    template = 'inv/index.html'
+    template = 'inv/inventario.html'
     Laptops.objects.filter(id=pk).delete()
 
     items = Laptops.objects.all()
@@ -104,7 +107,7 @@ def delete_laptop(request, pk):
 
 def delete_desktop(request, pk):
 
-    template = 'inv/index.html'
+    template = 'inv/inventario.html'
     Desktops.objects.filter(id=pk).delete()
 
     items = Desktops.objects.all()
@@ -118,7 +121,7 @@ def delete_desktop(request, pk):
 
 def delete_mobile(request, pk):
 
-    template = 'inv/index.html'
+    template = 'inv/inventario.html'
     Mobiles.objects.filter(id=pk).delete()
 
     items = Mobiles.objects.all()
