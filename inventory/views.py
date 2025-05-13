@@ -7,11 +7,30 @@ from .models import *
 from .forms import *
 
 
+
+
 def inventario(request):
     return render(request, 'inv/inventario.html')
 
 def index(request):
-    return render(request, 'inv/index.html')
+    laptops = Laptops.objects.all()
+    desktops = Desktops.objects.all()
+    mobiles = Mobiles.objects.all()
+
+    items = [
+        {"item": laptop, "category": "Laptops"} for laptop in laptops
+    ] + [
+        {"item": desktop, "category": "Desktops"} for desktop in desktops
+    ] + [
+        {"item": mobile, "category": "Mobiles"} for mobile in mobiles
+    ]
+
+    print(items)  # Debug: Print items to the console
+
+    context = {
+        'items': items,
+    }
+    return render(request, 'inv/index.html', context)
 
 def display_laptops(request):
     items = Laptops.objects.all()

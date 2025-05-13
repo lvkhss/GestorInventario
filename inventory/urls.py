@@ -18,5 +18,5 @@ urlpatterns = [
     re_path(r'^laptops/delete/(?P<pk>\d+)$', delete_laptop, name="delete_laptop"),
     re_path(r'^desktops/delete/(?P<pk>\d+)$', delete_desktop, name="delete_desktop"),
     re_path(r'^mobiles/delete/(?P<pk>\d+)$', delete_mobile, name="delete_mobile"),
-    re_path(r'^inventario$', inventario, name='inventario'),  # Reference 'inventario' directly
+    re_path(r'^inventario$', inventario, name='inventario'), 
 ]
