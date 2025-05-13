@@ -9,7 +9,7 @@ body {
 
 
 .navbar-vertical {
-    background-color: #343a40; 
+    background-color: #354e66; 
     color: white;
     height: 100vh;
     width: 220px; 
@@ -33,7 +33,7 @@ body {
 }
 
 .navbar-vertical a:hover {
-    background-color: #495057; 
+    background-color: #415970; 
     color: #ffc107; 
     border-radius: 4px;
 }
