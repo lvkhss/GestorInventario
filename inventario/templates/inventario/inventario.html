@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventario</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <script src="{% static 'code.js' %}"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="main-container">
+    <section class="sidebar">
+      <div class="sidebar-bg btn-toggle-menu"></div>
+      <div class="sidebar-body">
+        <div class="sidebar-logo text-center">
+          <span></span> Inventario
+        </div>
+        <figure class="sidebar-user">
+          <figcaption>
+            <span>
+              Usuario:<br>
+              <small>Admin</small>
+            </span>
+          </figcaption>
+        </figure>
+        <nav class="sidebar-nav">
+          <ul class="menu">
+            <li>
+              <a href="{% url 'lista_productos' %}" class="menu-link">
+                <span class="icon">🏠</span>
+                <span class="text">HOME</span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li>
+                    <a href="{% url 'proveedores' %}" class="menu-link">
+                    <span class="icon">🚚</span>
+                    <span class="text">PROVEEDORES</span>
+                    </a>
+                </li>
+            <li class="divider"></li>
+            <li>
+              <a href="" class="menu-link">
+                <span class="icon">👤</span>
+                <span class="text">USUARIOS</span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a href="{% url 'inventario' %}" class="menu-link">
+                <span class="icon">🏬</span>
+                <span class="text">INVENTARIO</span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a href="" class="menu-link">
+                <span class="icon">🛒</span>
+                <span class="text">SALES</span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a href="#" class="menu-link">
+                <span class="icon">⚙️</span>
+                <span class="text">SETTINGS</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </section>
+
+    <main class="proveedor-dashboard">
+        <div class="proveedor-titulo-tabla">
+            <span class="proveedor-texto-titulo">Gestión de Inventario</span>
+                <div class="buscador">
+                    <input type="text" id="filtro" placeholder="Buscar producto...">
+                    <button class="proveedor-boton-agregar" id="btnAgregar"><i class="fas fa-plus"></i> Agregar</button>
+                </div>
+            </div>
+
+                <!-- Encabezado de tabla -->
+            <div class="proveedor-columna-tabla">
+                <div>Producto</div>
+                <div>Categoría</div>
+                <div>Cantidad</div>
+                <div>Precio</div>
+                <div>Codigo Barra</div>
+                <div>Acciones</div>
+            </div>
+
+                <!-- Productos -->
+            <ul class="proveedor-fila">
+                <li>Vidrio Laminado</li>
+                <li>Vidrio</li>
+                <li>25</li>
+                <li>$15.000</li>
+                <li>3333333333</li>
+                <li>
+                    <i class="fas fa-edit proveedor-edit-btn"></i>
+                    <i class="fas fa-trash proveedor-delete-btn"></i>
+                </li>
+            </ul>
+
+            <ul class="proveedor-fila">
+                <li>Silicona Sellante</li>
+                <li>Accesorios</li>
+                <li>50</li>
+                <li>$3.500</li>
+                <li>555555555</li>
+                <li>
+                    <i class="fas fa-edit proveedor-edit-btn"></i>
+                    <i class="fas fa-trash proveedor-delete-btn"></i>
+                </li>
+            </ul>
+
+            <div class="proveedor-mensaje">
+                Administra el stock y los productos disponibles para ventas o pedidos.
+            </div>
+
+                <!-- Modal para agregar producto -->
+            <div id="modalAgregar" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn">&times;</span>
+                    <h2>Agregar Producto</h2>
+                        
+                        <!-- Formulario para agregar producto -->
+                    <form id="formAgregarProducto">
+                        <label for="nombreProducto">Nombre del Producto:</label>
+                        <input type="text" id="nombreProducto" name="nombreProducto" required>
+                            
+                        <label for="categoriaProducto">Categoría:</label>
+                        <input type="text" id="categoriaProducto" name="categoriaProducto" required>
+
+                        <label for="cantidadProducto">Cantidad:</label>
+                        <input type="number" id="cantidadProducto" name="cantidadProducto" required>
+
+                        <label for="precioProducto">Precio:</label>
+                        <input type="number" id="precioProducto" name="precioProducto" required>
+
+                        <label for="proveedorProducto">Proveedor:</label>
+                        <input type="text" id="proveedorProducto" name="proveedorProducto" required>
+
+                        <button type="submit" class="btn-submit">Agregar</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+  </div>
+</body>
+</html>

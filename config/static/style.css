@@ -192,33 +192,271 @@ body, html {
     color: #777;
   }
   
-  
-  
-  /* Responsive 
-  @media (max-width: 768px) {
-    .sidebar {
-      transform: translateX(-100%);
-    }
-  
-    .sidebar.open {
-      transform: translateX(0);
-    }
-  
-    .sidebar-bg {
-      display: block;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .dashboard-cards {
-      margin-left: 0;
-    }
-  }
-  
+  .titulo-tabla {
+    font-size: 1.8rem;
+    margin-left: 310px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.texto-titulo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-top: 50px;
+}
+
+.boton-agregar {
+    background-color: #27ae60;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.boton-agregar:hover {
+    background-color: #2ecc71;
+}
+
+/* Encabezado columnas */
+.columna-tabla {
+    margin-left: 310px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    background-color: #34495e;
+    color: white;
+    padding: 10px;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+}
+
+/* Producto individual */
+ul.producto {
+    margin-left: 310px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    background-color: white;
+    border: 1px solid #ccc;
+    list-style: none;
+    padding: 10px;
+    transition: background-color 0.2s ease;
+}
+
+ul.producto:hover {
+    background-color: #f0f0f0;
+}
+
+/* Mensaje inferior */
+.mensaje {
+    margin-left: 310px;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #555;
+    font-style: italic;
+}
+
+.producto i {
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin: 0 8px;
+    color: #555;
+    transition: color 0.2s ease;
+}
+
+.producto i:hover {
+    color: #e74c3c;
+}
+
+.edit-btn:hover {
+    color: #2980b9;
+}
+
+.delete-btn:hover {
+    color: #c0392b;
+}
+
+
+.contenido {
+  margin: 0px auto;
+  padding: 5% 20px;
+}
+
+.proveedor-dashboard {
+    margin: 0px auto;
+    padding: 5% 20px;
+}
+
+.proveedor-titulo-tabla {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.proveedor-texto-titulo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-left: 310px;
+}
+
+.buscador {
+    background-color: #ecf0f1;
+    border-radius: 5px;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    display: flex;
+    gap: 10px;
+}
+
+.proveedor-boton-agregar {
+    background-color: #27ae60;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    border: none;
+}
+
+.proveedor-boton-agregar:hover {
+    background-color: #2ecc71;
+}
+
+buscador input {
+    padding: 8px 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 250px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+buscador input:focus {
+    border-color: #3498db;
+}
+
+.proveedor-columna-tabla {
+    margin-left: 310px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    background-color: #34495e;
+    color: white;
+    padding: 10px;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
+}
+
+ul.proveedor-fila {
+    margin-left: 310px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    background-color: white;
+    border: 1px solid #ccc;
+    list-style: none;
+    padding: 10px;
+    transition: background-color 0.2s ease;
+}
+
+ul.proveedor-fila:hover {
+    background-color: #f0f0f0;
+}
+
+.proveedor-mensaje {
+    margin-left: 310px;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #555;
+    font-style: italic;
+}
+
+.proveedor-fila i {
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin: 0 8px;
+    color: #555;
+    transition: color 0.2s ease;
+}
+
+.proveedor-fila i:hover {
+    color: #e74c3c;
+}
+
+.proveedor-edit-btn:hover {
+    color: #2980b9;
+}
+
+.proveedor-delete-btn:hover {
+    color: #c0392b;
+}
+
+/* Modal */
+/* Estilo de la modal */
+.modal {
+  display: none; /* La modal está oculta por defecto */
+  position: fixed;
+  z-index: 1; /* Queda por encima del contenido */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4); /* Fondo translúcido */
+}
+
+/* Contenido de la modal */
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Puedes ajustar el tamaño de la modal */
+  max-width: 500px;
+}
+
+/* Botón para cerrar la modal */
+.close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Estilos del formulario */
+form label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+}
+
+form button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+form button:hover {
+  background-color: #45a049;
+}

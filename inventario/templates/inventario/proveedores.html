@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'style.css' %}">
+<script src="{% static 'code.js' %}"></script>
+<html lang="es">
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- Íconos -->
+</head>
+<body>
+    <div class="main-container">
+        <section class="sidebar">
+            <div class="sidebar-bg btn-toggle-menu"></div>
+            <div class="sidebar-body">
+            <div class="sidebar-logo text-center">
+                <span></span> Inventario
+            </div>
+            <figure class="sidebar-user">
+                <figcaption>
+                <span>
+                    Usuario:<br>
+                    <small>Admin</small>
+                </span>
+                </figcaption>
+            </figure>
+            <nav class="sidebar-nav">
+                <ul class="menu">
+                <li>
+                    <a href="{% url 'lista_productos' %}" class="menu-link">
+                    <span class="icon">🏠</span>
+                    <span class="text">HOME</span>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="{% url 'proveedores' %}" class="menu-link">
+                    <span class="icon">🚚</span>
+                    <span class="text">PROVEEDORES</span>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="" class="menu-link">
+                    <span class="icon">👤</span>
+                    <span class="text">USUARIOS</span>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="{% url 'inventario' %}" class="menu-link">
+                    <span class="icon">🏬</span>
+                    <span class="text">INVENTARIO</span>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="" class="menu-link">
+                    <span class="icon">🛒</span>
+                    <span class="text">SALES</span>
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href="#" class="menu-link">
+                    <span class="icon">⚙️</span>
+                    <span class="text">SETTINGS</span>
+                    </a>
+                </li>
+                </ul>
+            </nav>
+            </div>
+        </section>
+
+        <main class="proveedor-dashboard">
+            <!-- Título y buscador -->
+            <div class="proveedor-titulo-tabla">
+                <span class="proveedor-texto-titulo">Gestión de Proveedores</span>
+                <div class="buscador">
+                    <input type="text" placeholder="Buscar proveedor...">
+                    <button class="proveedor-boton-agregar"><i class="fas fa-plus"></i> Agregar</button>
+                </div>
+            </div>
+
+            <!-- Encabezado de tabla -->
+            <div class="proveedor-columna-tabla">
+                <div>Nombre</div>
+                <div>Empresa</div>
+                <div>Correo</div>
+                <div>Teléfono</div>
+                <div>Dirección</div>
+                <div>Acciones</div>
+            </div>
+
+            <!-- Proveedores -->
+            <ul class="proveedor-fila">
+                <li>Juan Pérez</li>
+                <li>Vidrios del Norte</li>
+                <li>juan@vidriosnorte.cl</li>
+                <li>+56 9 1234 5678</li>
+                <li>Av. Central 123</li>
+                <li>
+                    <i class="fas fa-edit proveedor-edit-btn"></i>
+                    <i class="fas fa-trash proveedor-delete-btn"></i>
+                </li>
+            </ul>
+
+            <ul class="proveedor-fila">
+                <li>María López</li>
+                <li>Alfa Insumos</li>
+                <li>maria@alfainsumos.cl</li>
+                <li>+56 9 8765 4321</li>
+                <li>Pasaje 7 #456</li>
+                <li>
+                    <i class="fas fa-edit proveedor-edit-btn"></i>
+                    <i class="fas fa-trash proveedor-delete-btn"></i>
+                </li>
+            </ul>
+
+            <div class="proveedor-mensaje">
+                Puedes registrar todos los proveedores frecuentes aquí para usarlos fácilmente en futuras órdenes de compra.
+            </div>
+        </main>
+    </div>    
+</body>
+</html>
