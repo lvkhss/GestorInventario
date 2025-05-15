@@ -1,35 +1,40 @@
-from django.db import models
-
-# Create your models here.
+from django.db import models, connection
 
 class Device(models.Model):
-
     type = models.CharField(max_length=200, blank=False)
     price = models.IntegerField()
 
     choices = (
         ('AVAILABLE', 'Item ready to be purchased'),
         ('SOLD', 'Item already purchased'),
-        ('RESTOCKING', 'Item restocking in few days')
+        ('RESTOCKING', 'Item restocking in a few days')
     )
 
     status = models.CharField(max_length=10, choices=choices, default='SOLD')
     issues = models.CharField(max_length=50, default="No Issues")
 
     class Meta:
-        abstract = True
+        abstract = True 
 
     def __str__(self):
         return 'Type: {0} Price: {1}'.format(self.type, self.price)
 
+    @classmethod
+    def table_exists(cls):
+        """Checks if the table for the model exists in the database."""
+        return cls._meta.db_table in connection.introspection.table_names()
+
+
 class Desktops(Device):
-    pass
+    pass  
+
 
 class Laptops(Device):
-    pass
+    pass 
+
 
 class Mobiles(Device):
-    pass
+    pass 
 
 
 # class Desktops(models.Model):

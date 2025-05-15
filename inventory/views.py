@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import OperationalError
+from .models import Laptops, Desktops, Mobiles
 
 # Create your views here.
 
@@ -13,9 +15,20 @@ def inventario(request):
     return render(request, 'inv/inventario.html')
 
 def index(request):
-    laptops = Laptops.objects.all()
-    desktops = Desktops.objects.all()
-    mobiles = Mobiles.objects.all()
+    try:
+        laptops = Laptops.objects.all()
+    except OperationalError:
+        laptops = []
+
+    try:
+        desktops = Desktops.objects.all()
+    except OperationalError:
+        desktops = []
+
+    try:
+        mobiles = Mobiles.objects.all()
+    except OperationalError:
+        mobiles = []
 
     items = [
         {"item": laptop, "category": "Laptops"} for laptop in laptops
@@ -25,15 +38,17 @@ def index(request):
         {"item": mobile, "category": "Mobiles"} for mobile in mobiles
     ]
 
-    print(items)  # Debug: Print items to the console
-
     context = {
         'items': items,
     }
     return render(request, 'inv/index.html', context)
 
 def display_laptops(request):
-    items = Laptops.objects.all()
+    try:
+        items = Laptops.objects.all()
+    except OperationalError:
+        items = []  
+
     context = {
         'items': items,
         'header': 'Laptops',
