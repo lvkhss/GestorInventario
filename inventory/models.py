@@ -1,4 +1,6 @@
 from django.db import models, connection
+from django.utils.timezone import now  # 'now' ftimezone-aware timestamps xd
+
 
 class Device(models.Model):
     type = models.CharField(max_length=200, blank=False)
@@ -12,12 +14,13 @@ class Device(models.Model):
 
     status = models.CharField(max_length=10, choices=choices, default='SOLD')
     issues = models.CharField(max_length=50, default="No Issues")
+    date_added = models.DateTimeField(default=now, editable=False)
 
     class Meta:
         abstract = True 
 
     def __str__(self):
-        return 'Type: {0} Price: {1}'.format(self.type, self.price)
+        return 'Type: {0} Price: {1}'.format(self.type, self.price, self.date_added)
 
     @classmethod
     def table_exists(cls):
