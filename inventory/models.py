@@ -2,7 +2,7 @@ from django.db import models, connection
 from django.utils.timezone import now  # 'now' ftimezone-aware timestamps xd
 
 
-class Device(models.Model):
+class Producto(models.Model):
     type = models.CharField(max_length=200, blank=False)
     price = models.IntegerField()
 
@@ -17,75 +17,23 @@ class Device(models.Model):
     date_added = models.DateTimeField(default=now, editable=False)
 
     class Meta:
-        abstract = True 
+        abstract = True
 
     def __str__(self):
-        return 'Type: {0} Price: {1}'.format(self.type, self.price, self.date_added)
+        return 'type: {0} price: {1} date_added: {2}'.format(self.type, self.price, self.date_added)
 
     @classmethod
     def table_exists(cls):
         """Checks if the table for the model exists in the database."""
         return cls._meta.db_table in connection.introspection.table_names()
 
+class Sellantes(Producto):
+    pass
 
-class Desktops(Device):
-    pass  
+class Herramientas(Producto):
+    pass
 
-
-class Laptops(Device):
-    pass 
-
-
-class Mobiles(Device):
-    pass 
+class Pinturas(Producto):
+    pass
 
 
-# class Desktops(models.Model):
-#     type = models.CharField(max_length=200, blank=False)
-#     price = models.IntegerField()
-#
-#     choices = (
-#         ('SOLD', 'Item already purchased'),
-#         ('AVAILABLE', 'Item ready to be purchased'),
-#         ('RESTOCKING', 'Item restocking in few days')
-#     )
-#
-#     status = models.CharField(max_length=10, choices=choices, default='SOLD')
-#     issues = models.CharField(max_length=50, default="No Issues")
-#
-#     def __str__(self):
-#         return 'Type: {0} Price: {1}'.format(self.type, self.price)
-#
-#
-# class Laptops(models.Model):
-#     type = models.CharField(max_length=200, blank=False)
-#     price = models.IntegerField()
-#
-#     choices = (
-#         ('SOLD', 'Item already purchased'),
-#         ('AVAILABLE', 'Item ready to be purchased'),
-#         ('RESTOCKING', 'Item restocking in few days')
-#     )
-#
-#     status = models.CharField(max_length=10, choices=choices, default='SOLD')
-#     issues = models.CharField(max_length=50, default="No Issues")
-#
-#     def __str__(self):
-#         return 'Type: {0} Price: {1}'.format(self.type, self.price)
-#
-#
-# class Mobiles(models.Model):
-#     type = models.CharField(max_length=200, blank=False)
-#     price = models.IntegerField()
-#
-#     choices = (
-#         ('SOLD', 'Item already purchased'),
-#         ('AVAILABLE', 'Item ready to be purchased'),
-#         ('RESTOCKING', 'Item restocking in few days')
-#     )
-#
-#     status = models.CharField(max_length=10, choices=choices, default='SOLD')
-#     issues = models.CharField(max_length=50, default="No Issues")
-#
-#     def __str__(self):
-#         return 'Type: {0} Price: {1}'.format(self.type, self.price)

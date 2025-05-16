@@ -4,21 +4,23 @@ from .views import *
 
 urlpatterns = [
     re_path(r'index$', index, name='index'),
-    re_path(r'^laptops$', display_laptops, name="display_laptops"),
-    re_path(r'^desktops$', display_desktops, name="display_desktops"),
-    re_path(r'^mobiles$', display_mobiles, name="display_mobiles"),
 
-    re_path(r'^add_laptop$', add_laptop, name="add_laptop"),
-    re_path(r'^add_desktop$', add_desktop, name="add_desktop"),
-    re_path(r'^add_mobile$', add_mobile, name="add_mobile"),
+    re_path(r'^sellantes$', display_sellantes, name="display_sellantes"),
+    re_path(r'^herramientas$', display_herramientas, name="display_herramientas"),
+    re_path(r'^pinturas$', display_pinturas, name="display_pinturas"),
 
-    re_path(r'^laptops/edit_item/(?P<pk>\d+)$', edit_laptop, name="edit_laptop"),
-    re_path(r'^desktops/edit_item/(?P<pk>\d+)$', edit_desktop, name="edit_desktop"),
-    re_path(r'^mobiles/edit_item/(?P<pk>\d+)$', edit_mobile, name="edit_mobile"),
+    re_path(r'^add_sellante$', add_sellante, name="add_sellante"),
+    re_path(r'^add_herramienta$', add_herramienta, name="add_herramienta"),
+    re_path(r'^add_pintura$', add_pintura, name="add_pintura"),
 
-    re_path(r'^laptops/delete/(?P<pk>\d+)$', delete_laptop, name="delete_laptop"),
-    re_path(r'^desktops/delete/(?P<pk>\d+)$', delete_desktop, name="delete_desktop"),
-    re_path(r'^mobiles/delete/(?P<pk>\d+)$', delete_mobile, name="delete_mobile"),
+    re_path(r'^sellantes/edit_item/(?P<pk>\d+)$', edit_sellante, name="edit_sellante"),
+    re_path(r'^herramientas/edit_item/(?P<pk>\d+)$', edit_herramienta, name="edit_herramienta"),
+    re_path(r'^pinturas/edit_item/(?P<pk>\d+)$', edit_pintura, name="edit_pintura"),
+
+    re_path(r'^sellantes/delete/(?P<pk>\d+)$', delete_sellante, name="delete_sellante"),
+    re_path(r'^herramientas/delete/(?P<pk>\d+)$', delete_herramienta, name="delete_herramienta"),
+    re_path(r'^pinturas/delete/(?P<pk>\d+)$', delete_pintura, name="delete_pintura"),
+
     re_path(r'^inventario$', inventario, name='inventario'),
     re_path(r'^$', login_view, name='login'),
     re_path(r'^register$', register_view, name='register'),

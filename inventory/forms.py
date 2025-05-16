@@ -1,10 +1,10 @@
 from django import forms
 from .models import *
 
-class LaptopForm(forms.ModelForm):
+class SellanteForm(forms.ModelForm):
     class Meta:
-        model = Laptops
-        fields = ('type', 'price', 'status', 'issues')  # Exclude 'date_added'
+        model = Sellantes
+        fields = ('type', 'price', 'status', 'issues')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -12,10 +12,10 @@ class LaptopForm(forms.ModelForm):
             initial=self.instance.date_added, disabled=True, required=False
         )
 
-class DesktopForm(forms.ModelForm):
+class HerramientaForm(forms.ModelForm):
     class Meta:
-        model = Desktops
-        fields = ('type', 'price', 'status', 'issues')  # Exclude 'date_added'
+        model = Herramientas
+        fields = ('type', 'price', 'status', 'issues')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,10 +23,10 @@ class DesktopForm(forms.ModelForm):
             initial=self.instance.date_added, disabled=True, required=False
         )
 
-class MobileForm(forms.ModelForm):
+class PinturaForm(forms.ModelForm):
     class Meta:
-        model = Mobiles
-        fields = ('type', 'price', 'status', 'issues')  # Exclude 'date_added'
+        model = Pinturas
+        fields = ('type', 'price', 'status', 'issues')  # Exclude 
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

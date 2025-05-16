@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import OperationalError
-from .models import Laptops, Desktops, Mobiles
+from .models import Sellantes, Herramientas, Pinturas
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 # Create your views here.
@@ -58,26 +58,26 @@ def inventario(request):
 @login_required
 def index(request):
     try:
-        laptops = Laptops.objects.all()
+        sellantes = Sellantes.objects.all()
     except OperationalError:
-        laptops = []
+        sellantes = []
 
     try:
-        desktops = Desktops.objects.all()
+        herramientas = Herramientas.objects.all()
     except OperationalError:
-        desktops = []
+        herramientas = []
 
     try:
-        mobiles = Mobiles.objects.all()
+        pinturas = Pinturas.objects.all()
     except OperationalError:
-        mobiles = []
+        pinturas = []
 
     items = [
-        {"item": laptop, "category": "Laptops"} for laptop in laptops
+        {"item": sellante, "category": "Sellantes"} for sellante in sellantes
     ] + [
-        {"item": desktop, "category": "Desktops"} for desktop in desktops
+        {"item": herramienta, "category": "Herramientas"} for herramienta in herramientas
     ] + [
-        {"item": mobile, "category": "Mobiles"} for mobile in mobiles
+        {"item": pintura, "category": "Pinturas"} for pintura in pinturas
     ]
 
     context = {
@@ -85,64 +85,55 @@ def index(request):
     }
     return render(request, 'inv/index.html', context)
 
-def display_laptops(request):
+def display_herramientas(request):
     try:
-        items = Laptops.objects.all()
+        items = Herramientas.objects.all()
     except OperationalError:
         items = []  
 
     context = {
         'items': items,
-        'header': 'Laptops',
+        'header': 'Herramientas',
     }
     return render(request, 'inv/inventario.html', context)
 
-
-def display_desktops(request):
-    items = Desktops.objects.all()
+def display_sellantes(request):
+    items = Sellantes.objects.all()
     context = {
         'items': items,
-        'header': 'Desktops',
+        'header': 'Sellantes',
     }
     return render(request, 'inv/inventario.html', context)
 
-
-def display_mobiles(request):
-    items = Mobiles.objects.all()
+def display_pinturas(request):
+    items = Pinturas.objects.all()
     context = {
         'items': items,
-        'header': 'Mobiles',
+        'header': 'Pinturas',
     }
     return render(request, 'inv/inventario.html', context)
 
 def add_item(request, cls):
     if request.method == "POST":
         form = cls(request.POST)
-
         if form.is_valid():
             form.save()
             return redirect('inventario')
-
     else:
         form = cls()
-        return render(request, 'inv/add_new.html', {'form' : form})
+    return render(request, 'inv/add_new.html', {'form': form})
 
+def add_herramienta(request):
+    return add_item(request, HerramientaForm)
 
-def add_laptop(request):
-    return add_item(request, LaptopForm)
+def add_sellante(request):
+    return add_item(request, SellanteForm)
 
-
-def add_desktop(request):
-    return add_item(request, DesktopForm)
-
-
-def add_mobile(request):
-    return add_item(request, MobileForm)
-
+def add_pintura(request):
+    return add_item(request, PinturaForm)
 
 def edit_item(request, pk, model, cls):
     item = get_object_or_404(model, pk=pk)
-
     if request.method == "POST":
         form = cls(request.POST, instance=item)
         if form.is_valid():
@@ -150,60 +141,34 @@ def edit_item(request, pk, model, cls):
             return redirect('inventario')
     else:
         form = cls(instance=item)
+    return render(request, 'inv/edit_item.html', {'form': form})
 
-        return render(request, 'inv/edit_item.html', {'form': form})
+def edit_herramienta(request, pk):
+    return edit_item(request, pk, Herramientas, HerramientaForm)
 
+def edit_sellante(request, pk):
+    return edit_item(request, pk, Sellantes, SellanteForm)
 
+def edit_pintura(request, pk):
+    return edit_item(request, pk, Pinturas, PinturaForm)
 
-def edit_laptop(request, pk):
-    return edit_item(request, pk, Laptops, LaptopForm)
-
-
-def edit_desktop(request, pk):
-    return edit_item(request, pk, Desktops, DesktopForm)
-
-
-def edit_mobile(request, pk):
-    return edit_item(request, pk, Mobiles, MobileForm)
-
-
-def delete_laptop(request, pk):
-
+def delete_herramienta(request, pk):
     template = 'inv/inventario.html'
-    Laptops.objects.filter(id=pk).delete()
-
-    items = Laptops.objects.all()
-
-    context = {
-        'items': items,
-    }
-
+    Herramientas.objects.filter(id=pk).delete()
+    items = Herramientas.objects.all()
+    context = {'items': items}
     return render(request, template, context)
 
-
-def delete_desktop(request, pk):
-
+def delete_sellante(request, pk):
     template = 'inv/inventario.html'
-    Desktops.objects.filter(id=pk).delete()
-
-    items = Desktops.objects.all()
-
-    context = {
-        'items': items,
-    }
-
+    Sellantes.objects.filter(id=pk).delete()
+    items = Sellantes.objects.all()
+    context = {'items': items}
     return render(request, template, context)
 
-
-def delete_mobile(request, pk):
-
+def delete_pintura(request, pk):
     template = 'inv/inventario.html'
-    Mobiles.objects.filter(id=pk).delete()
-
-    items = Mobiles.objects.all()
-
-    context = {
-        'items': items,
-    }
-
+    Pinturas.objects.filter(id=pk).delete()
+    items = Pinturas.objects.all()
+    context = {'items': items}
     return render(request, template, context)

@@ -112,12 +112,22 @@ body {
     box-shadow: #333;
   }
 
-  .table {
-    width: 45%;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+.fixed-table {
+    table-layout: fixed;
+    width: 900px;
+    min-width: 900px;
+    max-width: 100%;
+}
+
+.fixed-table th,
+.fixed-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 .table {
+
     width: 100%; 
     background-color: white;
     border-collapse: collapse;
@@ -126,7 +136,10 @@ body {
     margin-top: 20px;
 }
 
+
+
 .table th {
+    
     background-color: #354e66;
     color: white;
     text-align: center;
@@ -137,6 +150,7 @@ body {
 }
 
 .table td {
+    
     text-align: center;
     padding: 15px;
     vertical-align: middle;
@@ -145,8 +159,10 @@ body {
 }
 
 .table-hover tbody tr:hover {
+    
     transition: background-color 0.3s;
 }
+
 
 .add_buttons .btn {
     font-size: 1.2rem; 
@@ -184,3 +200,4 @@ body {
     border-bottom-left-radius: 0;
     margin-left: 0;
 }
+
