@@ -9,7 +9,33 @@ from .models import *
 
 from .forms import *
 
+from django.contrib.auth.models import User
+from django.contrib.auth import login
 
+
+
+def users_view(request):
+    users = User.objects.all()
+    return render(request, 'inv/users.html', {'users': users})
+
+def register_view(request):
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        if password1 != password2:
+            error = "Las contraseñas no coinciden."
+        elif User.objects.filter(username=username).exists():
+            error = "El usuario ya existe."
+        elif User.objects.filter(email=email).exists():
+            error = "El email ya está registrado."
+        else:
+            user = User.objects.create_user(username=username, password=password1, email=email)
+            login(request, user)
+            return redirect('index')
+    return render(request, 'inv/register.html', {'error': error})
 
 def login_view(request):
     error = None
@@ -19,7 +45,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('index')  # Change 'index' to your desired post-login page
+            return redirect('index') 
         else:
             error = "Usuario o contraseña incorrectos."
     return render(request, 'inv/login.html', {'error': error})

@@ -151,16 +151,11 @@ body {
 .add_buttons .btn {
     font-size: 1.2rem; 
     padding: 15px 30px; 
-    /* margin: 10px 15px; */
+     margin: 10px 15px; 
     font-weight: bold; 
     transition: transform 0.2s, background-color 0.3s;
 }
 
-
-.add_buttons .btn-primary:hover {
-    background-color: #0056b3; 
-    transform: scale(1.05); 
-}
 
 .add_buttons .btn-warning {
     background-color: #ffc107; 
@@ -170,7 +165,6 @@ body {
 
 .add_buttons .btn-warning:hover {
     background-color: #e0a800; 
-    transform: scale(1.05); 
 }
 
 .button-group {
@@ -189,5 +183,4 @@ body {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     margin-left: 0;
-    border-left: 1px solid #fff3cd;
 }

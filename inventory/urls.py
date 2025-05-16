@@ -21,4 +21,6 @@ urlpatterns = [
     re_path(r'^mobiles/delete/(?P<pk>\d+)$', delete_mobile, name="delete_mobile"),
     re_path(r'^inventario$', inventario, name='inventario'),
     re_path(r'^$', login_view, name='login'),
+    re_path(r'^register$', register_view, name='register'),
+    re_path(r'^usuarios$', users_view, name='users'),
 ]

@@ -6,6 +6,7 @@
   {% if error %}
     <div class="alert alert-danger">{{ error }}</div>
   {% endif %}
+<div class="group-form">
   <form method="POST">
     {% csrf_token %}
     <div class="form-group mb-3">
@@ -17,6 +18,7 @@
       <input type="password" class="form-control" id="id_password" name="password" required>
     </div>
     <button type="submit" class="btn btn-primary w-100">Entrar</button>
+    <a href="{% url 'register' %}">¿No tienes cuenta? Registrate</a>
   </form>
 </div>
 

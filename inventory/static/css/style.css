@@ -1,6 +1,59 @@
-.container-login{
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+
+
+.container-login {
+    font-family: 'Nunito', Arial, sans-serif;
+    border-radius: 8%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;     
+    justify-content: center;  
+    margin: 0 auto;
+    padding: 32px 24px 24px 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
 }
 
+
+.group-form {
+   align-items: center;
+}
+
+.container-login h3 {
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #354e66;
+}
+
+.form-group label {
+    display: flex;
+    font-weight: 500;
+    color: #354e66;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    padding: 10px 12px;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: #354e66;
+    outline: none;
+    box-shadow: 0 0 0 2px #354e6633;
+}
+
+.btn-primary {
+    width: 80%;
+    margin: 16px auto 0;
+    display: block;
+    text-align: center;
+}
+
+
+.btn-primary:hover {
+    background-color: #223146;
+}
