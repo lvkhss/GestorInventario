@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import OperationalError
 from .models import Laptops, Desktops, Mobiles
-
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 from .models import *
@@ -10,10 +11,25 @@ from .forms import *
 
 
 
+def login_view(request):
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('index')  # Change 'index' to your desired post-login page
+        else:
+            error = "Usuario o contraseña incorrectos."
+    return render(request, 'inv/login.html', {'error': error})
 
+
+@login_required
 def inventario(request):
     return render(request, 'inv/inventario.html')
 
+@login_required
 def index(request):
     try:
         laptops = Laptops.objects.all()

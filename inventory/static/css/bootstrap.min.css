@@ -86,8 +86,7 @@ body {
 }
 
 .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: #354e66;
     color: white;
 }
 
@@ -152,16 +151,11 @@ body {
 .add_buttons .btn {
     font-size: 1.2rem; 
     padding: 15px 30px; 
-    margin: 10px 15px;
+    /* margin: 10px 15px; */
     font-weight: bold; 
     transition: transform 0.2s, background-color 0.3s;
 }
 
-.add_buttons .btn-primary {
-    background-color: #007bff; 
-    border-color: #007bff;
-    color: white;
-}
 
 .add_buttons .btn-primary:hover {
     background-color: #0056b3; 
@@ -177,4 +171,23 @@ body {
 .add_buttons .btn-warning:hover {
     background-color: #e0a800; 
     transform: scale(1.05); 
+}
+
+.button-group {
+    display: flex;
+    gap: 0; 
+    margin-bottom: 20px;
+}
+
+.button-group .btn-primary {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+
+.button-group .btn-warning {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: 0;
+    border-left: 1px solid #fff3cd;
 }

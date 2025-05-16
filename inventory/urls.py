@@ -1,8 +1,9 @@
 from django.urls import re_path
-from .views import *  # Import all views directly
+from .views import * 
+
 
 urlpatterns = [
-    re_path(r'^$', index, name='index'),
+    re_path(r'index$', index, name='index'),
     re_path(r'^laptops$', display_laptops, name="display_laptops"),
     re_path(r'^desktops$', display_desktops, name="display_desktops"),
     re_path(r'^mobiles$', display_mobiles, name="display_mobiles"),
@@ -18,5 +19,6 @@ urlpatterns = [
     re_path(r'^laptops/delete/(?P<pk>\d+)$', delete_laptop, name="delete_laptop"),
     re_path(r'^desktops/delete/(?P<pk>\d+)$', delete_desktop, name="delete_desktop"),
     re_path(r'^mobiles/delete/(?P<pk>\d+)$', delete_mobile, name="delete_mobile"),
-    re_path(r'^inventario$', inventario, name='inventario'), 
+    re_path(r'^inventario$', inventario, name='inventario'),
+    re_path(r'^$', login_view, name='login'),
 ]
