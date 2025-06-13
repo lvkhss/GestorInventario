@@ -1,0 +1,27 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+
+<div class="add-product-container">
+  <form method="POST" class="add-product-form">
+    {% csrf_token %}
+
+    <h4>Editar Producto</h4>
+    {% for field in form %}
+    <div class="add-product-group">
+      <label for="id_{{ field.name }}" class="add-product-label">{{ field.label }}</label>
+      <div class="add-product-field">
+        {{ field }}
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="add-product-group">
+      <div class="add-product-btn-wrap">
+        <button type="submit" class="add-product-btn">Guardar Cambios</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

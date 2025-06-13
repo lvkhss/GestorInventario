@@ -1,0 +1,47 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+  <div class="add_buttons">
+    <div class="button-group">
+      <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="form-control d-inline-block w-auto" />
+    </div>
+    <div class="button-group">
+      <select id="filterType" class="form-select d-inline-block w-auto">
+        <option value="">Todos</option>
+        <option value="Sellantes">Sellantes</option>
+        <option value="Herramientas">Herramientas</option>
+        <option value="Pinturas">Pinturas</option>
+      </select>
+    </div>
+    <div class="button-group">
+      <a href="{% url 'agregar_producto' %}" class="btn btn-success btn-md btn-trim" role="button">Agregar producto</a>
+    </div>
+  </div>
+
+  <div id="tablaProductos">
+    {% include 'inv/tabla_productos.html' %}
+  </div>
+
+  <script>
+    function updateTable() {
+  const query = document.getElementById("searchInput").value;
+  const type = document.getElementById("filterType").value;
+
+  let url = `{% url 'inventario' %}?`;
+  if (query) url += `q=${encodeURIComponent(query)}&`;
+  if (type) url += `type=${encodeURIComponent(type)}`;
+
+  fetch(url)
+    .then(response => response.text())
+    .then(data => {
+      const parser = new DOMParser();
+      const htmlDoc = parser.parseFromString(data, "text/html");
+      const newContent = htmlDoc.querySelector("#tablaProductos").innerHTML;
+      document.getElementById("tablaProductos").innerHTML = newContent;
+    });
+}
+
+document.getElementById("searchInput").addEventListener("input", updateTable);
+document.getElementById("filterType").addEventListener("change", updateTable);
+  </script>
+{% endblock %}

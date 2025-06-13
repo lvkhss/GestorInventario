@@ -1,0 +1,62 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+<div class="table-container">
+  <div class="table-wrapper">
+    <h3>Ultimos Productos</h3>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in items %}
+        <tr>
+          <td>{{ entry.item.pk }}</td>
+          <td>{{ entry.item.type }}</td>
+          <td>{{ entry.item.price }} $</td>
+          <td>{{ entry.item.date_added }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center">No hay productos en el inventario.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-wrapper">
+    <h3>Table 2: Sales Details</h3>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in items %}
+        <tr>
+          <td>{{ entry.item.pk }}</td>
+          <td>{{ entry.item.type }}</td>
+          <td>{{ entry.item.price }} $</td>
+          <td>{{ entry.item.date_added }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center">No hay productos en el inventario.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
