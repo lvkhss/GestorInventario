@@ -16,11 +16,12 @@ class ProductoForm(forms.Form):
 class SellanteForm(forms.ModelForm):
     class Meta:
         model = Sellantes
-        fields = ('name', 'price', 'type')
+        fields = ('name', 'price', 'type', 'stock')
         labels = {
             'name': 'Nombre',
             'type': 'Tipo',
             'price': 'Precio',
+            'stock': 'Stock',
         }
 
     def __init__(self, *args, **kwargs):
@@ -33,11 +34,12 @@ class SellanteForm(forms.ModelForm):
 class HerramientaForm(forms.ModelForm):
     class Meta:
         model = Herramientas
-        fields = ('name', 'price', 'type')
+        fields = ('name', 'price', 'type', 'stock')
         labels = {
             'name': 'Nombre',
             'type': 'Tipo',
             'price': 'Precio',
+            'stock': 'Stock',
         } 
 
     def __init__(self, *args, **kwargs):
@@ -49,11 +51,12 @@ class HerramientaForm(forms.ModelForm):
 class PinturaForm(forms.ModelForm):
     class Meta:
         model = Pinturas
-        fields = ('name', 'price', 'type')
+        fields = ('name', 'price', 'type', 'stock')
         labels = {
             'name': 'Nombre',
             'type': 'Tipo',
             'price': 'Precio',
+            'stock': 'Stock',
         } 
 
     def __init__(self, *args, **kwargs):

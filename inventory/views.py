@@ -56,6 +56,11 @@ def inventario(request):
     return render(request, 'inv/inventario.html')
 
 @login_required
+def historial(request):
+    movimientos = HistorialMovimiento.objects.all().order_by('-fecha')
+    return render(request, 'inv/historial.html', {'movimientos': movimientos})
+
+@login_required
 def index(request):
     try:
         sellantes = Sellantes.objects.all()

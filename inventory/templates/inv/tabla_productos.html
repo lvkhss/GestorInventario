@@ -5,7 +5,7 @@
         <th>id</th>
         <th>Nombre</th>
         <th>Precio</th>
-        <th>Fecha</th>
+        <th>Stock</th>
         <th></th>
       </tr>
     </thead>
@@ -15,7 +15,7 @@
           <td>{{ entry.item.pk }}</td>
           <td>{{ entry.item.name }}</td>
           <td>{{ entry.item.price }} $</td>
-          <td>{{ entry.item.date_added }}</td>
+          <td>{{ entry.item.stock }}</td>
           <td>
             {% if entry.category == "Sellantes" %}
               <a href="{% url 'edit_sellante' entry.item.pk %}" class="btn btn-warning btn-sm" role="button" aria-pressed="true">Editar</a>

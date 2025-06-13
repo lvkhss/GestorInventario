@@ -1,0 +1,29 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+<h2>Historial de movimientos</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>Tipo</th>
+      <th>Fecha</th>
+      <th>Cambio de Stock</th>
+      <th>Stock Final</th>
+      <th>Motivo</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for mov in movimientos %}
+      <tr>
+        <td>{{ mov.nombre_producto }}</td>
+        <td>{{ mov.tipo_producto }}</td>
+        <td>{{ mov.fecha }}</td>
+        <td>{% if mov.cambio_stock > 0 %}+{% endif %}{{ mov.cambio_stock }}</td>
+        <td>{{ mov.stock_final }}</td>
+        <td>{{ mov.motivo }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

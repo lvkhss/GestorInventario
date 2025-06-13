@@ -20,4 +20,6 @@ urlpatterns = [
     re_path(r'^$', login_view, name='login'),
     re_path(r'^register$', register_view, name='register'),
     re_path(r'^usuarios$', users_view, name='users'),
+    re_path(r'^historial$', historial, name='historial'),
+
 ]
