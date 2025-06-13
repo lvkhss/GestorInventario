@@ -130,3 +130,30 @@
 .add-product-btn:hover {
     background: #223146;
 }
+
+.add_buttons {
+  display: flex;
+  align-items: center;        /* Centrar verticalmente */
+  gap: 15px;                  /* Espacio entre los elementos */
+  margin-bottom: 20px;        /* Espacio debajo del contenedor */
+  flex-wrap: wrap;            /* Que se envuelvan si no hay espacio */
+}
+
+.add_buttons .button-group {
+  /* Opcional: puedes darle un ancho mínimo para mejor control */
+  min-width: 150px;
+}
+
+/* Opcional: ajustar input y select para que no sean muy grandes */
+.add_buttons input#searchInput,
+.add_buttons select#filterType {
+  max-width: 250px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* El botón hereda estilos bootstrap, puedes añadir margen si quieres */
+.add_buttons .btn {
+  white-space: nowrap; /* que no se parta el texto */
+}
+

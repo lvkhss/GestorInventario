@@ -1,64 +1,47 @@
 {% extends 'inv/base.html' %}
 
 {% block body %}
-
   <div class="add_buttons">
-
     <div class="button-group">
-      <a href="{% url 'display_sellantes' %}" class="btn btn-primary btn-md btn-trim" role="button"> Sellantes</a>
-      <a href="{% url 'add_sellante' %}" class="btn btn-warning btn-sm btn-pad" role="button"> +</a>
-
-      <a href="{% url 'display_herramientas' %}" class="btn btn-primary btn-md btn-trim" role="button"> Herramientas</a>
-      <a href="{% url 'add_herramienta' %}" class="btn btn-warning btn-sm btn-pad" role="button"> +</a>
-
-      <a href="{% url 'display_pinturas' %}" class="btn btn-primary btn-md btn-trim" role="button"> Pinturas</a>
-      <a href="{% url 'add_pintura' %}" class="btn btn-warning btn-sm btn-pad" role="button"> +</a>
-
+      <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="form-control d-inline-block w-auto" />
     </div>
-
+    <div class="button-group">
+      <select id="filterType" class="form-select d-inline-block w-auto">
+        <option value="">Todos</option>
+        <option value="Sellantes">Sellantes</option>
+        <option value="Herramientas">Herramientas</option>
+        <option value="Pinturas">Pinturas</option>
+      </select>
+    </div>
+    <div class="button-group">
+      <a href="{% url 'agregar_producto' %}" class="btn btn-success btn-md btn-trim" role="button">Agregar producto</a>
+    </div>
   </div>
 
-  <div>
+  <div id="tablaProductos">
+    {% include 'inv/tabla_productos.html' %}
+  </div>
 
-    <!-- <h4>Currently Viewing {{ header }}</h4> -->
-  </div>
- <div class="table-responsive">
-    <table class="table table-hover fixed-table">
-      <thead>
-        <tr>
-          <th>id</th>
-          <th>Nombre</th>
-          <th>Precio</th>
-          <th>Fecha</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in items %}
-        <tr>
-          <td>{{ item.pk }}</td>
-          <td>{{ item.type }}</td>
-          <td>{{ item.price }} $</td>
-          <td>{{ item.date_added }}</td>
-          {% if header|lower == "laptops" %}
-          <td>
-              <a href="{% url 'edit_sellante' item.pk %}" class="btn btn-warning btn-sm" role="button" aria-pressed="true" > Editar</a>
-              <a href="{% url 'delete_sellante' item.pk%}" class="btn btn-danger btn-sm" role="button" aria-pressed="true" > x</a>
-          </td>
-          {% elif header|lower == "desktops" %}
-          <td>
-              <a href="{% url 'edit_herramienta' item.pk %}" class="btn btn-warning btn-sm" role="button" aria-pressed="true" > Editar</a>
-              <a href="{% url 'delete_herramienta' item.pk%}" class="btn btn-danger btn-sm" role="button" aria-pressed="true" > x</a>
-          </td>
-          {% else %}
-          <td>
-              <a href="{% url 'edit_pintura' item.pk %}" class="btn btn-warning btn-sm" role="button" aria-pressed="true" > Editar</a>
-              <a href="{% url 'delete_pintura' item.pk%}" class="btn btn-danger btn-sm" role="button" aria-pressed="true" > x</a>
-          </td>
-          {% endif %}
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+  <script>
+    function updateTable() {
+  const query = document.getElementById("searchInput").value;
+  const type = document.getElementById("filterType").value;
+
+  let url = `{% url 'inventario' %}?`;
+  if (query) url += `q=${encodeURIComponent(query)}&`;
+  if (type) url += `type=${encodeURIComponent(type)}`;
+
+  fetch(url)
+    .then(response => response.text())
+    .then(data => {
+      const parser = new DOMParser();
+      const htmlDoc = parser.parseFromString(data, "text/html");
+      const newContent = htmlDoc.querySelector("#tablaProductos").innerHTML;
+      document.getElementById("tablaProductos").innerHTML = newContent;
+    });
+}
+
+document.getElementById("searchInput").addEventListener("input", updateTable);
+document.getElementById("filterType").addEventListener("change", updateTable);
+  </script>
 {% endblock %}

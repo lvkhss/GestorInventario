@@ -3,15 +3,10 @@ from .views import *
 
 
 urlpatterns = [
+    re_path(r'^agregar$', agregar_producto, name='agregar_producto'),
+
     re_path(r'index$', index, name='index'),
 
-    re_path(r'^sellantes$', display_sellantes, name="display_sellantes"),
-    re_path(r'^herramientas$', display_herramientas, name="display_herramientas"),
-    re_path(r'^pinturas$', display_pinturas, name="display_pinturas"),
-
-    re_path(r'^add_sellante$', add_sellante, name="add_sellante"),
-    re_path(r'^add_herramienta$', add_herramienta, name="add_herramienta"),
-    re_path(r'^add_pintura$', add_pintura, name="add_pintura"),
 
     re_path(r'^sellantes/edit_item/(?P<pk>\d+)$', edit_sellante, name="edit_sellante"),
     re_path(r'^herramientas/edit_item/(?P<pk>\d+)$', edit_herramienta, name="edit_herramienta"),

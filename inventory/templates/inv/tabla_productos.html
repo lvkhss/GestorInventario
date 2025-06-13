@@ -1,0 +1,37 @@
+<div class="table-responsive">
+  <table class="table table-hover fixed-table">
+    <thead>
+      <tr>
+        <th>id</th>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Fecha</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in items %}
+        <tr>
+          <td>{{ entry.item.pk }}</td>
+          <td>{{ entry.item.name }}</td>
+          <td>{{ entry.item.price }} $</td>
+          <td>{{ entry.item.date_added }}</td>
+          <td>
+            {% if entry.category == "Sellantes" %}
+              <a href="{% url 'edit_sellante' entry.item.pk %}" class="btn btn-warning btn-sm" role="button" aria-pressed="true">Editar</a>
+              <a href="{% url 'delete_sellante' entry.item.pk %}" class="btn btn-danger btn-sm" role="button" aria-pressed="true">x</a>
+            {% elif entry.category == "Herramientas" %}
+              <a href="{% url 'edit_herramienta' entry.item.pk %}" class="btn btn-warning btn-sm" role="button" aria-pressed="true">Editar</a>
+              <a href="{% url 'delete_herramienta' entry.item.pk %}" class="btn btn-danger btn-sm" role="button" aria-pressed="true">x</a>
+            {% elif entry.category == "Pinturas" %}
+              <a href="{% url 'edit_pintura' entry.item.pk %}" class="btn btn-warning btn-sm" role="button" aria-pressed="true">Editar</a>
+              <a href="{% url 'delete_pintura' entry.item.pk %}" class="btn btn-danger btn-sm" role="button" aria-pressed="true">x</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">No hay productos que mostrar</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

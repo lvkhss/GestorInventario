@@ -4,7 +4,7 @@ from .models import Sellantes, Herramientas, Pinturas
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 # Create your views here.
-
+from django.db.models import Q
 from .models import *
 
 from .forms import *
@@ -85,33 +85,46 @@ def index(request):
     }
     return render(request, 'inv/index.html', context)
 
-def display_herramientas(request):
-    try:
-        items = Herramientas.objects.all()
-    except OperationalError:
-        items = []  
+@login_required
+def inventario(request):
+    q = request.GET.get('q', '')
+    tipo = request.GET.get('type', '')
+
+    sellantes = Sellantes.objects.all()
+    herramientas = Herramientas.objects.all()
+    pinturas = Pinturas.objects.all()
+
+    if q:
+        sellantes = sellantes.filter(name__icontains=q)
+        herramientas = herramientas.filter(name__icontains=q)
+        pinturas = pinturas.filter(name__icontains=q)
+
+    if tipo:
+        # Filtra solo la categoría elegida, vacía las otras
+        if tipo == "Sellantes":
+            herramientas = Herramientas.objects.none()
+            pinturas = Pinturas.objects.none()
+        elif tipo == "Herramientas":
+            sellantes = Sellantes.objects.none()
+            pinturas = Pinturas.objects.none()
+        elif tipo == "Pinturas":
+            sellantes = Sellantes.objects.none()
+            herramientas = Herramientas.objects.none()
+
+    items = [
+        {"item": sellante, "category": "Sellantes"} for sellante in sellantes
+    ] + [
+        {"item": herramienta, "category": "Herramientas"} for herramienta in herramientas
+    ] + [
+        {"item": pintura, "category": "Pinturas"} for pintura in pinturas
+    ]
 
     context = {
         'items': items,
-        'header': 'Herramientas',
     }
     return render(request, 'inv/inventario.html', context)
 
-def display_sellantes(request):
-    items = Sellantes.objects.all()
-    context = {
-        'items': items,
-        'header': 'Sellantes',
-    }
-    return render(request, 'inv/inventario.html', context)
 
-def display_pinturas(request):
-    items = Pinturas.objects.all()
-    context = {
-        'items': items,
-        'header': 'Pinturas',
-    }
-    return render(request, 'inv/inventario.html', context)
 
 def add_item(request, cls):
     if request.method == "POST":
@@ -153,22 +166,34 @@ def edit_pintura(request, pk):
     return edit_item(request, pk, Pinturas, PinturaForm)
 
 def delete_herramienta(request, pk):
-    template = 'inv/inventario.html'
     Herramientas.objects.filter(id=pk).delete()
-    items = Herramientas.objects.all()
-    context = {'items': items}
-    return render(request, template, context)
+    return redirect('inventario')
 
 def delete_sellante(request, pk):
-    template = 'inv/inventario.html'
     Sellantes.objects.filter(id=pk).delete()
-    items = Sellantes.objects.all()
-    context = {'items': items}
-    return render(request, template, context)
+    return redirect('inventario') 
 
 def delete_pintura(request, pk):
-    template = 'inv/inventario.html'
     Pinturas.objects.filter(id=pk).delete()
-    items = Pinturas.objects.all()
-    context = {'items': items}
-    return render(request, template, context)
+    return redirect('inventario')
+
+def agregar_producto(request):
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            tipo = form.cleaned_data['type']
+            name = form.cleaned_data['name']
+            price = form.cleaned_data['price']
+
+            if tipo == 'Sellantes':
+                Sellantes.objects.create(name=name, price=price, type=tipo)
+            elif tipo == 'Herramientas':
+                Herramientas.objects.create(name=name, price=price, type=tipo)
+            elif tipo == 'Pinturas':
+                Pinturas.objects.create(name=name, price=price, type=tipo)
+
+            return redirect('inventario')
+    else:
+        form = ProductoForm()
+
+    return render(request, 'inv/add_new.html', {'form': form, 'header': 'Agregar Producto'})

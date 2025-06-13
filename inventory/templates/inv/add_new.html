@@ -6,7 +6,7 @@
   <form method="POST" class="add-product-form">
     {% csrf_token %}
 
-    <h4>{{ header }}</h4>
+    <h4>Agregar nuevo producto</h4>
 
     {% for field in form %}
     <div class="add-product-group">
@@ -19,11 +19,10 @@
 
     <div class="add-product-group">
       <div class="add-product-btn-wrap">
-        <button type="submit" class="add-product-btn">Nuevo Producto</button>
+        <button type="submit" class="add-product-btn">Agregar Producto</button>
       </div>
     </div>
   </form>
 </div>
-
 
 {% endblock %}

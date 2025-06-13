@@ -1,8 +1,9 @@
 from django.db import models, connection
-from django.utils.timezone import now  # 'now' ftimezone-aware timestamps xd
+from django.utils.timezone import now  
 
 
 class Producto(models.Model):
+    name = models.CharField(max_length=200, default='Sin nombre')
     type = models.CharField(max_length=200, blank=False)
     price = models.IntegerField()
 
@@ -26,7 +27,7 @@ class Producto(models.Model):
     def table_exists(cls):
         """Checks if the table for the model exists in the database."""
         return cls._meta.db_table in connection.introspection.table_names()
-
+    
 class Sellantes(Producto):
     pass
 
