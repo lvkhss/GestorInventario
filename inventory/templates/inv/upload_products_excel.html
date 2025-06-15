@@ -1,0 +1,12 @@
+{% extends 'inv/base.html' %}
+{% block body %}
+<h2>Subir productos desde Excel</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Subir</button>
+</form>
+{% if msg %}
+  <p>{{ msg }}</p>
+{% endif %}
+{% endblock %}

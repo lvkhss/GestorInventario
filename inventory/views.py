@@ -7,7 +7,9 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import *
 from .forms import *
-
+import pandas as pd
+from .models import Producto
+from .forms import ExcelUploadForm
 
 from django.contrib.auth.models import User
 from django.contrib.auth import login
@@ -235,6 +237,22 @@ def agregar_producto(request):
 
     return render(request, 'inv/add_new.html', {'form': form, 'header': 'Agregar Producto'})
 
-
+def upload_products_excel(request):
+    msg = ""
+    if request.method == "POST":
+        form = ExcelUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            excel_file = request.FILES['file']
+            df = pd.read_excel(excel_file)
+            for _, row in df.iterrows():
+                Producto.objects.create(
+                    name=row['name'],
+                    price=row['price'],
+                    type=row['type'],
+                )
+            msg = "Productos cargados exitosamente."
+    else:
+        form = ExcelUploadForm()
+    return render(request, 'inv/upload_products_excel.html', {'form': form, 'msg': msg})
 
 

@@ -34,10 +34,14 @@ class Producto(models.Model):
     def __str__(self):
         return 'type: {0} price: {1} date_added: {2}'.format(self.type, self.price, self.date_added)
 
+
     @classmethod
     def table_exists(cls):
         """Checks if the table for the model exists in the database."""
         return cls._meta.db_table in connection.introspection.table_names()
+
+
+
     
 class Sellantes(Producto):
     pass

@@ -26,4 +26,5 @@ urlpatterns = [
     re_path(r'^suppliers/create/?$', views.supplier_create, name='supplier_create'),
     re_path(r'^suppliers/(?P<pk>\d+)/edit/?$', views.supplier_update, name='supplier_update'),
     re_path(r'^suppliers/(?P<pk>\d+)/delete/?$', views.supplier_delete, name='supplier_delete'),
+    re_path(r'^productos/upload_excel/?$', views.upload_products_excel, name='upload_products_excel'),
 ]

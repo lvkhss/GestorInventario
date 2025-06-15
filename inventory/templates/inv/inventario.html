@@ -1,48 +1,61 @@
 {% extends 'inv/base.html' %}
 
 {% block body %}
+<div class="container-set-inventory">
   <div class="add_buttons">
-    <h2>Inventario</h2>
-    <div class="button-group">
-      <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="form-control d-inline-block w-auto" />
+    <div class="inventory-left">
+      <h2>Inventario</h2>
+      <div class="button-group">
+        <input type="text" id="searchInput" placeholder="Buscar por nombre..."
+          class="form-control d-inline-block w-auto" />
+      </div>
+      <div class="button-group">
+
+        <select id="filterType" class="form-select d-inline-block w-auto">
+          <option value="">Todos</option>
+          <option value="Sellantes">Sellantes</option>
+          <option value="Herramientas">Herramientas</option>
+          <option value="Pinturas">Pinturas</option>
+        </select>
+      </div>
     </div>
-    <div class="button-group">
-      <select id="filterType" class="form-select d-inline-block w-auto">
-        <option value="">Todos</option>
-        <option value="Sellantes">Sellantes</option>
-        <option value="Herramientas">Herramientas</option>
-        <option value="Pinturas">Pinturas</option>
-      </select>
-    </div>
-    <div class="button-group">
-      <a href="{% url 'agregar_producto' %}" class="btn btn-success btn-md btn-trim" role="button">Agregar producto</a>
+    <div class="inventory-right">
+      <div class="button-group">
+        <div class="button-group-fused">
+          <a href="{% url 'agregar_producto' %}" class=" agregar-producto">Agregar producto</a>
+          <a href="{% url 'upload_products_excel' %}" class=" agregar-excel">Subir Excel</a>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div id="tablaProductos">
-    {% include 'inv/tabla_productos.html' %}
-  </div>
 
-  <script>
-    function updateTable() {
-  const query = document.getElementById("searchInput").value;
-  const type = document.getElementById("filterType").value;
 
-  let url = `{% url 'inventario' %}?`;
-  if (query) url += `q=${encodeURIComponent(query)}&`;
-  if (type) url += `type=${encodeURIComponent(type)}`;
+</div>
+<div id="tablaProductos">
+  {% include 'inv/tabla_productos.html' %}
+</div>
 
-  fetch(url)
-    .then(response => response.text())
-    .then(data => {
-      const parser = new DOMParser();
-      const htmlDoc = parser.parseFromString(data, "text/html");
-      const newContent = htmlDoc.querySelector("#tablaProductos").innerHTML;
-      document.getElementById("tablaProductos").innerHTML = newContent;
-    });
-}
+<script>
+  function updateTable() {
+    const query = document.getElementById("searchInput").value;
+    const type = document.getElementById("filterType").value;
 
-document.getElementById("searchInput").addEventListener("input", updateTable);
-document.getElementById("filterType").addEventListener("change", updateTable);
-  </script>
+    let url = `{% url 'inventario' %}?`;
+    if (query) url += `q=${encodeURIComponent(query)}&`;
+    if (type) url += `type=${encodeURIComponent(type)}`;
+
+    fetch(url)
+      .then(response => response.text())
+      .then(data => {
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(data, "text/html");
+        const newContent = htmlDoc.querySelector("#tablaProductos").innerHTML;
+        document.getElementById("tablaProductos").innerHTML = newContent;
+      });
+  }
+
+  document.getElementById("searchInput").addEventListener("input", updateTable);
+  document.getElementById("filterType").addEventListener("change", updateTable);
+</script>
 {% endblock %}
