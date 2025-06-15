@@ -1,11 +1,11 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
-from .models import *
+from .models import *\
+
 # Register your models here.
 
 # admin.site.register(item)
 @admin.register(Sellantes, Herramientas, Pinturas)
 class ViewAdmin(ImportExportModelAdmin):
     exclude = ('id', )
-
-    admin.site.register(Proveedor)
+admin.site.register(Suppliers)

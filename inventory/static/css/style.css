@@ -1,5 +1,38 @@
 
 
+
+.button-group {
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.form-select {
+  padding: 6px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 1rem;
+  color: #333;
+  min-width: 140px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
+}
+
+.d-inline-block {
+  display: inline-block;
+}
+
+.w-auto {
+  width: auto;
+}
+
+
 .container-login {
     font-family: 'Nunito', Arial, sans-serif;
     border-radius: 8%;

@@ -1,5 +1,6 @@
 from django import forms
 from .models import *
+from .models import Suppliers
 
 TIPOS_PRODUCTO = (
     ('Sellantes', 'Sellante'),
@@ -66,7 +67,7 @@ class PinturaForm(forms.ModelForm):
         )
 
 
-class ProveedorForm(forms.ModelForm):
+class suplierForm(forms.ModelForm):
     class Meta:
-        model = Proveedor
+        model = Suppliers
         fields = ['empresa', 'encargado', 'email', 'numero', 'direccion']

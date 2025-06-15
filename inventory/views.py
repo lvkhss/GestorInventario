@@ -6,15 +6,44 @@ from django.contrib.auth.decorators import login_required
 # Create your views here.
 from django.db.models import Q
 from .models import *
-
 from .forms import *
+
 
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 
-from .models import Proveedor
-from .forms import ProveedorForm
 
+def suppliers_list(request):
+    suppliers = Suppliers.objects.all()
+    return render(request, 'inv/suppliers_list.html', {'suppliers': suppliers})
+
+def supplier_create(request):
+    if request.method == 'POST':
+        form = suplierForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('suppliers_list')
+    else:
+        form = suplierForm()
+    return render(request, 'inv/suppliers_form.html', {'form': form})
+
+def supplier_update(request, pk):
+    supplier = get_object_or_404(Suppliers, pk=pk)
+    if request.method == 'POST':
+        form = suplierForm(request.POST, instance=supplier)
+        if form.is_valid():
+            form.save()
+            return redirect('suppliers_list')
+    else:
+        form = suplierForm(instance=supplier)
+    return render(request, 'inv/supplier_form.html', {'form': form})
+
+def supplier_delete(request, pk):
+    supplier = get_object_or_404(Suppliers, pk=pk)
+    if request.method == 'POST':
+        supplier.delete()
+        return redirect('suppliers_list')
+    return render(request, 'inv/supplier_confirm_delete.html', {'supplier': supplier})
 
 
 def users_view(request):
@@ -206,38 +235,6 @@ def agregar_producto(request):
 
     return render(request, 'inv/add_new.html', {'form': form, 'header': 'Agregar Producto'})
 
-def supplier_view(request):
-    return render(request, 'inv/supplier.html')
 
 
-def proveedores_list(request):
-    proveedores = Proveedor.objects.all()
-    return render(request, 'inv/proveedores_list.html', {'proveedores': proveedores})
 
-def proveedor_create(request):
-    if request.method == 'POST':
-        form = ProveedorForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('proveedores_list')
-    else:
-        form = ProveedorForm()
-    return render(request, 'inv/proveedor_form.html', {'form': form})
-
-def proveedor_update(request, pk):
-    proveedor = get_object_or_404(Proveedor, pk=pk)
-    if request.method == 'POST':
-        form = ProveedorForm(request.POST, instance=proveedor)
-        if form.is_valid():
-            form.save()
-            return redirect('proveedores_list')
-    else:
-        form = ProveedorForm(instance=proveedor)
-    return render(request, 'inv/proveedor_form.html', {'form': form})
-
-def proveedor_delete(request, pk):
-    proveedor = get_object_or_404(Proveedor, pk=pk)
-    if request.method == 'POST':
-        proveedor.delete()
-        return redirect('proveedores_list')
-    return render(request, 'inv/proveedor_confirm_delete.html', {'proveedor': proveedor})

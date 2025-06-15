@@ -1,0 +1,40 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+
+<div class="add_buttons">
+<h2>Lista de Proveedores</h2>
+    <div class="button-group">
+     <a href="{% url 'supplier_create' %}" class="btn btn-success btn-md btn-trim" role="button">Agregar Proveedor</a>
+    </div>
+  </div>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Empresa</th>
+      <th>Encargado</th>
+      <th>Email</th>
+      <th>Numero</th>
+      <th>Dirección</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for supplier in suppliers %}
+      <tr>
+        <td>{{ supplier.id }}</td>
+        <td>{{ supplier.empresa }}</td>
+        <td>{{ supplier.encargado }}</td>
+        <td>{{ supplier.email }}</td>
+        <td>{{ supplier.numero }}</td>
+        <td>{{ supplier.direccion }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="6">No hay proveedores.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

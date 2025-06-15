@@ -3,7 +3,7 @@ from django.utils.timezone import now
 
 
 
-class Proveedor(models.Model):
+class Suppliers(models.Model):
     empresa = models.CharField(max_length=100)
     encargado = models.CharField(max_length=100)
     email = models.EmailField()
