@@ -2,6 +2,17 @@ from django.db import models, connection
 from django.utils.timezone import now  
 
 
+
+class Proveedor(models.Model):
+    empresa = models.CharField(max_length=100)
+    encargado = models.CharField(max_length=100)
+    email = models.EmailField()
+    numero = models.CharField(max_length=20)
+    direccion = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f"{self.empresa} - {self.encargado}"
+
 class Producto(models.Model):
     name = models.CharField(max_length=200, default='Sin nombre')
     type = models.CharField(max_length=200, blank=False)

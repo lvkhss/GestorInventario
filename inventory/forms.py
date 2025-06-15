@@ -64,3 +64,9 @@ class PinturaForm(forms.ModelForm):
         self.fields['date_added'] = forms.DateTimeField(
             initial=self.instance.date_added, disabled=True, required=False, label='Fecha de ingreso'
         )
+
+
+class ProveedorForm(forms.ModelForm):
+    class Meta:
+        model = Proveedor
+        fields = ['empresa', 'encargado', 'email', 'numero', 'direccion']

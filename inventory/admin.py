@@ -7,3 +7,5 @@ from .models import *
 @admin.register(Sellantes, Herramientas, Pinturas)
 class ViewAdmin(ImportExportModelAdmin):
     exclude = ('id', )
+
+    admin.site.register(Proveedor)
