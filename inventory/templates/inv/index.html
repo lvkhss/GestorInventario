@@ -7,7 +7,7 @@
     <table class="table table-hover">
       <thead>
         <tr>
-          <th>ID</th>
+          <!-- <th>ID</th> -->
           <th>Nombre</th>
           <th>Precio</th>
           <th>Fecha</th>
@@ -16,8 +16,8 @@
       <tbody>
         {% for entry in items %}
         <tr>
-          <td>{{ entry.item.pk }}</td>
-          <td>{{ entry.item.type }}</td>
+          <!-- <td>{{ entry.item.pk }}</td> -->
+          <td>{{ entry.item.name }}</td>
           <td>{{ entry.item.price }} $</td>
           <td>{{ entry.item.date_added }}</td>
         </tr>
@@ -35,7 +35,7 @@
     <table class="table table-hover">
       <thead>
         <tr>
-          <th>ID</th>
+          <!-- <th>ID</th> -->
           <th>Nombre</th>
           <th>Precio</th>
           <th>Fecha</th>
@@ -44,8 +44,8 @@
       <tbody>
         {% for entry in items %}
         <tr>
-          <td>{{ entry.item.pk }}</td>
-          <td>{{ entry.item.type }}</td>
+          <!-- <td>{{ entry.item.pk }}</td> -->
+          <td>{{ entry.item.name }}</td>
           <td>{{ entry.item.price }} $</td>
           <td>{{ entry.item.date_added }}</td>
         </tr>

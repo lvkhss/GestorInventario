@@ -26,4 +26,14 @@
     {% endfor %}
   </tbody>
 </table>
+
+<div class="pagination">
+  {% if movimientos.has_previous %}
+    <a href="?page={{ movimientos.previous_page_number }}">Anterior</a>
+  {% endif %}
+  <span>Página {{ movimientos.number }} de {{ movimientos.paginator.num_pages }}</span>
+  {% if movimientos.has_next %}
+    <a href="?page={{ movimientos.next_page_number }}">Siguiente</a>
+  {% endif %}
+</div>
 {% endblock %}

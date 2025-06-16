@@ -5,21 +5,20 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 from django.db.models import Q
-from .models import *
 
 from .forms import *
 import pandas as pd
 from .models import ProductoReal, Sellantes, Herramientas, Pinturas
 from .forms import ExcelUploadForm
-
+from django.core.paginator import Paginator
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 
-
+@login_required
 def suppliers_list(request):
     suppliers = Suppliers.objects.all()
     return render(request, 'inv/suppliers_list.html', {'suppliers': suppliers})
-
+@login_required
 def supplier_create(request):
     if request.method == 'POST':
         form = suplierForm(request.POST)
@@ -29,7 +28,7 @@ def supplier_create(request):
     else:
         form = suplierForm()
     return render(request, 'inv/suppliers_form.html', {'form': form})
-
+@login_required
 def supplier_update(request, pk):
     supplier = get_object_or_404(Suppliers, pk=pk)
     if request.method == 'POST':
@@ -40,7 +39,7 @@ def supplier_update(request, pk):
     else:
         form = suplierForm(instance=supplier)
     return render(request, 'inv/supplier_form.html', {'form': form})
-
+@login_required
 def supplier_delete(request, pk):
     supplier = get_object_or_404(Suppliers, pk=pk)
     if request.method == 'POST':
@@ -48,7 +47,7 @@ def supplier_delete(request, pk):
         return redirect('suppliers_list')
     return render(request, 'inv/supplier_confirm_delete.html', {'supplier': supplier})
 
-
+@login_required
 def users_view(request):
     users = User.objects.all()
     return render(request, 'inv/users.html', {'users': users})
@@ -92,7 +91,11 @@ def inventario(request):
 
 @login_required
 def historial(request):
-    movimientos = HistorialMovimiento.objects.all().order_by('-fecha')
+    movimientos_list = HistorialMovimiento.objects.all().order_by('-fecha')
+    paginator = Paginator(movimientos_list, 10)  # 10 per page
+
+    page_number = request.GET.get('page')
+    movimientos = paginator.get_page(page_number)
     return render(request, 'inv/historial.html', {'movimientos': movimientos})
 
 @login_required
@@ -119,6 +122,13 @@ def index(request):
     ] + [
         {"item": pintura, "category": "Pinturas"} for pintura in pinturas
     ]
+
+    # Sort by date_added descending and get the last 5
+    items = sorted(
+        items,
+        key=lambda x: getattr(x["item"], "date_added", None) or 0,
+        reverse=True
+    )[:5]
 
     context = {
         'items': items,
@@ -165,7 +175,7 @@ def inventario(request):
     return render(request, 'inv/inventario.html', context)
 
 
-
+@login_required
 def add_item(request, cls):
     if request.method == "POST":
         form = cls(request.POST)
@@ -175,16 +185,16 @@ def add_item(request, cls):
     else:
         form = cls()
     return render(request, 'inv/add_new.html', {'form': form})
-
+@login_required
 def add_herramienta(request):
     return add_item(request, HerramientaForm)
-
+@login_required
 def add_sellante(request):
     return add_item(request, SellanteForm)
-
+@login_required
 def add_pintura(request):
     return add_item(request, PinturaForm)
-
+@login_required
 def edit_item(request, pk, model, cls):
     item = get_object_or_404(model, pk=pk)
     stock_field = 'stock'  # Adjust if your field is named differently
@@ -210,28 +220,28 @@ def edit_item(request, pk, model, cls):
     else:
         form = cls(instance=item)
     return render(request, 'inv/edit_item.html', {'form': form})
-
+@login_required
 def edit_herramienta(request, pk):
     return edit_item(request, pk, Herramientas, HerramientaForm)
-
+@login_required
 def edit_sellante(request, pk):
     return edit_item(request, pk, Sellantes, SellanteForm)
-
+@login_required
 def edit_pintura(request, pk):
     return edit_item(request, pk, Pinturas, PinturaForm)
-
+@login_required
 def delete_herramienta(request, pk):
     Herramientas.objects.filter(id=pk).delete()
     return redirect('inventario')
-
+@login_required
 def delete_sellante(request, pk):
     Sellantes.objects.filter(id=pk).delete()
     return redirect('inventario') 
-
+@login_required
 def delete_pintura(request, pk):
     Pinturas.objects.filter(id=pk).delete()
     return redirect('inventario')
-
+@login_required
 def agregar_producto(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST)
@@ -259,7 +269,7 @@ MODEL_MAP = {
     'Herramientas': Herramientas,
     'Pinturas': Pinturas,
 }
-
+@login_required
 def upload_products_excel(request):
     msg = ""
     if request.method == "POST":
