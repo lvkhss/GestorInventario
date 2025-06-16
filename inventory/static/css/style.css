@@ -100,65 +100,54 @@
     justify-content: center;
 
 }
-
 .add-product-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 14px;
-    justify-content: center;
-
+  margin-bottom: 20px;
 }
 
 .add-product-label {
-    display: flex;
-    flex: 0 0 90px;
-    font-weight: 500;
-    text-align: right;
-
-
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
 }
 
 .add-product-field input,
 .add-product-field select,
 .add-product-field textarea {
-    display: flex;
-    margin-bottom: 14px;
-    align-items: center;
-    width: 100%;
-    padding: 7px 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    font-size: 1rem;
-
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
 }
 
-
+.add-product-field input:focus,
+.add-product-field select:focus,
+.add-product-field textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
 
 .add-product-btn-wrap {
-    display: flex;
-    margin-bottom: 14px;
-    align-items: center;
-    width: 100%;
-
-
+  text-align: right;
 }
 
 .add-product-btn {
-    width: 100%;
-    padding: 9px 0;
-    font-size: 1rem;
-    border-radius: 4px;
-    background: #354e66;
-    color: #fff;
-    border: none;
-    font-weight: 600;
-    transition: background 0.2s;
-
+  background-color: #354e66;
+  color: #fff;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
 .add-product-btn:hover {
-    background: #223146;
+  background-color: #0056b3;
 }
 
 .add_buttons {
@@ -247,3 +236,55 @@
   border-bottom-right-radius: 50px;
   margin-right: 0;
 }
+
+
+/* EXCEL */
+
+form {
+  max-width: 400px;
+  margin: 32px auto 0 auto;
+  padding: 24px 28px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+form h2 {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+form p {
+  margin-bottom: 18px;
+}
+
+form input[type="file"] {
+  display: block;
+  margin-bottom: 18px;
+}
+
+form button[type="submit"] {
+  background-color: #354e66;
+  color: #fff;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+form button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+form + p {
+  text-align: center;
+  margin-top: 18px;
+  color: #28a745;
+  font-weight: 500;
+}
+
+
+/* EXCEL */
