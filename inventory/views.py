@@ -8,7 +8,7 @@ from django.db.models import Q
 from .models import *
 from .forms import *
 import pandas as pd
-from .models import Producto
+from .models import ProductoReal, Sellantes, Herramientas, Pinturas
 from .forms import ExcelUploadForm
 
 from django.contrib.auth.models import User
@@ -237,6 +237,13 @@ def agregar_producto(request):
 
     return render(request, 'inv/add_new.html', {'form': form, 'header': 'Agregar Producto'})
 
+MODEL_MAP = {
+    'ProductoReal': ProductoReal,
+    'Sellantes': Sellantes,
+    'Herramientas': Herramientas,
+    'Pinturas': Pinturas,
+}
+
 def upload_products_excel(request):
     msg = ""
     if request.method == "POST":
@@ -245,14 +252,21 @@ def upload_products_excel(request):
             excel_file = request.FILES['file']
             df = pd.read_excel(excel_file)
             for _, row in df.iterrows():
-                Producto.objects.create(
+                print(row)
+                model_name = row['type']
+                model = MODEL_MAP.get(model_name)
+                if not model:
+                    print(f"Tipo '{model_name}' no reconocido. Fila omitida.")
+                    continue
+                obj, created = model.objects.update_or_create(
                     name=row['name'],
-                    price=row['price'],
-                    type=row['type'],
+                    defaults={
+                        'price': row['price'],
+                        'stock': row.get('stock', 0),
+                        'type': row['type'],
+                    }
                 )
-            msg = "Productos cargados exitosamente."
+            msg = "Productos cargados o actualizados exitosamente."
     else:
         form = ExcelUploadForm()
     return render(request, 'inv/upload_products_excel.html', {'form': form, 'msg': msg})
-
-

@@ -41,7 +41,8 @@ class Producto(models.Model):
         return cls._meta.db_table in connection.introspection.table_names()
 
 
-
+class ProductoReal(Producto):
+    pass
     
 class Sellantes(Producto):
     pass
