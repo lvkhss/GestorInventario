@@ -1,5 +1,6 @@
 from django import forms
 from .models import *
+from .models import Suppliers
 
 TIPOS_PRODUCTO = (
     ('Sellantes', 'Sellante'),
@@ -64,3 +65,14 @@ class PinturaForm(forms.ModelForm):
         self.fields['date_added'] = forms.DateTimeField(
             initial=self.instance.date_added, disabled=True, required=False, label='Fecha de ingreso'
         )
+
+
+class suplierForm(forms.ModelForm):
+    class Meta:
+        model = Suppliers
+        fields = ['empresa', 'encargado', 'email', 'numero', 'direccion']
+
+
+
+class ExcelUploadForm(forms.Form):
+    file = forms.FileField(label="Archivo Excel")

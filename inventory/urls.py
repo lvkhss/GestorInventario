@@ -1,5 +1,6 @@
-from django.urls import re_path
-from .views import * 
+from django.urls import path, re_path
+from .views import *
+from . import views 
 
 
 urlpatterns = [
@@ -21,5 +22,9 @@ urlpatterns = [
     re_path(r'^register$', register_view, name='register'),
     re_path(r'^usuarios$', users_view, name='users'),
     re_path(r'^historial$', historial, name='historial'),
-
+    re_path(r'^suppliers/?$', views.suppliers_list, name='suppliers_list'),
+    re_path(r'^suppliers/create/?$', views.supplier_create, name='supplier_create'),
+    re_path(r'^suppliers/(?P<pk>\d+)/edit/?$', views.supplier_update, name='supplier_update'),
+    re_path(r'^suppliers/(?P<pk>\d+)/delete/?$', views.supplier_delete, name='supplier_delete'),
+    re_path(r'^productos/upload_excel/?$', views.upload_products_excel, name='upload_products_excel'),
 ]

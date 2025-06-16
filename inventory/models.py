@@ -2,6 +2,17 @@ from django.db import models, connection
 from django.utils.timezone import now  
 
 
+
+class Suppliers(models.Model):
+    empresa = models.CharField(max_length=100)
+    encargado = models.CharField(max_length=100)
+    email = models.EmailField()
+    numero = models.CharField(max_length=20)
+    direccion = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f"{self.empresa} - {self.encargado}"
+
 class Producto(models.Model):
     name = models.CharField(max_length=200, default='Sin nombre')
     type = models.CharField(max_length=200, blank=False)
@@ -23,10 +34,15 @@ class Producto(models.Model):
     def __str__(self):
         return 'type: {0} price: {1} date_added: {2}'.format(self.type, self.price, self.date_added)
 
+
     @classmethod
     def table_exists(cls):
         """Checks if the table for the model exists in the database."""
         return cls._meta.db_table in connection.introspection.table_names()
+
+
+class ProductoReal(Producto):
+    pass
     
 class Sellantes(Producto):
     pass

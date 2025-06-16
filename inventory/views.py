@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import OperationalError
-from .models import Sellantes, Herramientas, Pinturas
+from .models import Sellantes, Herramientas, Pinturas, HistorialMovimiento
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 # Create your views here.
@@ -8,10 +8,45 @@ from django.db.models import Q
 from .models import *
 
 from .forms import *
+import pandas as pd
+from .models import ProductoReal, Sellantes, Herramientas, Pinturas
+from .forms import ExcelUploadForm
 
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 
+
+def suppliers_list(request):
+    suppliers = Suppliers.objects.all()
+    return render(request, 'inv/suppliers_list.html', {'suppliers': suppliers})
+
+def supplier_create(request):
+    if request.method == 'POST':
+        form = suplierForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('suppliers_list')
+    else:
+        form = suplierForm()
+    return render(request, 'inv/suppliers_form.html', {'form': form})
+
+def supplier_update(request, pk):
+    supplier = get_object_or_404(Suppliers, pk=pk)
+    if request.method == 'POST':
+        form = suplierForm(request.POST, instance=supplier)
+        if form.is_valid():
+            form.save()
+            return redirect('suppliers_list')
+    else:
+        form = suplierForm(instance=supplier)
+    return render(request, 'inv/supplier_form.html', {'form': form})
+
+def supplier_delete(request, pk):
+    supplier = get_object_or_404(Suppliers, pk=pk)
+    if request.method == 'POST':
+        supplier.delete()
+        return redirect('suppliers_list')
+    return render(request, 'inv/supplier_confirm_delete.html', {'supplier': supplier})
 
 
 def users_view(request):
@@ -152,10 +187,25 @@ def add_pintura(request):
 
 def edit_item(request, pk, model, cls):
     item = get_object_or_404(model, pk=pk)
+    stock_field = 'stock'  # Adjust if your field is named differently
+    stock_anterior = getattr(item, stock_field, None)
+
     if request.method == "POST":
         form = cls(request.POST, instance=item)
         if form.is_valid():
-            form.save()
+            updated_item = form.save(commit=False)
+            stock_nuevo = getattr(updated_item, stock_field, None)
+            if stock_anterior is not None and stock_nuevo is not None and stock_anterior != stock_nuevo:
+                # Save history only if stock changed
+                HistorialMovimiento.objects.create(
+                    producto_id=item.id,
+                    nombre_producto=getattr(item, 'name', ''),  # Adjust if your field is named differently
+                    tipo_producto=getattr(item, 'type', ''),    # Adjust if your field is named differently
+                    cambio_stock=stock_nuevo - stock_anterior,
+                    stock_final=stock_nuevo,
+                    motivo=request.POST.get('motivo', 'Edición manual')
+                )
+            updated_item.save()
             return redirect('inventario')
     else:
         form = cls(instance=item)
@@ -202,3 +252,37 @@ def agregar_producto(request):
         form = ProductoForm()
 
     return render(request, 'inv/add_new.html', {'form': form, 'header': 'Agregar Producto'})
+
+MODEL_MAP = {
+    'ProductoReal': ProductoReal,
+    'Sellantes': Sellantes,
+    'Herramientas': Herramientas,
+    'Pinturas': Pinturas,
+}
+
+def upload_products_excel(request):
+    msg = ""
+    if request.method == "POST":
+        form = ExcelUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            excel_file = request.FILES['file']
+            df = pd.read_excel(excel_file)
+            for _, row in df.iterrows():
+                print(row)
+                model_name = row['type']
+                model = MODEL_MAP.get(model_name)
+                if not model:
+                    print(f"Tipo '{model_name}' no reconocido. Fila omitida.")
+                    continue
+                obj, created = model.objects.update_or_create(
+                    name=row['name'],
+                    defaults={
+                        'price': row['price'],
+                        'stock': row.get('stock', 0),
+                        'type': row['type'],
+                    }
+                )
+            msg = "Productos cargados o actualizados exitosamente."
+    else:
+        form = ExcelUploadForm()
+    return render(request, 'inv/upload_products_excel.html', {'form': form, 'msg': msg})
