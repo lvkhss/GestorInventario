@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import OperationalError
-from .models import Sellantes, Herramientas, Pinturas
+from .models import Sellantes, Herramientas, Pinturas, HistorialMovimiento
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 from django.db.models import Q
 from .models import *
+
 from .forms import *
 import pandas as pd
 from .models import ProductoReal, Sellantes, Herramientas, Pinturas
@@ -186,10 +187,25 @@ def add_pintura(request):
 
 def edit_item(request, pk, model, cls):
     item = get_object_or_404(model, pk=pk)
+    stock_field = 'stock'  # Adjust if your field is named differently
+    stock_anterior = getattr(item, stock_field, None)
+
     if request.method == "POST":
         form = cls(request.POST, instance=item)
         if form.is_valid():
-            form.save()
+            updated_item = form.save(commit=False)
+            stock_nuevo = getattr(updated_item, stock_field, None)
+            if stock_anterior is not None and stock_nuevo is not None and stock_anterior != stock_nuevo:
+                # Save history only if stock changed
+                HistorialMovimiento.objects.create(
+                    producto_id=item.id,
+                    nombre_producto=getattr(item, 'name', ''),  # Adjust if your field is named differently
+                    tipo_producto=getattr(item, 'type', ''),    # Adjust if your field is named differently
+                    cambio_stock=stock_nuevo - stock_anterior,
+                    stock_final=stock_nuevo,
+                    motivo=request.POST.get('motivo', 'Edición manual')
+                )
+            updated_item.save()
             return redirect('inventario')
     else:
         form = cls(instance=item)
