@@ -159,11 +159,13 @@
     margin-bottom: 20px;
     /* Espacio debajo del contenedor */
     flex-wrap: wrap;
+    max-width: 1500px;
+    max-height: 70px;
     /* Que se envuelvan si no hay espacio */
 }
 
 .add_buttons .button-group {
-    /* Opcional: puedes darle un ancho mínimo para mejor control */
+    /* Opcional: puedes darle un ancho mÃ­nimo para mejor control */
     min-width: 150px;
 }
 
@@ -283,6 +285,33 @@ form + p {
   text-align: center;
   margin-top: 18px;
   color: #28a745;
+  font-weight: 500;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 24px;
+  gap: 16px;
+  font-size: 1.1em;
+}
+
+.pagination a {
+  color: #fff;
+  background: #354e66;
+  padding: 6px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.pagination a:hover {
+  background: #0056b3;
+}
+
+.pagination span {
+  color: #333;
   font-weight: 500;
 }
 

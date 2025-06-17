@@ -106,6 +106,7 @@ body {
     border-color: #b21f2d;
 }
  .table-container {
+    
     display: flex; 
     gap: 20px; 
     justify-content: center; 
@@ -113,6 +114,7 @@ body {
   }
 
 .fixed-table {
+    
     table-layout: fixed;
     width: 900px;
     min-width: 900px;
@@ -121,17 +123,19 @@ body {
 
 .fixed-table th,
 .fixed-table td {
+    
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .table {
-
+    border-left: 1px solid #dee2e6;
+    border-right:  1px solid #dee2e6;
+    border-collapse: collapse;
     width: 100%; 
     background-color: white;
-    border-collapse: collapse;
-    border-radius: 8px;
+
     overflow: hidden;
     margin-top: 20px;
 }
@@ -139,7 +143,7 @@ body {
 
 
 .table th {
-    
+     border-collapse: collapse;
     background-color: #354e66;
     color: white;
     text-align: center;

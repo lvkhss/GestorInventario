@@ -1,0 +1,18 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+<div class="container mt-4">
+  <h2>Detalle del Movimiento</h2>
+  <ul class="list-group">
+    <li class="list-group-item"><strong>Producto:</strong> {{ movimiento.nombre_producto }}</li>
+    
+    <li class="list-group-item"><strong>Tipo:</strong> {{ movimiento.tipo_producto }}</li>
+    <li class="list-group-item"><strong>Fecha:</strong> {{ movimiento.fecha }}</li>
+    <li class="list-group-item"><strong>Cambio de Stock:</strong> {{ movimiento.cambio_stock }}</li>
+    <li class="list-group-item"><strong>Stock Final:</strong> {{ movimiento.stock_final }}</li>
+    <li class="list-group-item"><strong>Motivo:</strong> {{ movimiento.motivo }}</li>
+    <li class="list-group-item"><strong>Usuario:</strong> {{ movimiento.usuario.username|default:"Desconocido" }}</li>
+  </ul>
+  <a href="{% url 'historial' %}" class="btn btn-secondary mt-3">Volver</a>
+</div>
+{% endblock %}

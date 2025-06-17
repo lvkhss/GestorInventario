@@ -3,27 +3,29 @@
 {% block body %}
 <div class="table-container">
   <div class="table-wrapper">
-    <h3>Ultimos Productos</h3>
+    <h3>Últimos productos</h3>
     <table class="table table-hover">
       <thead>
         <tr>
-          <!-- <th>ID</th> -->
           <th>Nombre</th>
+          <th>Categoría</th>
           <th>Precio</th>
           <th>Fecha</th>
+          <th>Stock</th>
         </tr>
       </thead>
       <tbody>
-        {% for entry in items %}
+        {% for entry in latest_items %}
         <tr>
-          <!-- <td>{{ entry.item.pk }}</td> -->
           <td>{{ entry.item.name }}</td>
+          <td>{{ entry.category }}</td>
           <td>{{ entry.item.price }} $</td>
           <td>{{ entry.item.date_added }}</td>
+          <td>{{ entry.item.stock }}</td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="4" class="text-center">No hay productos en el inventario.</td>
+          <td colspan="5" class="text-center">No hay productos en el inventario.</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -31,32 +33,43 @@
   </div>
 
   <div class="table-wrapper">
-    <h3>Table 2: Sales Details</h3>
+    <h3>Poco Stock</h3>
     <table class="table table-hover">
       <thead>
         <tr>
-          <!-- <th>ID</th> -->
           <th>Nombre</th>
+          <th>Categoría</th>
           <th>Precio</th>
           <th>Fecha</th>
+          <th>Stock</th>
         </tr>
       </thead>
       <tbody>
-        {% for entry in items %}
+        {% for entry in least_stock_items %}
         <tr>
-          <!-- <td>{{ entry.item.pk }}</td> -->
           <td>{{ entry.item.name }}</td>
+          <td>{{ entry.category }}</td>
           <td>{{ entry.item.price }} $</td>
           <td>{{ entry.item.date_added }}</td>
+          <td>{{ entry.item.stock }}</td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="4" class="text-center">No hay productos en el inventario.</td>
+          <td colspan="5" class="text-center">No hay productos en el inventario.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
-
 {% endblock %}
+
+<style>
+  table, th, td {
+    border: 1px solid #333;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 8px;
+  }
+</style>

@@ -8,6 +8,8 @@ urlpatterns = [
 
     re_path(r'index$', index, name='index'),
 
+    re_path(r'historial(?P<pk>\d+)$', detalle_historial, name='detalle_historial'),
+
 
     re_path(r'^sellantes/edit_item/(?P<pk>\d+)$', edit_sellante, name="edit_sellante"),
     re_path(r'^herramientas/edit_item/(?P<pk>\d+)$', edit_herramienta, name="edit_herramienta"),
@@ -27,4 +29,5 @@ urlpatterns = [
     re_path(r'^suppliers/(?P<pk>\d+)/edit/?$', views.supplier_update, name='supplier_update'),
     re_path(r'^suppliers/(?P<pk>\d+)/delete/?$', views.supplier_delete, name='supplier_delete'),
     re_path(r'^productos/upload_excel/?$', views.upload_products_excel, name='upload_products_excel'),
+    re_path(r'^logout/$', logout_custom, name='logout_custom'),
 ]
