@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 from django.db.models import Q
-
+from datetime import datetime
 from .forms import *
 import pandas as pd
 from .models import ProductoReal, Sellantes, Herramientas, Pinturas
@@ -91,11 +91,37 @@ def inventario(request):
 
 @login_required
 def historial(request):
-    movimientos_list = HistorialMovimiento.objects.all().order_by('-fecha')
-    paginator = Paginator(movimientos_list, 10)  # 10 per page
+    query = request.GET.get('q', '')
+    tipo = request.GET.get('type', '')
+    start = request.GET.get('start', '')
+    end = request.GET.get('end', '')
 
+    movimientos_list = HistorialMovimiento.objects.all().order_by('-fecha')
+
+    if query:
+        movimientos_list = movimientos_list.filter(nombre_producto__icontains=query)
+
+    if tipo:
+        movimientos_list = movimientos_list.filter(tipo_producto=tipo)
+
+    if start:
+        try:
+            start_date = datetime.strptime(start, "%Y-%m-%d")
+            movimientos_list = movimientos_list.filter(fecha__date__gte=start_date)
+        except ValueError:
+            pass
+
+    if end:
+        try:
+            end_date = datetime.strptime(end, "%Y-%m-%d")
+            movimientos_list = movimientos_list.filter(fecha__date__lte=end_date)
+        except ValueError:
+            pass
+
+    paginator = Paginator(movimientos_list, 10)
     page_number = request.GET.get('page')
     movimientos = paginator.get_page(page_number)
+
     return render(request, 'inv/historial.html', {'movimientos': movimientos})
 
 @login_required
@@ -209,11 +235,12 @@ def edit_item(request, pk, model, cls):
                 # Save history only if stock changed
                 HistorialMovimiento.objects.create(
                     producto_id=item.id,
-                    nombre_producto=getattr(item, 'name', ''),  # Adjust if your field is named differently
-                    tipo_producto=getattr(item, 'type', ''),    # Adjust if your field is named differently
+                    nombre_producto=getattr(item, 'name', ''),
+                    tipo_producto=getattr(item, 'type', ''),
                     cambio_stock=stock_nuevo - stock_anterior,
                     stock_final=stock_nuevo,
-                    motivo=request.POST.get('motivo', 'Edición manual')
+                    motivo=request.POST.get('motivo', 'Edición manual'),
+                    usuario=request.user  # 👈 Aquí se guarda el usuario autenticado
                 )
             updated_item.save()
             return redirect('inventario')
@@ -296,3 +323,7 @@ def upload_products_excel(request):
     else:
         form = ExcelUploadForm()
     return render(request, 'inv/upload_products_excel.html', {'form': form, 'msg': msg})
+
+def detalle_historial(request, pk):
+    movimiento = get_object_or_404(HistorialMovimiento, pk=pk)
+    return render(request, 'inv/detalle_historial.html', {'movimiento': movimiento})

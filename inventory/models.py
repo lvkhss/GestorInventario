@@ -1,5 +1,6 @@
 from django.db import models, connection
 from django.utils.timezone import now  
+from django.contrib.auth.models import User
 
 
 
@@ -18,6 +19,8 @@ class Producto(models.Model):
     type = models.CharField(max_length=200, blank=False)
     price = models.IntegerField()
     stock = models.IntegerField(default=0)
+    codigo_barras = models.CharField(max_length=50, null=True, blank=True)
+    
     choices = (
         ('AVAILABLE', 'Item ready to be purchased'),
         ('SOLD', 'Item already purchased'),
@@ -56,14 +59,16 @@ class Pinturas(Producto):
 class HistorialMovimiento(models.Model):
     producto_id = models.IntegerField()
     nombre_producto = models.CharField(max_length=200)
-    tipo_producto = models.CharField(max_length=50)  # "Sellante", "Herramienta", "Pintura"
+    tipo_producto = models.CharField(max_length=50)
     fecha = models.DateTimeField(auto_now_add=True)
-    cambio_stock = models.IntegerField()  # Positivo para entrada, negativo para salida
+    cambio_stock = models.IntegerField()
     stock_final = models.IntegerField()
     motivo = models.CharField(max_length=255, blank=True)
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # 👈 Nuevo campo
 
     def __str__(self):
         return f"{self.nombre_producto} ({self.tipo_producto}) - {self.cambio_stock} unidades"
+
 
 
 

@@ -2,38 +2,65 @@
 
 {% block body %}
 <h2>Historial de movimientos</h2>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Producto</th>
-      <th>Tipo</th>
-      <th>Fecha</th>
-      <th>Cambio de Stock</th>
-      <th>Stock Final</th>
-      <th>Motivo</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for mov in movimientos %}
-      <tr>
-        <td>{{ mov.nombre_producto }}</td>
-        <td>{{ mov.tipo_producto }}</td>
-        <td>{{ mov.fecha }}</td>
-        <td>{% if mov.cambio_stock > 0 %}+{% endif %}{{ mov.cambio_stock }}</td>
-        <td>{{ mov.stock_final }}</td>
-        <td>{{ mov.motivo }}</td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
 
-<div class="pagination">
-  {% if movimientos.has_previous %}
-    <a href="?page={{ movimientos.previous_page_number }}">Anterior</a>
-  {% endif %}
-  <span>Página {{ movimientos.number }} de {{ movimientos.paginator.num_pages }}</span>
-  {% if movimientos.has_next %}
-    <a href="?page={{ movimientos.next_page_number }}">Siguiente</a>
-  {% endif %}
+<div class="container-set-inventory">
+  <div class="add_buttons">
+    <div class="inventory-left">
+      <div class="button-group">
+        <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="form-control" />
+      </div>
+
+      <div class="button-group">
+        <select id="filterType" class="form-select">
+          <option value="">Todos</option>
+          <option value="Sellantes">Sellantes</option>
+          <option value="Herramientas">Herramientas</option>
+          <option value="Pinturas">Pinturas</option>
+        </select>
+      </div>
+    </div>
+    <div class="button-group">
+      <label for="startDate">Desde:</label>
+      <input type="date" id="startDate" class="form-control">
+      <label for="endDate">Hasta:</label>
+      <input type="date" id="endDate" class="form-control">
+    </div>
+  </div>
 </div>
+
+
+<div id="tablaHistorial">
+  {% include 'inv/tabla_historial.html' %}
+</div>
+
+<script>
+  function updateTable() {
+  const query = document.getElementById("searchInput").value;
+  const type = document.getElementById("filterType").value;
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
+
+  let url = `{% url 'historial' %}?`;
+
+  if (query) url += `q=${encodeURIComponent(query)}&`;
+  if (type) url += `type=${encodeURIComponent(type)}&`;
+  if (startDate) url += `start=${encodeURIComponent(startDate)}&`;
+  if (endDate) url += `end=${encodeURIComponent(endDate)}`;
+
+  fetch(url)
+    .then(response => response.text())
+    .then(data => {
+      const parser = new DOMParser();
+      const htmlDoc = parser.parseFromString(data, "text/html");
+      const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
+      document.getElementById("tablaHistorial").innerHTML = newContent;
+    });
+}
+
+document.getElementById("searchInput").addEventListener("input", updateTable);
+document.getElementById("filterType").addEventListener("change", updateTable);
+document.getElementById("startDate").addEventListener("change", updateTable);
+document.getElementById("endDate").addEventListener("change", updateTable);
+
+</script>
 {% endblock %}
