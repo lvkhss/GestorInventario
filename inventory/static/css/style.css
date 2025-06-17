@@ -159,6 +159,8 @@
     margin-bottom: 20px;
     /* Espacio debajo del contenedor */
     flex-wrap: wrap;
+    max-width: 1500px;
+    max-height: 70px;
     /* Que se envuelvan si no hay espacio */
 }
 
