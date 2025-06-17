@@ -8,6 +8,8 @@ urlpatterns = [
 
     re_path(r'index$', index, name='index'),
 
+    re_path(r'historial(?P<pk>\d+)$', detalle_historial, name='detalle_historial'),
+
 
     re_path(r'^sellantes/edit_item/(?P<pk>\d+)$', edit_sellante, name="edit_sellante"),
     re_path(r'^herramientas/edit_item/(?P<pk>\d+)$', edit_herramienta, name="edit_herramienta"),

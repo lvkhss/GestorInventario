@@ -10,6 +10,7 @@ TIPOS_PRODUCTO = (
 
 class ProductoForm(forms.Form):
     name = forms.CharField(label="Nombre", max_length=200)
+    codigo_barras =forms.CharField(label="Codigo Barras")
     price = forms.IntegerField(label="Precio")
     type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO)
     date_added = forms.DateTimeField(label='Fecha de ingreso', initial=now, required=False, disabled=True,)
@@ -17,12 +18,13 @@ class ProductoForm(forms.Form):
 class SellanteForm(forms.ModelForm):
     class Meta:
         model = Sellantes
-        fields = ('name', 'price', 'type', 'stock')
+        fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
         labels = {
             'name': 'Nombre',
             'type': 'Tipo',
             'price': 'Precio',
             'stock': 'Stock',
+            'codigo_barras':'Codigo Barras'
         }
 
     def __init__(self, *args, **kwargs):
@@ -35,13 +37,14 @@ class SellanteForm(forms.ModelForm):
 class HerramientaForm(forms.ModelForm):
     class Meta:
         model = Herramientas
-        fields = ('name', 'price', 'type', 'stock')
+        fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
         labels = {
             'name': 'Nombre',
             'type': 'Tipo',
             'price': 'Precio',
             'stock': 'Stock',
-        } 
+            'codigo_barras':'Codigo Barras'
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,13 +55,14 @@ class HerramientaForm(forms.ModelForm):
 class PinturaForm(forms.ModelForm):
     class Meta:
         model = Pinturas
-        fields = ('name', 'price', 'type', 'stock')
+        fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
         labels = {
             'name': 'Nombre',
             'type': 'Tipo',
             'price': 'Precio',
             'stock': 'Stock',
-        } 
+            'codigo_barras':'Codigo Barras'
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

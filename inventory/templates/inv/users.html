@@ -20,8 +20,7 @@
           <td>{{ user.id }}</td>
           <td>{{ user.username }}</td>
           <td>{{ user.email }}</td>
-          <td>{{ user.date_joined|date:"Y-m-d H:i:s" }}</td>
-
+          <td>{{ user.date_joined|date:"d-m-Y H:i" }}</td>
         </tr>
         {% empty %}
         <tr>

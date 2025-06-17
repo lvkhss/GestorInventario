@@ -286,5 +286,31 @@ form + p {
   font-weight: 500;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 24px;
+  gap: 16px;
+  font-size: 1.1em;
+}
+
+.pagination a {
+  color: #fff;
+  background: #354e66;
+  padding: 6px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.pagination a:hover {
+  background: #0056b3;
+}
+
+.pagination span {
+  color: #333;
+  font-weight: 500;
+}
 
 /* EXCEL */
