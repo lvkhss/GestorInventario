@@ -14,7 +14,7 @@
       <tr>
         <td>{{ mov.codigo_barras }}</td>
         <td>{{ mov.nombre_producto }}</td>
-        <td>{{ mov.fecha|date:"d-m-Y H:i:" }}</td>
+        <td>{{ mov.fecha|date:"d-m-Y H:i" }}</td>
         <td>{% if mov.cambio_stock > 0 %}+{% endif %}{{ mov.cambio_stock }}</td>
         <td>{{ mov.stock_final }}</td>
         <td>

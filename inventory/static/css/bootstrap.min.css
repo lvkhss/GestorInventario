@@ -14,6 +14,7 @@ body {
       width: 200px;     
         height: 100%;
       position: fixed; 
+      box-shadow: 6px 4px 6px rgba(0, 0, 0, 0.2);
     }
 
    
@@ -24,9 +25,9 @@ body {
       font-size: 20px;
       font-weight: bold;
       border-bottom: 1px solid #ffffff33; 
+      align-items: center;
+      display: flex;
     }
-
-
     .sidebar-nav {
       display: flex;
       flex-direction: column;
@@ -60,12 +61,13 @@ body {
     margin-left: 240px; 
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+   
 }
 .container {
     margin-left: 240px; 
     padding: 20px;
     border-radius: 8px;
+    
 }
 
 
@@ -79,6 +81,7 @@ body {
     font-weight: bold; 
     background-color: #ffc107;
     color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .btn:hover {
@@ -110,7 +113,7 @@ body {
     display: flex; 
     gap: 20px; 
     justify-content: center; 
-    box-shadow: #333;
+    
   }
 
 .fixed-table {
@@ -138,6 +141,7 @@ body {
 
     overflow: hidden;
     margin-top: 20px;
+     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 

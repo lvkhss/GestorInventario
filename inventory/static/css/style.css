@@ -188,8 +188,9 @@
     margin: 10px 1px;
     font-weight: bold;
     transition: transform 0.2s, background-color 0.3s;
-    background-color: orange;
+    background-color: rgb(236, 175, 61);
     color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .agregar-excel {
@@ -203,6 +204,7 @@
     transition: transform 0.2s, background-color 0.3s;
     background-color: #354e66;
     color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .add_buttons {
