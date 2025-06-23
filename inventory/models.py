@@ -2,11 +2,7 @@ from django.db import models, connection
 from django.utils.timezone import now  
 from django.contrib.auth.models import User
 
-TIPOS_PRODUCTO = (
-    ('Sellantes', 'Sellante'),
-    ('Herramientas', 'Herramienta'),
-    ('Pinturas', 'Pintura'),
-)
+
 
 class Suppliers(models.Model):
     empresa = models.CharField(max_length=100)
@@ -20,7 +16,7 @@ class Suppliers(models.Model):
 
 class Producto(models.Model):
     name = models.CharField(max_length=200, default='Sin nombre')
-    type = models.CharField(max_length=200, blank=False, choices=TIPOS_PRODUCTO)
+    type = models.CharField(max_length=200, blank=False)
     price = models.IntegerField()
     stock = models.IntegerField(default=0)
     codigo_barras = models.CharField(max_length=50, null=True, blank=True)

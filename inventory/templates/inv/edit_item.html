@@ -14,55 +14,59 @@
         {{ field }}
       </div>
     </div>
+    
     {% endfor %}
 
-    <div class="add-product-group">
-      <label for="id_motivo" class="add-product-label">Motivo</label>
-      <div class="add-product-field">
-        <select name="motivo" id="id_motivo" class="form-control" required>
-  <option value="" disabled selected>Seleccione un motivo</option>
-  <option value="Venta">Venta</option>
-  <option value="Corrección">Corrección</option>
-  <option value="Ajuste de inventario">Ajuste de inventario</option>
-  <option value="Uso interno">Uso interno</option>
-  <option value="Otro">Otro</option>
-</select>
-        <input type="text" name="motivo_otro" id="motivo_otro" class="form-control mt-2" placeholder="Especifique el motivo" style="display:none;" />
-      </div>
-    </div>
-
+   <div class="add-product-group">
+  <label for="id_motivo" class="add-product-label">Motivo</label>
+  <div class="add-product-field">
+    <select name="motivo" id="id_motivo" class="form-control" required>
+      <option value="" disabled selected>Seleccione un motivo</option>
+      <option value="Venta">Venta</option>
+      <option value="Corrección">Corrección</option>
+      <option value="Ajuste de inventario">Ajuste de inventario</option>
+      <option value="Uso interno">Uso interno</option>
+      <option value="Otro">Otro</option>
+    </select>
+    <input type="text" id="motivo_extra" class="form-control" placeholder="Añadir motivo" style="margin-top:8px;" disabled>
+  </div>
+</div>
+    <input type="hidden" name="motivo" id="motivo_hidden">
     <div class="add-product-group">
       <div class="add-product-btn-wrap">
-  <button type="button" class="add-product-btn" onclick="window.location.href='{% url "inventario" %}'">Volver </button>
-  <button type="submit" class="add-product-btn">Guardar Cambios</button>
-</div>
+        <button type="button" class="add-product-btn" onclick="window.location.href='{% url "inventario" %}'">Volver </button>
+        <button type="submit" class="add-product-btn">Guardar Cambios</button>
+      </div>
     </div>
   </form>
 </div>
 
-{% endblock %}
-
-{% block scripts %}
 <script>
-  document.querySelector('.add-product-form').addEventListener('submit', function() {
-    var motivo = document.getElementById('id_motivo').value;
-    if (!motivo) {
-      motivo = 'Sin motivo';
-    }
-    // Aquí puedes agregar el código para manejar el motivo antes de enviar el formulario
-  });
-
+document.addEventListener('DOMContentLoaded', function() {
   const motivoSelect = document.getElementById('id_motivo');
-  const motivoOtro = document.getElementById('motivo_otro');
+  const motivoExtra = document.getElementById('motivo_extra');
+  const motivoHidden = document.getElementById('motivo_hidden');
+  const form = document.querySelector('form');
 
   motivoSelect.addEventListener('change', function() {
-    if (this.value === 'Otro') {
-      motivoOtro.style.display = 'block';
-      motivoOtro.required = true;
+    if (motivoSelect.value !== "Otro") {
+      motivoExtra.disabled = true;
+      motivoExtra.value = "";
     } else {
-      motivoOtro.style.display = 'none';
-      motivoOtro.required = false;
+      motivoExtra.disabled = false;
+      motivoExtra.value = "";
+      motivoExtra.focus();
     }
   });
+
+  form.addEventListener('submit', function(e) {
+    if (motivoSelect.value === "Otro") {
+      motivoHidden.value = motivoExtra.value;
+    } else {
+      motivoHidden.value = motivoSelect.value;
+    }
+  });
+});
 </script>
 {% endblock %}
+

@@ -153,10 +153,10 @@ def index(request):
         {"item": pintura, "category": "Pinturas"} for pintura in pinturas
     ]
 
-    # Last 10 added products (by date_added descending)
+    # Last 10 added products (by id descending)
     latest_items = sorted(
         all_items,
-        key=lambda x: getattr(x["item"], "date_added", None) or 0,
+        key=lambda x: getattr(x["item"], "id", None) or 0,
         reverse=True
     )[:10]
 

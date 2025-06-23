@@ -313,3 +313,39 @@ form + p {
 
 
 /* EXCEL */
+
+.detalle-mov-container {
+  max-width: 500px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  padding: 32px 24px 24px 24px;
+}
+
+.detalle-mov-container h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.detalle-mov-container .list-group {
+  margin-bottom: 1.5rem;
+}
+
+.detalle-mov-container .list-group-item {
+  font-size: 1.1rem;
+  border: none;
+  padding: 14px 10px;
+}
+
+.detalle-mov-container .list-group-item:last-child {
+  border-bottom: none;
+}
+
+.detalle-mov-container .btn {
+  background-color: #354e66;
+  width: 100%;
+  font-size: 1.1rem;
+}
