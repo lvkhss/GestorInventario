@@ -59,3 +59,10 @@
   document.getElementById("filterType").addEventListener("change", updateTable);
 </script>
 {% endblock %}
+{% block extra_scripts %}
+<script>
+  sellantes = Sellantes.objects.all().order_by('-date_added')
+  herramientas = Herramientas.objects.all().order_by('-date_added')
+  pinturas = Pinturas.objects.all().order_by('-date_added')
+</script>
+{% endblock %}

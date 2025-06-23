@@ -92,9 +92,6 @@ def login_view(request):
     return render(request, 'inv/login.html', {'error': error})
 
 
-@login_required
-def inventario(request):
-    return render(request, 'inv/inventario.html')
 
 @login_required
 def historial(request):
@@ -174,14 +171,16 @@ def index(request):
         'least_stock_items': least_stock_items,
     }
     return render(request, 'inv/index.html', context)
+
 @login_required
 def inventario(request):
     q = request.GET.get('q', '')
     tipo = request.GET.get('type', '')
 
-    sellantes = Sellantes.objects.all()
-    herramientas = Herramientas.objects.all()
-    pinturas = Pinturas.objects.all()
+    # Always order by -date_added
+    sellantes = Sellantes.objects.all().order_by('-date_added')
+    herramientas = Herramientas.objects.all().order_by('-date_added')
+    pinturas = Pinturas.objects.all().order_by('-date_added')
 
     if q:
         sellantes = sellantes.filter(name__icontains=q)
@@ -189,7 +188,6 @@ def inventario(request):
         pinturas = pinturas.filter(name__icontains=q)
 
     if tipo:
-        # Filtra solo la categoría elegida, vacía las otras
         if tipo == "Sellantes":
             herramientas = Herramientas.objects.none()
             pinturas = Pinturas.objects.none()
@@ -200,19 +198,30 @@ def inventario(request):
             sellantes = Sellantes.objects.none()
             herramientas = Herramientas.objects.none()
 
-    items = [
-        {"item": sellante, "category": "Sellantes"} for sellante in sellantes
-    ] + [
-        {"item": herramienta, "category": "Herramientas"} for herramienta in herramientas
-    ] + [
-        {"item": pintura, "category": "Pinturas"} for pintura in pinturas
-    ]
+    # Combine all items into a single list
+    items = (
+        [{"item": s, "category": "Sellantes"} for s in sellantes] +
+        [{"item": h, "category": "Herramientas"} for h in herramientas] +
+        [{"item": p, "category": "Pinturas"} for p in pinturas]
+    )
+
+    # Sort the combined list by date_added DESCENDING
+    items = sorted(
+        items,
+        key=lambda x: getattr(x["item"], "date_added", None) or datetime.min,
+        reverse=True
+    )
+
+    # PAGINATE: 20 items per page (or 5 if you want)
+    paginator = Paginator(items, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        'items': items,
+        'page_obj': page_obj,
+        'items': page_obj,  # So your template keeps working
     }
     return render(request, 'inv/inventario.html', context)
-
 
 @login_required
 def add_item(request, cls):
