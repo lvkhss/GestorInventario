@@ -257,26 +257,31 @@ def add_pintura(request):
 @login_required
 def edit_item(request, pk, model, cls):
     item = get_object_or_404(model, pk=pk)
-    stock_field = 'stock'  # Adjust if your field is named differently
+    stock_field = 'stock'
     stock_anterior = getattr(item, stock_field, None)
 
     if request.method == "POST":
         form = cls(request.POST, instance=item)
+        motivo = request.POST.get('motivo', 'Edición manual')
         if form.is_valid():
             updated_item = form.save(commit=False)
             stock_nuevo = getattr(updated_item, stock_field, None)
+            cambio_stock = 0
+            stock_final = stock_anterior
             if stock_anterior is not None and stock_nuevo is not None and stock_anterior != stock_nuevo:
-                # Save history only if stock changed
-                HistorialMovimiento.objects.create(
-                    producto_id=item.id,
-                    nombre_producto=getattr(item, 'name', ''),  
-                    tipo_producto=getattr(item, 'type', ''),   
-                    codigo_barras=getattr(item, 'codigo_barras', ''), 
-                    cambio_stock=stock_nuevo - stock_anterior,
-                    stock_final=stock_nuevo,
-                    motivo=request.POST.get('motivo', 'Edición manual'),
-                    usuario=request.user # Add the username of the user making the change
-                )
+                cambio_stock = stock_nuevo - stock_anterior
+                stock_final = stock_nuevo
+            # Always create historial entry
+            HistorialMovimiento.objects.create(
+                producto_id=item.id,
+                nombre_producto=getattr(updated_item, 'name', ''),
+                tipo_producto=getattr(updated_item, 'type', ''),
+                codigo_barras=getattr(updated_item, 'codigo_barras', ''),
+                cambio_stock=cambio_stock,
+                stock_final=stock_final,
+                motivo=motivo,
+                usuario=request.user
+            )
             updated_item.save()
             return redirect('inventario')
     else:

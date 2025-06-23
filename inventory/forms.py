@@ -16,6 +16,7 @@ class ProductoForm(forms.Form):
     date_added = forms.DateTimeField(label='Fecha de ingreso', initial=now, required=False, disabled=True,)
 
 class SellanteForm(forms.ModelForm):
+    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO) 
     class Meta:
         model = Sellantes
         fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
@@ -35,6 +36,7 @@ class SellanteForm(forms.ModelForm):
         
 
 class HerramientaForm(forms.ModelForm):
+    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO)  # <-- Add this line
     class Meta:
         model = Herramientas
         fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
@@ -53,6 +55,7 @@ class HerramientaForm(forms.ModelForm):
         )
 
 class PinturaForm(forms.ModelForm):
+    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO)  # <-- Add this line
     class Meta:
         model = Pinturas
         fields = ['name', 'price', 'type', 'stock', 'codigo_barras']

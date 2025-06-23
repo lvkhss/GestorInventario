@@ -12,6 +12,7 @@
     <li class="list-group-item"><strong>Stock Final:</strong> {{ movimiento.stock_final }}</li>
     <li class="list-group-item"><strong>Motivo:</strong> {{ movimiento.motivo }}</li>
     <li class="list-group-item"><strong>Usuario:</strong> {{ movimiento.usuario.username|default:"Desconocido" }}</li>
+    
   </ul>
   <a href="{% url 'historial' %}" class="btn btn-secondary mt-3">Volver</a>
 </div>
