@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
 from django.db.models import Q
-from datetime import datetime
+from datetime import datetime, timedelta
 from .forms import *
 import pandas as pd
 from .models import ProductoReal, Sellantes, Herramientas, Pinturas
@@ -108,19 +108,31 @@ def historial(request):
     if tipo:
         movimientos_list = movimientos_list.filter(tipo_producto=tipo)
 
-    if start:
-        try:
+    try:
+        if start:
             start_date = datetime.strptime(start, "%Y-%m-%d")
-            movimientos_list = movimientos_list.filter(fecha__gte=start_date)
-        except ValueError:
-            pass
+        else:
+            start_date = None
 
-    if end:
-        try:
-            end_date = datetime.strptime(end, "%Y-%m-%d")
-            movimientos_list = movimientos_list.filter(fecha__lte=end_date)
-        except ValueError:
-            pass
+        if end:
+            # le sumamos 1 día para incluir todos los registros del día seleccionado
+            end_date = datetime.strptime(end, "%Y-%m-%d") + timedelta(days=1)
+        else:
+            end_date = None
+
+        # validamos coherencia
+        if start_date and end_date:
+            if start_date > end_date:
+                movimientos_list = movimientos_list.none()
+            else:
+                movimientos_list = movimientos_list.filter(fecha__gte=start_date, fecha__lt=end_date)
+        elif start_date:
+            movimientos_list = movimientos_list.filter(fecha__gte=start_date)
+        elif end_date:
+            movimientos_list = movimientos_list.filter(fecha__lt=end_date)
+
+    except ValueError:
+        pass  # Si alguna fecha es inválida, simplemente no filtra por fecha
 
     paginator = Paginator(movimientos_list, 10)
     page_number = request.GET.get('page')

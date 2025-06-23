@@ -37,8 +37,28 @@
   function updateTable() {
   const query = document.getElementById("searchInput").value;
   const type = document.getElementById("filterType").value;
-  const startDate = document.getElementById("startDate").value;
-  const endDate = document.getElementById("endDate").value;
+  const startDateInput = document.getElementById("startDate");
+  const endDateInput = document.getElementById("endDate");
+  const startDate = startDateInput.value;
+  const endDate = endDateInput.value;
+
+  // Validar si las fechas están bien puestas
+  if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+    alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
+
+    endDateInput.value = "";
+
+    fetch(`{% url 'historial' %}`)
+      .then(response => response.text())
+      .then(data => {
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(data, "text/html");
+        const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
+        document.getElementById("tablaHistorial").innerHTML = newContent;
+      });
+
+    return; 
+  }
 
   let url = `{% url 'historial' %}?`;
 
@@ -61,6 +81,7 @@ document.getElementById("searchInput").addEventListener("input", updateTable);
 document.getElementById("filterType").addEventListener("change", updateTable);
 document.getElementById("startDate").addEventListener("change", updateTable);
 document.getElementById("endDate").addEventListener("change", updateTable);
+
 
 </script>
 {% endblock %}
