@@ -409,22 +409,8 @@ def producto_create(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST)
         if form.is_valid():
-     
-            nombre = form.cleaned_data.get('name')
-            codigo_barras = form.cleaned_data.get('codigo_barras')
-      
-
-            if nombre and Producto.objects.filter(name__iexact=nombre).exists():
-                form.add_error('name', 'Ya existe un producto con este nombre.')
-                return render(request, 'inv/add_new.html', {'form': form})
-            
-
-            if codigo_barras and Producto.objects.filter(codigo_barras=codigo_barras).exists():
-                form.add_error('codigo_barras', 'Ya existe un producto con este código de barras.')
-                return render(request, 'inv/add_new.html', {'form': form})
-            
             producto = form.save()
-      
+            
             HistorialMovimiento.objects.create(
                 producto_id=producto.id,
                 nombre_producto=producto.name,
@@ -433,7 +419,8 @@ def producto_create(request):
                 cambio_stock=producto.stock,
                 stock_final=producto.stock,
                 motivo='Producto creado',
-                usuario=request.user
+                usuario=request.user,
+                precio=producto.price  # Add this line
             )
             return redirect('inventario')
     else:
@@ -533,7 +520,6 @@ def producto_update(request, pk):
 def producto_delete(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     
-   
     HistorialMovimiento.objects.create(
         producto_id=producto.id,
         nombre_producto=producto.name,
@@ -542,7 +528,8 @@ def producto_delete(request, pk):
         cambio_stock=-producto.stock,
         stock_final=0,
         motivo='Producto eliminado',
-        usuario=request.user
+        usuario=request.user,
+        precio=producto.price  # Add this line
     )
     producto.delete()
     return redirect('inventario')

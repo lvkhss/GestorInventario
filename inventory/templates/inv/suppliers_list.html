@@ -12,7 +12,7 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>ID</th>
+      <th>RUT</th>
       <th>Empresa</th>
       <th>Encargado</th>
       <th>Email</th>
@@ -23,7 +23,7 @@
   <tbody>
     {% for supplier in suppliers %}
       <tr>
-        <td>{{ supplier.id }}</td>
+        <td>{{ supplier.rut }}</td>
         <td>{{ supplier.empresa }}</td>
         <td>{{ supplier.encargado }}</td>
         <td>{{ supplier.email }}</td>

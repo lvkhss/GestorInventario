@@ -8,7 +8,24 @@
 
     <h4>{{ title|default:"Agregar nuevo proveedor" }}</h4>
 
-    <!-- Empresa field -->
+
+ <!-- Empresa rut -->
+    <div class="add-product-group">
+      <label for="rut_empresa" class="add-product-label">{{ form.rut.label }}</label>
+      <div class="add-product-field">
+        {{ form.rut }}
+        {% if form.empresa.errors %}
+          <div class="text-danger">
+            {% for error in form.rut.errors %}
+              <small>{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+
+    <!-- Empresa -->
     <div class="add-product-group">
       <label for="id_empresa" class="add-product-label">{{ form.empresa.label }}</label>
       <div class="add-product-field">
@@ -23,7 +40,7 @@
       </div>
     </div>
 
-    <!-- Encargado field -->
+    <!-- Encargado  -->
     <div class="add-product-group">
       <label for="id_encargado" class="add-product-label">{{ form.encargado.label }}</label>
       <div class="add-product-field">
@@ -38,7 +55,7 @@
       </div>
     </div>
 
-    <!-- Email field -->
+    <!-- Email  -->
     <div class="add-product-group">
       <label for="id_email" class="add-product-label">{{ form.email.label }}</label>
       <div class="add-product-field">
@@ -53,7 +70,7 @@
       </div>
     </div>
 
-    <!-- Numero field -->
+    <!-- Numero -->
     <div class="add-product-group">
       <label for="id_numero" class="add-product-label">{{ form.numero.label }}</label>
       <div class="add-product-field">
@@ -71,7 +88,7 @@
       </div>
     </div>
 
-    <!-- Direccion field -->
+    <!-- Direccion -->
     <div class="add-product-group">
       <label for="id_direccion" class="add-product-label">{{ form.direccion.label }}</label>
       <div class="add-product-field">

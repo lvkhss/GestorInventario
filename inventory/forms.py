@@ -53,13 +53,14 @@ class ProductTypeForm(forms.ModelForm):
 class SupplierForm(forms.ModelForm):
     class Meta:
         model = Suppliers
-        fields = ['empresa', 'encargado', 'email', 'numero', 'direccion']
+        fields = ['empresa', 'encargado', 'email', 'numero', 'direccion','rut']
         labels = {
             'empresa': 'Empresa',
             'encargado': 'Encargado',
             'email': 'Email',
             'numero': 'Teléfono',
-            'direccion': 'Dirección'
+            'direccion': 'Dirección',
+            'rut': 'RUT'
         }
         widgets = {
             'empresa': forms.TextInput(attrs={
@@ -76,13 +77,17 @@ class SupplierForm(forms.ModelForm):
             }),
             'numero': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': '9 8765 4321'  # Show example without +56
+                'placeholder': '9 8765 4321'  # No +56
             }),
             'direccion': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Dirección completa del proveedor'
-            })
+            }),
+            'rut': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '0987654321-1'  
+            }),
         }
 
     def clean_empresa(self):
@@ -109,7 +114,7 @@ class SupplierForm(forms.ModelForm):
         email = self.cleaned_data.get('email')
         if email:
             email = email.lower().strip()
-            # Check if email already exists (excluding current instance in update)
+
             if self.instance.pk:
                 if Suppliers.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
                     raise ValidationError('Ya existe un proveedor con este email.')
@@ -121,10 +126,10 @@ class SupplierForm(forms.ModelForm):
     def clean_numero(self):
         numero = self.cleaned_data.get('numero')
         if numero:
-            # Remove spaces and common separators
+     
             numero = re.sub(r'[\s\-\(\)]', '', numero)
             
-            # Always add +56 prefix
+          
             if not numero.startswith('+56'):
                 numero = '+56' + numero
             
