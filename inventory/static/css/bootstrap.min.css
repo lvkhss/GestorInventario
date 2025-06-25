@@ -1,4 +1,3 @@
-
 body {
     font-family: 'Nunito', Arial, sans-serif;
     background-color: #ffffff; 
@@ -112,6 +111,8 @@ body {
     
   }
 
+
+
 .fixed-table {
     
     table-layout: fixed;
@@ -134,10 +135,9 @@ body {
     border-collapse: collapse;
     width: 100%; 
     background-color: white;
-
     overflow: hidden;
     margin-top: 20px;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -222,4 +222,9 @@ body {
     color: #495057;
     display: flex;
     align-items: center;
+}
+
+
+.price-cell {
+    white-space: nowrap;
 }

@@ -1,5 +1,5 @@
 {% extends 'inv/base.html' %}
-
+{% load number_filters %}
 {% block body %}
 <div class="table-container">
   <div class="table-wrapper">
@@ -15,12 +15,11 @@
         </tr>
       </thead>
       <tbody>
-        {% for producto in latest_items %}
-        <tr>
+        {% for producto in latest_items %}        <tr>
           <td>{{ producto.name }}</td>
           <td>{{ producto.product_type.name }}</td>
-          <td>$ {{ producto.price }}</td>
-          <td>{{ producto.date_added|date:"d/m/Y H:i" }}</td>
+          <td class="price-cell">$ {{ producto.price|comma_miles }}</td>
+          <td>{{ producto.date_added|date:"d/m/Y" }}</td>
           <td>
             <span class="badge {% if producto.stock > 10 %}bg-success{% elif producto.stock > 0 %}bg-warning{% else %}bg-danger{% endif %}">
               {{ producto.stock }}
@@ -49,12 +48,11 @@
         </tr>
       </thead>
       <tbody>
-        {% for producto in least_stock_items %}
-        <tr class="{% if producto.stock == 0 %}table-danger{% elif producto.stock <= 5 %}table-warning{% endif %}">
+        {% for producto in least_stock_items %}        <tr class="{% if producto.stock == 0 %}table-danger{% elif producto.stock <= 5 %}table-warning{% endif %}">
           <td>{{ producto.name }}</td>
           <td>{{ producto.product_type.name }}</td>
-          <td>$ {{ producto.price }}</td>
-          <td>{{ producto.date_added|date:"d/m/Y H:i" }}</td>
+          <td class="price-cell">$ {{ producto.price|comma_miles }}</td>
+          <td>{{ producto.date_added|date:"d/m/Y" }}</td>
           <td>
             <span class="badge {% if producto.stock == 0 %}bg-danger{% elif producto.stock <= 5 %}bg-warning{% else %}bg-success{% endif %}">
               {{ producto.stock }}
