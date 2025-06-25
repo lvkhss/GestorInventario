@@ -280,15 +280,16 @@ def edit_item(request, pk, model, cls):
                 stock_final = stock_nuevo
             # Always create historial entry
             HistorialMovimiento.objects.create(
-                producto_id=item.id,
-                nombre_producto=getattr(updated_item, 'name', ''),
-                tipo_producto=getattr(updated_item, 'type', ''),
-                codigo_barras=getattr(updated_item, 'codigo_barras', ''),
-                cambio_stock=cambio_stock,
-                stock_final=stock_final,
-                motivo=motivo,
-                usuario=request.user
-            )
+                producto_id=producto.id,
+    nombre_producto=producto.name,
+    tipo_producto=producto.product_type.name,
+    codigo_barras=producto.codigo_barras,
+    cambio_stock=cambio_stock,
+    stock_final=producto.stock,
+    motivo=motivo,
+    usuario=request.user,
+    precio=producto.price, 
+)
             updated_item.save()
             return redirect('inventario')
     else:
@@ -321,7 +322,7 @@ def upload_products_excel(request):
                     try:
                         tipo_input = str(row.get('tipo', '')).strip()
                         nombre = str(row.get('nombre', '')).strip()
-                        codigo_barras = str(row.get('codigo_barras', '')).strip()
+                        codigo_barras = str(row.get('codigo de barras', '')).strip()
                         
           
                         debug_info.append(f"Row {index+1}: nombre='{nombre}', tipo='{tipo_input}'")
@@ -395,7 +396,11 @@ def upload_products_excel(request):
 
 def detalle_historial(request, pk):
     movimiento = get_object_or_404(HistorialMovimiento, pk=pk)
-    return render(request, 'inv/detalle_historial.html', {'movimiento': movimiento})
+    stock_inicial = movimiento.stock_final - movimiento.cambio_stock
+    return render(request, 'inv/detalle_historial.html', {
+        'movimiento': movimiento,
+        'stock_inicial': stock_inicial,
+    })
 
 
 
@@ -495,7 +500,7 @@ def producto_detail(request, pk):
 def producto_update(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     stock_anterior = producto.stock
-    
+
     if request.method == 'POST':
         form = ProductoForm(request.POST, instance=producto)
         motivo = request.POST.get('motivo', 'Producto editado')
@@ -503,8 +508,7 @@ def producto_update(request, pk):
             updated_producto = form.save()
             stock_nuevo = updated_producto.stock
             cambio_stock = stock_nuevo - stock_anterior
-            
-     
+
             HistorialMovimiento.objects.create(
                 producto_id=updated_producto.id,
                 nombre_producto=updated_producto.name,
@@ -513,7 +517,8 @@ def producto_update(request, pk):
                 cambio_stock=cambio_stock,
                 stock_final=stock_nuevo,
                 motivo=motivo,
-                usuario=request.user
+                usuario=request.user,
+                precio=updated_producto.price  # <-- agrega esto
             )
             return redirect('inventario')
     else:

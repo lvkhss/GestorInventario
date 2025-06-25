@@ -64,6 +64,7 @@ class HistorialMovimiento(models.Model):
     stock_final = models.IntegerField()
     motivo = models.CharField(max_length=255, blank=True)
     usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    precio = models.IntegerField()  # Assuming you want to track the price in the history
 
     def __str__(self):
         return f"{self.nombre_producto} ({self.tipo_producto}) - {self.cambio_stock} unidades"

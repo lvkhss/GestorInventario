@@ -1,3 +1,4 @@
+{% load number_filters %}
 <div class="table-responsive">
   <table class="table table-striped">
     <thead>
@@ -17,7 +18,7 @@
         <td>{{ producto.codigo_barras|default:"-" }}</td>
         <td>{{ producto.name }}</td>
         <td>{{ producto.product_type.name }}</td>
-        <td>${{ producto.price }}</td>
+        <td>${{ producto.price|comma_miles }}</td>
         <td>{{ producto.stock }}</td>
         <td>{{ producto.date_added|date:"d/m/Y H:i" }}</td>
         <td>
@@ -25,7 +26,8 @@
           <!-- <a href="{% url 'producto_detail' producto.pk %}?next=inventario" class="btn btn-sm btn-info">
             Ver
           </a> -->
-          <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro que desea eliminar este producto?')">X</a>
+          <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-sm btn-danger"
+           onclick="return confirm('¿Está seguro que desea eliminar este producto?')">X</a>
         </td>
       </tr>
       {% empty %}
