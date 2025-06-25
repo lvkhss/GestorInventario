@@ -24,10 +24,10 @@ from django.contrib import messages
 from .models import ProductType
 @login_required
 def delete_product_type(request, pk):
-    if request.method == 'POST':
-        ProductType.objects.filter(pk=pk).delete()
-        messages.success(request, "Tipo de producto eliminado.")
+    ProductType.objects.filter(pk=pk).delete()
+    messages.success(request, "Tipo de producto eliminado.")
     return redirect('settings_view')
+
 @login_required
 def settings_view(request):
     if request.method == 'POST':

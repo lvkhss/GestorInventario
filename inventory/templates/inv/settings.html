@@ -12,47 +12,47 @@
         <input type="text" name="type" id="id_type" class="form-control"
           placeholder="Ej: Sellante, Pintura, Herramienta" required>
       </div>
-      <label for="id_description" class="add-product-label" >Descripción</label>
+      <label for="id_description" class="add-product-label">Descripción</label>
       <div class="add-product-field">
         <input type="text" name="description" id="id_description" class="form-control" placeholder="(Opcional)">
       </div>
       <div class="add-product-btn-wrap">
         <button type="submit" class="add-product-btn">Crear Tipo</button>
       </div>
-    
+
 
     </div>
 
- <div class="add-product-table-wrap">
-    <table class="table-type">
-      <thead>
-        <tr>
-          <th>Tipo</th>
-          <th>Descripción</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for tipo in product_types %}
-        <tr>
-          <td>{{ tipo.name }}</td>
-          <td>{{ tipo.description }}</td>
-          <td>
-            <a href="{% url 'producto_delete' tipo.pk %}" class="btn-product-type-delete"
-              onclick="return confirm('¿Está seguro que desea eliminar este tipo de producto?. Esto eliminará todos los productos con este tipo')">X</a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="3">No hay tipos de producto registrados.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <a href="/admin/" class="btn btn-primary mb-4" target="_blank">
-        Ir al Django Admin
-      </a>
+    <div class="add-product-table-wrap">
+      <table class="table-type">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tipo in product_types %}
+          <tr>
+            <td>{{ tipo.name }}</td>
+            <td>{{ tipo.description }}</td>
+            <td>
+              <a href="{% url 'delete_product_type' tipo.pk %}" class="btn-product-type-delete"
+                onclick="return confirm('¿Está seguro que desea eliminar este tipo de producto?. Esto eliminará todos los productos con este tipo')">X</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3">No hay tipos de producto registrados.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <a href="/admin/" class="btn btn-primary mb-4" target="_blank">
+      Ir al Django Admin
+    </a>
   </form>
 
 </div>
