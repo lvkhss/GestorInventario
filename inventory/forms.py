@@ -1,85 +1,40 @@
 from django import forms
-from .models import *
-from .models import Suppliers
+from .models import Suppliers, ProductType, Producto
 
-TIPOS_PRODUCTO = (
-    ('Sellantes', 'Sellante'),
-    ('Herramientas', 'Herramienta'),
-    ('Pinturas', 'Pintura'),
-)
-
-class ProductoForm(forms.Form):
-    name = forms.CharField(label="Nombre", max_length=200)
-    codigo_barras =forms.CharField(label="Codigo Barras")
-    price = forms.IntegerField(label="Precio")
-    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO)
-    date_added = forms.DateTimeField(label='Fecha de ingreso', initial=now, required=False, disabled=True,)
-
-class SellanteForm(forms.ModelForm):
-    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO) 
+class ProductoForm(forms.ModelForm):
+    """Dynamic form for the new unified Producto model"""
     class Meta:
-        model = Sellantes
-        fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
+        model = Producto
+        fields = ['name', 'product_type', 'price', 'stock', 'codigo_barras']
         labels = {
             'name': 'Nombre',
-            'type': 'Tipo',
+            'product_type': 'Tipo',
             'price': 'Precio',
             'stock': 'Stock',
-            'codigo_barras':'Codigo Barras'
+            'codigo_barras': 'Código de Barras'
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['date_added'] = forms.DateTimeField(
-            initial=self.instance.date_added, disabled=True, required=False, label='Fecha de ingreso' 
-        )
-        
+        # Only show active product types
+        self.fields['product_type'].queryset = ProductType.objects.filter(is_active=True)
 
-class HerramientaForm(forms.ModelForm):
-    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO)  # <-- Add this line
+class ProductTypeForm(forms.ModelForm):
+    """Form for managing product types"""
     class Meta:
-        model = Herramientas
-        fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
+        model = ProductType
+        fields = ['name', 'description', 'is_active']
         labels = {
-            'name': 'Nombre',
-            'type': 'Tipo',
-            'price': 'Precio',
-            'stock': 'Stock',
-            'codigo_barras':'Codigo Barras'
+            'name': 'Nombre del Tipo',
+            'description': 'Descripción',
+            'is_active': 'Activo'
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['date_added'] = forms.DateTimeField(
-            initial=self.instance.date_added, disabled=True, required=False, label='Fecha de ingreso'
-        )
-
-class PinturaForm(forms.ModelForm):
-    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO)  # <-- Add this line
-    class Meta:
-        model = Pinturas
-        fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
-        labels = {
-            'name': 'Nombre',
-            'type': 'Tipo',
-            'price': 'Precio',
-            'stock': 'Stock',
-            'codigo_barras':'Codigo Barras'
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['date_added'] = forms.DateTimeField(
-            initial=self.instance.date_added, disabled=True, required=False, label='Fecha de ingreso'
-        )
-
 
 class suplierForm(forms.ModelForm):
     class Meta:
         model = Suppliers
         fields = ['empresa', 'encargado', 'email', 'numero', 'direccion']
 
-
-
 class ExcelUploadForm(forms.Form):
     file = forms.FileField(label="Archivo Excel")
+

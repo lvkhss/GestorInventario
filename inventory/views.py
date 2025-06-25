@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db import OperationalError
-from .models import Sellantes, Herramientas, Pinturas, HistorialMovimiento
+from .models import  HistorialMovimiento
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 
@@ -8,7 +7,6 @@ from django.db.models import Q
 from datetime import datetime, timedelta
 from .forms import *
 import pandas as pd
-from .models import ProductoReal, Sellantes, Herramientas, Pinturas
 from .forms import ExcelUploadForm
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
@@ -140,100 +138,56 @@ def historial(request):
 
     return render(request, 'inv/historial.html', {'movimientos': movimientos})
 @login_required
-# views.py
 def index(request):
-    try:
-        sellantes = Sellantes.objects.all()
-    except OperationalError:
-        sellantes = []
-
-    try:
-        herramientas = Herramientas.objects.all()
-    except OperationalError:
-        herramientas = []
-
-    try:
-        pinturas = Pinturas.objects.all()
-    except OperationalError:
-        pinturas = []
-
-    all_items = [
-        {"item": sellante, "category": "Sellantes"} for sellante in sellantes
-    ] + [
-        {"item": herramienta, "category": "Herramientas"} for herramienta in herramientas
-    ] + [
-        {"item": pintura, "category": "Pinturas"} for pintura in pinturas
-    ]
-
-    # Last 10 added products (by id descending)
-    latest_items = sorted(
-        all_items,
-        key=lambda x: getattr(x["item"], "id", None) or 0,
-        reverse=True
-    )[:10]
-
-    # 10 products with the least stock (ascending)
-    least_stock_items = sorted(
-        all_items,
-        key=lambda x: getattr(x["item"], "stock", None) if getattr(x["item"], "stock", None) is not None else float('inf')
-    )[:10]
-
+    # Get last 10 added products (by date_added, not edited)
+    latest_items = Producto.objects.all().order_by('-date_added')[:10]
+    
+    # Get 10 products with lowest stock (including 0)
+    least_stock_items = Producto.objects.all().order_by('stock', 'date_added')[:10]
+    
     context = {
         'latest_items': latest_items,
-        'least_stock_items': least_stock_items,
+        'least_stock_items': least_stock_items
     }
+    
     return render(request, 'inv/index.html', context)
+
 
 @login_required
 def inventario(request):
-    q = request.GET.get('q', '')
-    tipo = request.GET.get('type', '')
-
-    # Always order by -date_added
-    sellantes = Sellantes.objects.all().order_by('-date_added')
-    herramientas = Herramientas.objects.all().order_by('-date_added')
-    pinturas = Pinturas.objects.all().order_by('-date_added')
-
-    if q:
-        sellantes = sellantes.filter(name__icontains=q)
-        herramientas = herramientas.filter(name__icontains=q)
-        pinturas = pinturas.filter(name__icontains=q)
-
-    if tipo:
-        if tipo == "Sellantes":
-            herramientas = Herramientas.objects.none()
-            pinturas = Pinturas.objects.none()
-        elif tipo == "Herramientas":
-            sellantes = Sellantes.objects.none()
-            pinturas = Pinturas.objects.none()
-        elif tipo == "Pinturas":
-            sellantes = Sellantes.objects.none()
-            herramientas = Herramientas.objects.none()
-
-    # Combine all items into a single list
-    items = (
-        [{"item": s, "category": "Sellantes"} for s in sellantes] +
-        [{"item": h, "category": "Herramientas"} for h in herramientas] +
-        [{"item": p, "category": "Pinturas"} for p in pinturas]
-    )
-
-    # Sort the combined list by date_added DESCENDING
-    items = sorted(
-        items,
-        key=lambda x: getattr(x["item"], "date_added", None) or datetime.min,
-        reverse=True
-    )
-
-    # PAGINATE: 20 items per page (or 5 if you want)
-    paginator = Paginator(items, 20)
+    query = request.GET.get('q', '')
+    product_type_filter = request.GET.get('type', '')
+    
+    # Get all products
+    productos = Producto.objects.all().order_by('-date_added')
+    
+    # Apply filters
+    if query:
+        productos = productos.filter(
+            Q(name__icontains=query) | 
+            Q(codigo_barras__icontains=query)
+        )
+    
+    if product_type_filter:
+        productos = productos.filter(product_type__name=product_type_filter)
+    
+    # Get all product types for the filter dropdown
+    product_types = ProductType.objects.filter(is_active=True)
+    
+    # Pagination
+    paginator = Paginator(productos, 20)
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
+    productos = paginator.get_page(page_number)
+    
     context = {
-        'page_obj': page_obj,
-        'items': page_obj,  # So your template keeps working
+        'productos': productos,
+        'product_types': product_types,
+        'current_query': query,
+        'current_type': product_type_filter
     }
+    
     return render(request, 'inv/inventario.html', context)
+
 
 @login_required
 def add_item(request, cls):
@@ -245,15 +199,7 @@ def add_item(request, cls):
     else:
         form = cls()
     return render(request, 'inv/add_new.html', {'form': form})
-@login_required
-def add_herramienta(request):
-    return add_item(request, HerramientaForm)
-@login_required
-def add_sellante(request):
-    return add_item(request, SellanteForm)
-@login_required
-def add_pintura(request):
-    return add_item(request, PinturaForm)
+
 @login_required
 def edit_item(request, pk, model, cls):
     item = get_object_or_404(model, pk=pk)
@@ -287,56 +233,7 @@ def edit_item(request, pk, model, cls):
     else:
         form = cls(instance=item)
     return render(request, 'inv/edit_item.html', {'form': form})
-@login_required
-def edit_herramienta(request, pk):
-    return edit_item(request, pk, Herramientas, HerramientaForm)
-@login_required
-def edit_sellante(request, pk):
-    return edit_item(request, pk, Sellantes, SellanteForm)
-@login_required
-def edit_pintura(request, pk):
-    return edit_item(request, pk, Pinturas, PinturaForm)
-@login_required
-def delete_herramienta(request, pk):
-    Herramientas.objects.filter(id=pk).delete()
-    return redirect('inventario')
-@login_required
-def delete_sellante(request, pk):
-    Sellantes.objects.filter(id=pk).delete()
-    return redirect('inventario') 
-@login_required
-def delete_pintura(request, pk):
-    Pinturas.objects.filter(id=pk).delete()
-    return redirect('inventario')
-@login_required
-def agregar_producto(request):
-    if request.method == 'POST':
-        form = ProductoForm(request.POST)
-        if form.is_valid():
-            tipo = form.cleaned_data['type']
-            name = form.cleaned_data['name']
-            price = form.cleaned_data['price']
-            codigo_barras = form.cleaned_data.get('codigo_barras', '')
 
-            if tipo == 'Sellantes':
-                Sellantes.objects.create(name=name, codigo_barras=codigo_barras, price =price, type=tipo)
-            elif tipo == 'Herramientas':
-                Herramientas.objects.create(name=name, codigo_barras=codigo_barras, price =price, type=tipo)
-            elif tipo == 'Pinturas':
-                Pinturas.objects.create(name=name, codigo_barras=codigo_barras, price =price, type=tipo)
-
-            return redirect('inventario')
-    else:
-        form = ProductoForm()
-
-    return render(request, 'inv/add_new.html', {'form': form, 'header': 'Agregar Producto'})
-
-MODEL_MAP = {
-    'ProductoReal': ProductoReal,
-    'Sellantes': Sellantes,
-    'Herramientas': Herramientas,
-    'Pinturas': Pinturas,
-}
 @login_required
 def upload_products_excel(request):
     msg = ""
@@ -370,3 +267,117 @@ def detalle_historial(request, pk):
     movimiento = get_object_or_404(HistorialMovimiento, pk=pk)
     return render(request, 'inv/detalle_historial.html', {'movimiento': movimiento})
 
+
+
+@login_required
+def producto_create(request):
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            producto = form.save()
+            # Create history entry for new product
+            HistorialMovimiento.objects.create(
+                producto_id=producto.id,
+                nombre_producto=producto.name,
+                tipo_producto=producto.product_type.name,
+                codigo_barras=producto.codigo_barras or '',
+                cambio_stock=producto.stock,
+                stock_final=producto.stock,
+                motivo='Producto creado',
+                usuario=request.user
+            )
+            return redirect('inventario')
+    else:
+        form = ProductoForm()
+    return render(request, 'inv/add_new.html', {'form': form})
+
+@login_required
+def producto_list(request):
+    query = request.GET.get('q', '')
+    product_type = request.GET.get('product_type', '')
+    
+    productos = Producto.objects.all().order_by('-date_added')
+    
+    if query:
+        productos = productos.filter(
+            Q(name__icontains=query) | 
+            Q(codigo_barras__icontains=query)
+        )
+    
+    if product_type:
+        productos = productos.filter(product_type__id=product_type)
+    
+    # Get all product types for filter dropdown
+    product_types = ProductType.objects.filter(is_active=True)
+    
+    paginator = Paginator(productos, 20)
+    page_number = request.GET.get('page')
+    productos = paginator.get_page(page_number)
+    
+    return render(request, 'inv/producto_list.html', {
+        'productos': productos, 
+        'product_types': product_types,
+        'current_query': query,
+        'current_type': product_type
+    })
+
+@login_required
+def producto_detail(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    # Get recent movements for this product
+    movimientos = HistorialMovimiento.objects.filter(producto_id=pk).order_by('-fecha')[:10]
+    return render(request, 'inv/producto_detail.html', {
+        'producto': producto,
+        'movimientos': movimientos
+    })
+@login_required
+def producto_update(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    stock_anterior = producto.stock
+    
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, instance=producto)
+        motivo = request.POST.get('motivo', 'Producto editado')
+        if form.is_valid():
+            updated_producto = form.save()
+            stock_nuevo = updated_producto.stock
+            cambio_stock = stock_nuevo - stock_anterior
+            
+            # Create history entry
+            HistorialMovimiento.objects.create(
+                producto_id=updated_producto.id,
+                nombre_producto=updated_producto.name,
+                tipo_producto=updated_producto.product_type.name,
+                codigo_barras=updated_producto.codigo_barras or '',
+                cambio_stock=cambio_stock,
+                stock_final=stock_nuevo,
+                motivo=motivo,
+                usuario=request.user
+            )
+            return redirect('producto_detail', pk=pk)
+    else:
+        form = ProductoForm(instance=producto)
+    return render(request, 'inv/edit_item.html', {  # Changed from producto_form.html
+        'form': form, 
+        'producto': producto
+    })
+
+
+@login_required
+def producto_delete(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    if request.method == 'POST':
+        # Create history entry before deletion
+        HistorialMovimiento.objects.create(
+            producto_id=producto.id,
+            nombre_producto=producto.name,
+            tipo_producto=producto.product_type.name,
+            codigo_barras=producto.codigo_barras or '',
+            cambio_stock=-producto.stock,
+            stock_final=0,
+            motivo='Producto eliminado',
+            usuario=request.user
+        )
+        producto.delete()
+        return redirect('producto_list')
+    return render(request, 'inv/producto_confirm_delete.html', {'producto': producto})

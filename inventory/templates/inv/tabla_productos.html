@@ -2,56 +2,30 @@
   <table class="table table-hover fixed-table">
     <thead>
       <tr>
-        <th>Codigo de Barras</th>
+        <th>Código de Barras</th>
         <th>Nombre</th>
+        <th>Tipo</th>
         <th>Precio</th>
         <th>Stock</th>
-        <th></th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      {% for entry in items %}
-      <tr>
-        <td>{{ entry.item.codigo_barras }}</td>
-        <td>{{ entry.item.name }}</td>
-        <td>$ {{ entry.item.price }}</td>
-        <td>{{ entry.item.stock }}</td>
-        <td>
-          {% if entry.category == "Sellantes" %}
-          <a href="{% url 'edit_sellante' entry.item.pk %}" class="btn btn-warning btn-sm" role="button"
-            aria-pressed="true">Editar</a>
-          <a href="{% url 'delete_sellante' entry.item.pk %}" class="btn btn-danger btn-sm delete-product-btn"
-            role="button" aria-pressed="true">x</a>
-          {% elif entry.category == "Herramientas" %}
-          <a href="{% url 'edit_herramienta' entry.item.pk %}" class="btn btn-warning btn-sm" role="button"
-            aria-pressed="true">Editar</a>
-          <a href="{% url 'delete_herramienta' entry.item.pk %}" class="btn btn-danger btn-sm delete-product-btn"
-            role="button" aria-pressed="true">x</a>
-          {% elif entry.category == "Pinturas" %}
-          <a href="{% url 'edit_pintura' entry.item.pk %}" class="btn btn-warning btn-sm" role="button"
-            aria-pressed="true">Editar</a>
-          <a href="{% url 'delete_pintura' entry.item.pk %}" class="btn btn-danger btn-sm delete-product-btn"
-            role="button" aria-pressed="true">x</a>
-          {% endif %}
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="5">No hay productos que mostrar</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
 
-<div class="pagination">
-  {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">Anterior</a>
-  {% endif %}
-  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-  {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">Siguiente</a>
-  {% endif %}
+      {% for producto in productos %}
+        <tr>
+          <td>{{ producto.codigo_barras|default:"Sin código" }}</td>
+          <td>{{ producto.name }}</td>
+          <td>{{ producto.product_type.name }}</td>
+          <td>${{ producto.price }}</td>
+          <td>{{ producto.stock }}</td>
+          <td>
+            <a href="{% url 'producto_update' producto.pk %}" class="btn btn-warning btn-sm">Editar</a>
+            <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-danger btn-sm delete-product-btn">X</a>
+          </td>
+        </tr>
+      {% endfor %}
+  </table>
 </div>
 
 <script>

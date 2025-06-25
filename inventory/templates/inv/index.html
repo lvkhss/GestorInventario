@@ -8,20 +8,24 @@
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Categoría</th>
+          <th>Tipo</th>
           <th>Precio</th>
           <th>Fecha</th>
           <th>Stock</th>
         </tr>
       </thead>
       <tbody>
-        {% for entry in latest_items %}
+        {% for producto in latest_items %}
         <tr>
-          <td>{{ entry.item.name }}</td>
-          <td>{{ entry.category }}</td>
-          <td>$ {{ entry.item.price }}</td>
-          <td>{{ entry.item.date_added }}</td>
-          <td>{{ entry.item.stock }}</td>
+          <td>{{ producto.name }}</td>
+          <td>{{ producto.product_type.name }}</td>
+          <td>$ {{ producto.price }}</td>
+          <td>{{ producto.date_added|date:"d/m/Y H:i" }}</td>
+          <td>
+            <span class="badge {% if producto.stock > 10 %}bg-success{% elif producto.stock > 0 %}bg-warning{% else %}bg-danger{% endif %}">
+              {{ producto.stock }}
+            </span>
+          </td>
         </tr>
         {% empty %}
         <tr>
@@ -38,20 +42,24 @@
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Categoría</th>
+          <th>Tipo</th>
           <th>Precio</th>
           <th>Fecha</th>
           <th>Stock</th>
         </tr>
       </thead>
       <tbody>
-        {% for entry in least_stock_items %}
-        <tr>
-          <td>{{ entry.item.name }}</td>
-          <td>{{ entry.category }}</td>
-          <td>$ {{ entry.item.price }}</td>
-          <td>{{ entry.item.date_added }}</td>
-          <td>{{ entry.item.stock }}</td>
+        {% for producto in least_stock_items %}
+        <tr class="{% if producto.stock == 0 %}table-danger{% elif producto.stock <= 5 %}table-warning{% endif %}">
+          <td>{{ producto.name }}</td>
+          <td>{{ producto.product_type.name }}</td>
+          <td>$ {{ producto.price }}</td>
+          <td>{{ producto.date_added|date:"d/m/Y H:i" }}</td>
+          <td>
+            <span class="badge {% if producto.stock == 0 %}bg-danger{% elif producto.stock <= 5 %}bg-warning{% else %}bg-success{% endif %}">
+              {{ producto.stock }}
+            </span>
+          </td>
         </tr>
         {% empty %}
         <tr>
@@ -63,13 +71,3 @@
   </div>
 </div>
 {% endblock %}
-
-<style>
-  table, th, td {
-    border: 1px solid #333;
-    border-collapse: collapse;
-  }
-  th, td {
-    padding: 8px;
-  }
-</style>

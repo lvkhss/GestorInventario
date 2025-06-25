@@ -1,0 +1,21 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+<div class="container mt-4 detalle-mov-container">
+  <h2>Detalle del Producto</h2>
+  <ul class="list-group">
+    <li class="list-group-item"><strong>Nombre:</strong> {{ producto.name }}</li>
+    <li class="list-group-item"><strong>Tipo:</strong> {{ producto.product_type.name }}</li>
+    <li class="list-group-item"><strong>Precio:</strong> ${{ producto.price }}</li>
+    <li class="list-group-item"><strong>Stock:</strong> {{ producto.stock }} unidades</li>
+    <li class="list-group-item"><strong>Código de Barras:</strong> {{ producto.codigo_barras|default:"No asignado" }}</li>
+    <li class="list-group-item"><strong>Fecha de Creación:</strong> {{ producto.date_added|date:"d/m/Y H:i" }}</li>
+  </ul>
+  
+  <div class="mt-4">
+    <a href="{% url 'inventario' %}" class="btn btn-secondary">Volver</a>
+    <!-- <a href="{% url 'producto_update' producto.pk %}" class="btn btn-warning">Editar</a>
+    <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-danger">Eliminar</a> -->
+  </div>
+</div>
+{% endblock %}

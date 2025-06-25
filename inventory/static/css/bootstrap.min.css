@@ -95,6 +95,8 @@ body {
 
 
 .btn-danger {
+    white-space: nowrap;
+     min-width: 80px;
     font-size: 1rem; 
     padding: 10px 30px; 
     margin: 5px 5px;

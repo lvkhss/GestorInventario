@@ -6,42 +6,55 @@
   <form method="POST" class="add-product-form">
     {% csrf_token %}
 
-    <h4>Editar Producto</h4>
+    <h4>{% if form.instance.pk %}Editar Producto{% else %}Crear Producto{% endif %}</h4>
     {% for field in form %}
     <div class="add-product-group">
       <label for="id_{{ field.name }}" class="add-product-label">{{ field.label }}</label>
       <div class="add-product-field">
         {{ field }}
+        {% if field.errors %}
+          <div class="text-danger">
+            {% for error in field.errors %}
+              <small>{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
     </div>
-    
     {% endfor %}
 
-   <div class="add-product-group">
-  <label for="id_motivo" class="add-product-label">Motivo</label>
-  <div class="add-product-field">
-    <select name="motivo" id="id_motivo" class="form-control" required>
-      <option value="" disabled selected>Seleccione un motivo</option>
-      <option value="Venta">Venta</option>
-      <option value="Corrección nombre">Corrección nombre</option>
-      <option value="Corrección precio">Corrección precio</option>
-      <option value="Ajuste de inventario">Ajuste de inventario</option>
-      <option value="Uso interno">Uso interno</option>
-      <option value="Otro">Otro</option>
-    </select>
-    <input type="text" id="motivo_extra" class="form-control" placeholder="Añadir motivo" style="margin-top:8px;" disabled>
-  </div>
-</div>
+    {% if form.instance.pk %}
+    <!-- Only show motivo field when editing -->
+    <div class="add-product-group">
+      <label for="id_motivo" class="add-product-label">Motivo</label>
+      <div class="add-product-field">
+        <select name="motivo" id="id_motivo" class="form-control" required>
+          <option value="" disabled selected>Seleccione un motivo</option>
+          <option value="Venta">Venta</option>
+          <option value="Corrección nombre">Corrección nombre</option>
+          <option value="Corrección precio">Corrección precio</option>
+          <option value="Ajuste de inventario">Ajuste de inventario</option>
+          <option value="Uso interno">Uso interno</option>
+          <option value="Otro">Otro</option>
+        </select>
+        <input type="text" id="motivo_extra" class="form-control" placeholder="Especifique el motivo" style="margin-top:8px; display:none;" disabled>
+      </div>
+    </div>
     <input type="hidden" name="motivo" id="motivo_hidden">
+    {% endif %}
+
     <div class="add-product-group">
       <div class="add-product-btn-wrap">
-        <button type="button" class="add-product-btn" onclick="window.location.href='{% url "inventario" %}'">Volver </button>
-        <button type="submit" class="add-product-btn">Guardar Cambios</button>
+        <button type="button" class="add-product-btn" onclick="window.location.href='{% url "inventario" %}'">Volver</button>
+        <button type="submit" class="add-product-btn">
+          {% if form.instance.pk %}Guardar Cambios{% else %}Crear Producto{% endif %}
+        </button>
       </div>
     </div>
   </form>
 </div>
 
+{% if form.instance.pk %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const motivoSelect = document.getElementById('id_motivo');
@@ -50,24 +63,39 @@ document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('form');
 
   motivoSelect.addEventListener('change', function() {
-    if (motivoSelect.value !== "Otro") {
-      motivoExtra.disabled = true;
-      motivoExtra.value = "";
-    } else {
+    if (motivoSelect.value === "Otro") {
+      motivoExtra.style.display = 'block';
       motivoExtra.disabled = false;
-      motivoExtra.value = "";
+      motivoExtra.required = true;
       motivoExtra.focus();
+    } else {
+      motivoExtra.style.display = 'none';
+      motivoExtra.disabled = true;
+      motivoExtra.required = false;
+      motivoExtra.value = "";
     }
   });
 
   form.addEventListener('submit', function(e) {
+    if (motivoSelect.value === "") {
+      e.preventDefault();
+      alert('Por favor seleccione un motivo para el cambio.');
+      return false;
+    }
+    
     if (motivoSelect.value === "Otro") {
-      motivoHidden.value = motivoExtra.value;
+      if (motivoExtra.value.trim() === "") {
+        e.preventDefault();
+        alert('Por favor especifique el motivo.');
+        motivoExtra.focus();
+        return false;
+      }
+      motivoHidden.value = motivoExtra.value.trim();
     } else {
       motivoHidden.value = motivoSelect.value;
     }
   });
 });
 </script>
+{% endif %}
 {% endblock %}
-

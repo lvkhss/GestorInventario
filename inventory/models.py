@@ -3,7 +3,6 @@ from django.utils.timezone import now
 from django.contrib.auth.models import User
 
 
-
 class Suppliers(models.Model):
     empresa = models.CharField(max_length=100)
     encargado = models.CharField(max_length=100)
@@ -14,46 +13,46 @@ class Suppliers(models.Model):
     def __str__(self):
         return f"{self.empresa} - {self.encargado}"
 
+
+class ProductType(models.Model):
+    """Model to define product types dynamically"""
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Tipo de Producto"
+        verbose_name_plural = "Tipos de Productos"
+
+
 class Producto(models.Model):
     name = models.CharField(max_length=200, default='Sin nombre')
-    type = models.CharField(max_length=200, blank=False)
+    product_type = models.ForeignKey(ProductType, on_delete=models.CASCADE, verbose_name="Tipo")
     price = models.IntegerField()
     stock = models.IntegerField(default=0)
     codigo_barras = models.CharField(max_length=50, null=True, blank=True)
-    choices = (
-        ('AVAILABLE', 'Item ready to be purchased'),
-        ('SOLD', 'Item already purchased'),
-        ('RESTOCKING', 'Item restocking in a few days')
-    )
-
-    status = models.CharField(max_length=10, choices=choices, default='SOLD')
-    issues = models.CharField(max_length=50, default="No Issues")
     date_added = models.DateTimeField(default=now, editable=False)
 
-    class Meta:
-        abstract = True
-
     def __str__(self):
-        return 'type: {0} price: {1} date_added: {2}'.format(self.type, self.price, self.date_added)
+        return f'{self.name} - {self.product_type.name} - ${self.price}'
 
+    @property
+    def type(self):
+        """Backward compatibility property"""
+        return self.product_type.name
 
     @classmethod
     def table_exists(cls):
         """Checks if the table for the model exists in the database."""
         return cls._meta.db_table in connection.introspection.table_names()
 
-
-class ProductoReal(Producto):
-    pass
-    
-class Sellantes(Producto):
-    pass
-
-class Herramientas(Producto):
-    pass
-
-class Pinturas(Producto):
-    pass
+    class Meta:
+        verbose_name = "Producto"
+        verbose_name_plural = "Productos"
 
 class HistorialMovimiento(models.Model):
     producto_id = models.IntegerField()

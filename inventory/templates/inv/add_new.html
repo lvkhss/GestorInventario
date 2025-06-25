@@ -6,21 +6,39 @@
   <form method="POST" class="add-product-form">
     {% csrf_token %}
 
-    <h4>Agregar nuevo producto</h4>
-
+    <h4>{% if form.instance.pk %}Editar Producto{% else %}Agregar Nuevo Producto{% endif %}</h4>
     {% for field in form %}
     <div class="add-product-group">
       <label for="id_{{ field.name }}" class="add-product-label">{{ field.label }}</label>
       <div class="add-product-field">
         {{ field }}
+        {% if field.errors %}
+          <div class="text-danger">
+            {% for error in field.errors %}
+              <small>{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
     </div>
     {% endfor %}
 
+    <!-- Add motivo field for stock changes when editing -->
+    {% if form.instance.pk %}
+    <div class="add-product-group">
+      <label for="motivo" class="add-product-label">Motivo del cambio</label>
+      <div class="add-product-field">
+        <input type="text" name="motivo" class="form-control" placeholder="Ej: Corrección de inventario, Restock, etc." />
+      </div>
+    </div>
+    {% endif %}
+
     <div class="add-product-group">
       <div class="add-product-btn-wrap">
         <button type="button" class="add-product-btn" onclick="window.location.href='{% url 'inventario' %}'">Volver</button>
-        <button type="submit" class="add-product-btn">Agregar Producto</button>
+        <button type="submit" class="add-product-btn">
+          {% if form.instance.pk %}Guardar Cambios{% else %}Crear Producto{% endif %}
+        </button>
       </div>
     </div>
   </form>

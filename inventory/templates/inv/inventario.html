@@ -1,5 +1,6 @@
 {% extends 'inv/base.html' %}
 
+
 {% block body %}
 <h2>Inventario</h2>
 <div class="container-set-inventory">
@@ -9,20 +10,18 @@
         <input type="text" id="searchInput" placeholder="Buscar por nombre..."
           class="form-control d-inline-block w-auto" />
       </div>
-      <div class="button-group">
-
-        <select id="filterType" class="form-select d-inline-block w-auto">
+      <div class="button-group"> <select id="filterType" class="form-select d-inline-block w-auto">
           <option value="">Todos</option>
-          <option value="Sellantes">Sellantes</option>
-          <option value="Herramientas">Herramientas</option>
-          <option value="Pinturas">Pinturas</option>
+          {% for product_type in product_types %}
+          <option value="{{ product_type.name }}">{{ product_type.name }}</option>
+          {% endfor %}
         </select>
       </div>
     </div>
     <div class="inventory-right">
       <div class="button-group">
         <div class="button-group-fused">
-          <a href="{% url 'agregar_producto' %}" class=" agregar-producto">Agregar producto</a>
+          <a href="{% url 'producto_create' %}" class=" agregar-producto">Agregar producto</a>
           <a href="{% url 'upload_products_excel' %}" class=" agregar-excel">Subir Excel</a>
         </div>
       </div>
@@ -60,9 +59,5 @@
 </script>
 {% endblock %}
 {% block extra_scripts %}
-<script>
-  sellantes = Sellantes.objects.all().order_by('-date_added')
-  herramientas = Herramientas.objects.all().order_by('-date_added')
-  pinturas = Pinturas.objects.all().order_by('-date_added')
-</script>
+
 {% endblock %}
