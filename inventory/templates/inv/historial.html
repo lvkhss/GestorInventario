@@ -13,9 +13,9 @@
       <div class="button-group">
         <select id="filterType" class="form-select">
           <option value="">Todos</option>
-          <option value="Sellantes">Sellantes</option>
-          <option value="Herramientas">Herramientas</option>
-          <option value="Pinturas">Pinturas</option>
+          {% for product_type in product_types %}
+          <option value="{{ product_type }}">{{ product_type }}</option>
+          {% endfor %}
         </select>
       </div>
     </div>

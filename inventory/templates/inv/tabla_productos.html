@@ -23,8 +23,9 @@
         <td>
           <a href="{% url 'producto_update' producto.pk %}" class="btn btn-sm btn-warning">Editar</a>
           <!-- <a href="{% url 'producto_detail' producto.pk %}?next=inventario" class="btn btn-sm btn-info">
-            Ver</a> -->
-          <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-sm btn-danger">X</a>
+            Ver
+          </a> -->
+          <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro que desea eliminar este producto?')">X</a>
         </td>
       </tr>
       {% empty %}

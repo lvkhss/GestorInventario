@@ -1,0 +1,70 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+<div class="add-product-container">
+    <form method="POST" enctype="multipart/form-data" class="add-product-form">
+        {% csrf_token %}
+        
+        <h4>Cargar Productos desde Excel</h4>
+        
+        
+        <div class="add-product-group">
+            <label for="{{ form.file.id_for_label }}" class="add-product-label">Archivo Excel</label>
+            <div class="add-product-field">
+                {{ form.file }}
+                {% if form.file.errors %}
+                    <div class="text-danger">
+                        {% for error in form.file.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="alert alert-info">
+            <h6>Formato requerido del archivo Excel:</h6>
+        </div>
+        
+        <div class="add-product-group">
+            <div class="add-product-btn-wrap">
+                <button type="button" class="add-product-btn" onclick="window.location.href='{% url 'inventario' %}'">
+                    Cancelar
+                </button>
+                <button type="submit" class="add-product-btn">
+                    Cargar Archivo
+                </button>
+            </div>
+        </div>
+             {% if success_message %}
+            <div class="alert alert-success">
+                {{ success_message }}
+            </div>
+        {% endif %}
+    </form>
+</div>
+<script>
+// Add file validation
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('{{ form.file.id_for_label }}');
+    
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const fileName = file.name.toLowerCase();
+            const validExtensions = ['.xlsx', '.xls'];
+            const isValid = validExtensions.some(ext => fileName.endsWith(ext));
+            
+            if (!isValid) {
+                alert('Por favor seleccione un archivo Excel (.xlsx o .xls)');
+                this.value = '';
+            } else if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert('El archivo es demasiado grande. Máximo 5MB.');
+                this.value = '';
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

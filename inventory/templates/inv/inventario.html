@@ -55,4 +55,26 @@
   document.getElementById("searchInput").addEventListener("input", updateTable);
   document.getElementById("filterType").addEventListener("change", updateTable);
 </script>
+
+<script>
+function confirmDelete(productId, productName) {
+    if (confirm(`¿Está seguro que desea eliminar el producto "${productName}"?\n\nEsta acción no se puede deshacer.`)) {
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/productos/${productId}/delete/`;
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 {% endblock %}

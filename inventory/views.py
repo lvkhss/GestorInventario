@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import  HistorialMovimiento
+from .models import HistorialMovimiento, Suppliers  # Change to whatever the actual model name is
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-
 from django.db.models import Q
-from datetime import datetime, timedelta
+from datetime import datetime
 from .forms import *
 import pandas as pd
 from .forms import ExcelUploadForm
@@ -13,7 +12,13 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 from .models import HistorialMovimiento
 from django.contrib.auth import logout
+from django.core.validators import RegexValidator, EmailValidator
+from django.core.exceptions import ValidationError
+from django.contrib import messages
 
+MODEL_MAP = {
+    'producto': Producto,  # or whatever your unified product model is called
+}
 
 def logout_custom(request):
     logout(request)
@@ -21,34 +26,59 @@ def logout_custom(request):
 
 @login_required
 def suppliers_list(request):
-    suppliers = Suppliers.objects.all()
+    suppliers = Suppliers.objects.all()  # Use your actual model name
     return render(request, 'inv/suppliers_list.html', {'suppliers': suppliers})
+
 @login_required
 def supplier_create(request):
     if request.method == 'POST':
-        form = suplierForm(request.POST)
+        form = SupplierForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('suppliers_list')
+            try:
+                supplier = form.save()
+                messages.success(request, f'Proveedor "{supplier.empresa}" creado exitosamente.')
+                return redirect('suppliers_list')
+            except ValidationError as e:
+                messages.error(request, f'Error al crear proveedor: {e}')
+        else:
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
     else:
-        form = suplierForm()
-    return render(request, 'inv/suppliers_form.html', {'form': form})
+        form = SupplierForm()
+    
+    return render(request, 'inv/suppliers_form.html', {  # Change this line
+        'form': form,
+        'title': 'Crear Proveedor'
+    })
+
 @login_required
 def supplier_update(request, pk):
     supplier = get_object_or_404(Suppliers, pk=pk)
     if request.method == 'POST':
-        form = suplierForm(request.POST, instance=supplier)
+        form = SupplierForm(request.POST, instance=supplier)
         if form.is_valid():
-            form.save()
-            return redirect('suppliers_list')
+            try:
+                supplier = form.save()
+                messages.success(request, f'Proveedor "{supplier.empresa}" actualizado exitosamente.')
+                return redirect('suppliers_list')
+            except ValidationError as e:
+                messages.error(request, f'Error al actualizar proveedor: {e}')
+        else:
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
     else:
-        form = suplierForm(instance=supplier)
-    return render(request, 'inv/supplier_form.html', {'form': form})
+        form = SupplierForm(instance=supplier)
+    
+    return render(request, 'inv/suppliers_form.html', {  # Change this line
+        'form': form,
+        'title': 'Editar Proveedor',
+        'supplier': supplier
+    })
+
 @login_required
 def supplier_delete(request, pk):
     supplier = get_object_or_404(Suppliers, pk=pk)
     if request.method == 'POST':
         supplier.delete()
+        messages.success(request, f'Proveedor "{supplier.empresa}" eliminado exitosamente.')
         return redirect('suppliers_list')
     return render(request, 'inv/supplier_confirm_delete.html', {'supplier': supplier})
 
@@ -90,53 +120,62 @@ def login_view(request):
     return render(request, 'inv/login.html', {'error': error})
 
 
-
 @login_required
 def historial(request):
     query = request.GET.get('q', '')
-    tipo = request.GET.get('type', '')
-    start = request.GET.get('start', '')
-    end = request.GET.get('end', '')
-
-    movimientos_list = HistorialMovimiento.objects.all().order_by('-fecha')
-
+    product_type_filter = request.GET.get('type', '')
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+    
+    movimientos = HistorialMovimiento.objects.all().order_by('-fecha')
+    
+    # Apply filters
     if query:
-        movimientos_list = movimientos_list.filter(nombre_producto__icontains=query)
-
-    if tipo:
-        movimientos_list = movimientos_list.filter(tipo_producto=tipo)
-
-    try:
-        if start:
-            start_date = datetime.strptime(start, "%Y-%m-%d")
-        else:
-            start_date = None
-
-        if end:
-            # le sumamos 1 día para incluir todos los registros del día seleccionado
-            end_date = datetime.strptime(end, "%Y-%m-%d") + timedelta(days=1)
-        else:
-            end_date = None
-
-        # validamos coherencia
-        if start_date and end_date:
-            if start_date > end_date:
-                movimientos_list = movimientos_list.none()
-            else:
-                movimientos_list = movimientos_list.filter(fecha__gte=start_date, fecha__lt=end_date)
-        elif start_date:
-            movimientos_list = movimientos_list.filter(fecha__gte=start_date)
-        elif end_date:
-            movimientos_list = movimientos_list.filter(fecha__lt=end_date)
-
-    except ValueError:
-        pass  # Si alguna fecha es inválida, simplemente no filtra por fecha
-
-    paginator = Paginator(movimientos_list, 10)
+        movimientos = movimientos.filter(
+            Q(nombre_producto__icontains=query) | 
+            Q(codigo_barras__icontains=query)
+        )
+    
+    if product_type_filter:
+        movimientos = movimientos.filter(tipo_producto=product_type_filter)
+    
+    if start_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            movimientos = movimientos.filter(fecha__date__gte=start_date)
+        except ValueError:
+            pass
+    
+    if end_date:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            movimientos = movimientos.filter(fecha__date__lte=end_date)
+        except ValueError:
+            pass
+    
+    # Calculate stock inicial for each movement
+    for mov in movimientos:
+        mov.stock_inicial = mov.stock_final - mov.cambio_stock
+    
+    # Pagination
+    paginator = Paginator(movimientos, 20)
     page_number = request.GET.get('page')
     movimientos = paginator.get_page(page_number)
+    
+    # Get all unique product types from HistorialMovimiento
+    product_types = HistorialMovimiento.objects.values_list('tipo_producto', flat=True).distinct().order_by('tipo_producto')
+    
+    context = {
+        'movimientos': movimientos,
+        'product_types': product_types,  # This passes the types to template
+        'current_query': query,
+        'current_type': product_type_filter,
+        'current_start': request.GET.get('start', ''),
+        'current_end': request.GET.get('end', ''),
+    }
+    
+    return render(request, 'inv/historial.html', context)
 
-    return render(request, 'inv/historial.html', {'movimientos': movimientos})
 @login_required
 def index(request):
     # Get last 10 added products (by date_added, not edited)
@@ -236,32 +275,103 @@ def edit_item(request, pk, model, cls):
 
 @login_required
 def upload_products_excel(request):
-    msg = ""
-    if request.method == "POST":
+    success_message = None
+    debug_info = []  # Add this for debugging
+    
+    if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
             excel_file = request.FILES['file']
-            df = pd.read_excel(excel_file)
-            for _, row in df.iterrows():
-                print(row)
-                model_name = row['type']
-                model = MODEL_MAP.get(model_name)
-                if not model:
-                    print(f"Tipo '{model_name}' no reconocido. Fila omitida.")
-                    continue
-                obj, created = model.objects.update_or_create(
-                    name=row['name'],
-                    defaults={
-                        'price': row['price'],
-                        'stock': row.get('stock', 0),
-                        'type': row['type'],
-                        'codigo_barras': row.get('codigo_barras', ''),
-                    }
-                )
-            msg = "Productos cargados o actualizados exitosamente."
+            
+            try:
+                # Read the Excel file
+                df = pd.read_excel(excel_file)
+                
+                # Get all existing product types for validation
+                existing_types = ProductType.objects.filter(is_active=True)
+                existing_type_names = [pt.name.lower() for pt in existing_types]
+                type_mapping = {pt.name.lower(): pt for pt in existing_types}
+                
+                success_count = 0
+                error_count = 0
+                
+                for index, row in df.iterrows():
+                    try:
+                        tipo_input = str(row.get('tipo', '')).strip()
+                        nombre = str(row.get('nombre', '')).strip()
+                        codigo_barras = str(row.get('codigo_barras', '')).strip()
+                        
+                        # Debug: Add this to see what's being processed
+                        debug_info.append(f"Row {index+1}: nombre='{nombre}', tipo='{tipo_input}'")
+                        
+                        # Skip if no name
+                        if not nombre:
+                            error_count += 1
+                            debug_info.append(f"Row {index+1}: SKIPPED - No name")
+                            continue
+                        
+                        # Check if the product type exists (case-insensitive)
+                        if not tipo_input:
+                            error_count += 1
+                            debug_info.append(f"Row {index+1}: SKIPPED - No product type")
+                            continue
+                            
+                        tipo_lower = tipo_input.lower()
+                        if tipo_lower not in existing_type_names:
+                            error_count += 1
+                            debug_info.append(f"Row {index+1}: SKIPPED - Product type '{tipo_input}' not found")
+                            continue
+                        
+                        # Check for duplicates by name
+                        if Producto.objects.filter(name__iexact=nombre).exists():
+                            error_count += 1
+                            debug_info.append(f"Row {index+1}: SKIPPED - Duplicate name '{nombre}'")
+                            continue
+                        
+                        # Check for duplicates by codigo_barras (if provided)
+                        if codigo_barras and Producto.objects.filter(codigo_barras=codigo_barras).exists():
+                            error_count += 1
+                            debug_info.append(f"Row {index+1}: SKIPPED - Duplicate barcode '{codigo_barras}'")
+                            continue
+                        
+                        # Get the existing ProductType
+                        product_type = type_mapping[tipo_lower]
+                        
+                        # Create the product using the unified Producto model
+                        product = Producto.objects.create(
+                            name=nombre,
+                            product_type=product_type,
+                            price=float(row.get('precio', 0)),
+                            stock=int(row.get('stock', 0)),
+                            codigo_barras=codigo_barras if codigo_barras else None
+                        )
+                        
+                        success_count += 1
+                        debug_info.append(f"Row {index+1}: SUCCESS - Created '{nombre}'")
+                        
+                    except Exception as e:
+                        error_count += 1
+                        debug_info.append(f"Row {index+1}: ERROR - {str(e)}")
+                
+                # Set success message if there were successful imports
+                if success_count > 0:
+                    success_message = f"Productos subidos exitosamente: {success_count}"
+                
+                # Temporarily show debug info (remove this later)
+                if debug_info:
+                    debug_message = "<br>".join(debug_info[:10])  # Show first 10 for debugging
+                    messages.info(request, f"Debug info: {debug_message}")
+                
+            except Exception as e:
+                messages.error(request, f"Error processing file: {str(e)}")
+                
     else:
         form = ExcelUploadForm()
-    return render(request, 'inv/upload_products_excel.html', {'form': form, 'msg': msg})
+    
+    return render(request, 'inv/upload_excel.html', {
+        'form': form,
+        'success_message': success_message
+    })
 
 def detalle_historial(request, pk):
     movimiento = get_object_or_404(HistorialMovimiento, pk=pk)
@@ -274,6 +384,20 @@ def producto_create(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST)
         if form.is_valid():
+            # Check for duplicates before saving
+            nombre = form.cleaned_data.get('name')
+            codigo_barras = form.cleaned_data.get('codigo_barras')
+            
+            # Check for duplicate name (case-insensitive)
+            if nombre and Producto.objects.filter(name__iexact=nombre).exists():
+                form.add_error('name', 'Ya existe un producto con este nombre.')
+                return render(request, 'inv/add_new.html', {'form': form})
+            
+            # Check for duplicate codigo_barras (if provided)
+            if codigo_barras and Producto.objects.filter(codigo_barras=codigo_barras).exists():
+                form.add_error('codigo_barras', 'Ya existe un producto con este código de barras.')
+                return render(request, 'inv/add_new.html', {'form': form})
+            
             producto = form.save()
             # Create history entry for new product
             HistorialMovimiento.objects.create(
@@ -371,7 +495,7 @@ def producto_update(request, pk):
                 motivo=motivo,
                 usuario=request.user
             )
-            return redirect('producto_detail', pk=pk)
+            return redirect('inventario')
     else:
         form = ProductoForm(instance=producto)
     return render(request, 'inv/edit_item.html', {  # Changed from producto_form.html
@@ -383,18 +507,17 @@ def producto_update(request, pk):
 @login_required
 def producto_delete(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
-    if request.method == 'POST':
-        # Create history entry before deletion
-        HistorialMovimiento.objects.create(
-            producto_id=producto.id,
-            nombre_producto=producto.name,
-            tipo_producto=producto.product_type.name,
-            codigo_barras=producto.codigo_barras or '',
-            cambio_stock=-producto.stock,
-            stock_final=0,
-            motivo='Producto eliminado',
-            usuario=request.user
-        )
-        producto.delete()
-        return redirect('producto_list')
-    return render(request, 'inv/producto_confirm_delete.html', {'producto': producto})
+    
+    # Create history entry before deletion
+    HistorialMovimiento.objects.create(
+        producto_id=producto.id,
+        nombre_producto=producto.name,
+        tipo_producto=producto.product_type.name,
+        codigo_barras=producto.codigo_barras or '',
+        cambio_stock=-producto.stock,
+        stock_final=0,
+        motivo='Producto eliminado',
+        usuario=request.user
+    )
+    producto.delete()
+    return redirect('inventario')

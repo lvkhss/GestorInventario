@@ -4,8 +4,9 @@
       <th>Codigo</th>
       <th>Producto</th>
       <th>Fecha</th>
-      <th>Cambio de Stock</th>
+      <th>Stock Inicial</th>
       <th>Stock Final</th>
+      <th>Cambio de Stock</th>
       <th>Motivo</th>
       <th>Detalle</th>
     </tr>
@@ -16,15 +17,22 @@
         <td>{{ mov.codigo_barras }}</td>
         <td>{{ mov.nombre_producto }}</td>
         <td>{{ mov.fecha|date:"d-m-Y H:i" }}</td>
-        <td>{% if mov.cambio_stock > 0 %}+{% endif %}{{ mov.cambio_stock }}</td>
+        <td>
+          {% if mov.stock_inicial %}
+            {{ mov.stock_inicial }}
+          {% else %}
+            {{ mov.stock_final|add:mov.cambio_stock|add:"-"|add:mov.cambio_stock|add:"-"|add:mov.cambio_stock|default:0 }}
+          {% endif %}
+        </td>
         <td>{{ mov.stock_final }}</td>
+        <td>{% if mov.cambio_stock > 0 %}+{% endif %}{{ mov.cambio_stock }}</td>
         <td>{{ mov.motivo }}</td>
         <td style="padding-right:30px;">
-  <a href="{% url 'detalle_historial' mov.pk %}" class="btn btn-sm btn-primary">Detalles</a>
-</td>
+          <a href="{% url 'detalle_historial' mov.pk %}" class="btn btn-sm btn-primary">Detalles</a>
+        </td>
       </tr>
     {% empty %}
-      <tr><td colspan="7">No hay movimientos.</td></tr>
+      <tr><td colspan="8">No hay movimientos.</td></tr>
     {% endfor %}
   </tbody>
 </table>
