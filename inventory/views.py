@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import HistorialMovimiento, Suppliers  # Change to whatever the actual model name is
+from .models import HistorialMovimiento, Suppliers 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -17,16 +17,38 @@ from django.core.exceptions import ValidationError
 from django.contrib import messages
 
 MODEL_MAP = {
-    'producto': Producto,  # or whatever your unified product model is called
+    'producto': Producto,  
 }
 
+from django.contrib import messages
+from .models import ProductType
+@login_required
+def delete_product_type(request, pk):
+    if request.method == 'POST':
+        ProductType.objects.filter(pk=pk).delete()
+        messages.success(request, "Tipo de producto eliminado.")
+    return redirect('settings_view')
+@login_required
+def settings_view(request):
+    if request.method == 'POST':
+        name_value = request.POST.get('type', '').strip()  # 'type' from the form, but maps to 'name' in the model
+        description = request.POST.get('description', '').strip()
+        if not name_value:
+            messages.error(request, "El tipo es obligatorio.")
+        elif ProductType.objects.filter(name__iexact=name_value).exists():
+            messages.error(request, "Ya existe un tipo de producto con ese nombre.")
+        else:
+            ProductType.objects.create(name=name_value, description=description)
+            messages.success(request, "Tipo de producto creado exitosamente.")
+    product_types = ProductType.objects.all()
+    return render(request, 'inv/settings.html', {'product_types': product_types})
 def logout_custom(request):
     logout(request)
     return redirect('login') 
 
 @login_required
 def suppliers_list(request):
-    suppliers = Suppliers.objects.all()  # Use your actual model name
+    suppliers = Suppliers.objects.all()  
     return render(request, 'inv/suppliers_list.html', {'suppliers': suppliers})
 
 @login_required
@@ -153,7 +175,7 @@ def historial(request):
         except ValueError:
             pass
     
-    # Calculate stock inicial for each movement
+
     for mov in movimientos:
         mov.stock_inicial = mov.stock_final - mov.cambio_stock
     
@@ -162,12 +184,12 @@ def historial(request):
     page_number = request.GET.get('page')
     movimientos = paginator.get_page(page_number)
     
-    # Get all unique product types from HistorialMovimiento
+
     product_types = HistorialMovimiento.objects.values_list('tipo_producto', flat=True).distinct().order_by('tipo_producto')
     
     context = {
         'movimientos': movimientos,
-        'product_types': product_types,  # This passes the types to template
+        'product_types': product_types,  
         'current_query': query,
         'current_type': product_type_filter,
         'current_start': request.GET.get('start', ''),
@@ -178,10 +200,10 @@ def historial(request):
 
 @login_required
 def index(request):
-    # Get last 10 added products (by date_added, not edited)
+    
     latest_items = Producto.objects.all().order_by('-date_added')[:10]
     
-    # Get 10 products with lowest stock (including 0)
+   
     least_stock_items = Producto.objects.all().order_by('stock', 'date_added')[:10]
     
     context = {
@@ -197,10 +219,10 @@ def inventario(request):
     query = request.GET.get('q', '')
     product_type_filter = request.GET.get('type', '')
     
-    # Get all products
+ 
     productos = Producto.objects.all().order_by('-date_added')
     
-    # Apply filters
+   
     if query:
         productos = productos.filter(
             Q(name__icontains=query) | 
@@ -210,11 +232,11 @@ def inventario(request):
     if product_type_filter:
         productos = productos.filter(product_type__name=product_type_filter)
     
-    # Get all product types for the filter dropdown
+  
     product_types = ProductType.objects.filter(is_active=True)
     
-    # Pagination
-    paginator = Paginator(productos, 20)  # Show 20 products per page
+
+    paginator = Paginator(productos, 20)  
     page_number = request.GET.get('page')
     productos = paginator.get_page(page_number)
     
@@ -276,7 +298,7 @@ def edit_item(request, pk, model, cls):
 @login_required
 def upload_products_excel(request):
     success_message = None
-    debug_info = []  # Add this for debugging
+    debug_info = [] 
     
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
@@ -284,10 +306,10 @@ def upload_products_excel(request):
             excel_file = request.FILES['file']
             
             try:
-                # Read the Excel file
+               
                 df = pd.read_excel(excel_file)
                 
-                # Get all existing product types for validation
+               
                 existing_types = ProductType.objects.filter(is_active=True)
                 existing_type_names = [pt.name.lower() for pt in existing_types]
                 type_mapping = {pt.name.lower(): pt for pt in existing_types}
@@ -301,16 +323,16 @@ def upload_products_excel(request):
                         nombre = str(row.get('nombre', '')).strip()
                         codigo_barras = str(row.get('codigo_barras', '')).strip()
                         
-                        # Debug: Add this to see what's being processed
+          
                         debug_info.append(f"Row {index+1}: nombre='{nombre}', tipo='{tipo_input}'")
                         
-                        # Skip if no name
+             
                         if not nombre:
                             error_count += 1
                             debug_info.append(f"Row {index+1}: SKIPPED - No name")
                             continue
                         
-                        # Check if the product type exists (case-insensitive)
+               
                         if not tipo_input:
                             error_count += 1
                             debug_info.append(f"Row {index+1}: SKIPPED - No product type")
@@ -321,23 +343,21 @@ def upload_products_excel(request):
                             error_count += 1
                             debug_info.append(f"Row {index+1}: SKIPPED - Product type '{tipo_input}' not found")
                             continue
-                        
-                        # Check for duplicates by name
+    
                         if Producto.objects.filter(name__iexact=nombre).exists():
                             error_count += 1
                             debug_info.append(f"Row {index+1}: SKIPPED - Duplicate name '{nombre}'")
                             continue
                         
-                        # Check for duplicates by codigo_barras (if provided)
+            
                         if codigo_barras and Producto.objects.filter(codigo_barras=codigo_barras).exists():
                             error_count += 1
                             debug_info.append(f"Row {index+1}: SKIPPED - Duplicate barcode '{codigo_barras}'")
                             continue
                         
-                        # Get the existing ProductType
+                      
                         product_type = type_mapping[tipo_lower]
-                        
-                        # Create the product using the unified Producto model
+            
                         product = Producto.objects.create(
                             name=nombre,
                             product_type=product_type,
@@ -353,13 +373,13 @@ def upload_products_excel(request):
                         error_count += 1
                         debug_info.append(f"Row {index+1}: ERROR - {str(e)}")
                 
-                # Set success message if there were successful imports
+              
                 if success_count > 0:
                     success_message = f"Productos subidos exitosamente: {success_count}"
                 
-                # Temporarily show debug info (remove this later)
+               
                 if debug_info:
-                    debug_message = "<br>".join(debug_info[:10])  # Show first 10 for debugging
+                    debug_message = "<br>".join(debug_info[:10])
                     messages.info(request, f"Debug info: {debug_message}")
                 
             except Exception as e:
@@ -384,22 +404,22 @@ def producto_create(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST)
         if form.is_valid():
-            # Check for duplicates before saving
+     
             nombre = form.cleaned_data.get('name')
             codigo_barras = form.cleaned_data.get('codigo_barras')
-            
-            # Check for duplicate name (case-insensitive)
+      
+
             if nombre and Producto.objects.filter(name__iexact=nombre).exists():
                 form.add_error('name', 'Ya existe un producto con este nombre.')
                 return render(request, 'inv/add_new.html', {'form': form})
             
-            # Check for duplicate codigo_barras (if provided)
+
             if codigo_barras and Producto.objects.filter(codigo_barras=codigo_barras).exists():
                 form.add_error('codigo_barras', 'Ya existe un producto con este código de barras.')
                 return render(request, 'inv/add_new.html', {'form': form})
             
             producto = form.save()
-            # Create history entry for new product
+      
             HistorialMovimiento.objects.create(
                 producto_id=producto.id,
                 nombre_producto=producto.name,
@@ -431,7 +451,7 @@ def producto_list(request):
     if product_type:
         productos = productos.filter(product_type__id=product_type)
     
-    # Get all product types for filter dropdown
+
     product_types = ProductType.objects.filter(is_active=True)
     
     paginator = Paginator(productos, 20)
@@ -448,15 +468,15 @@ def producto_list(request):
 @login_required
 def producto_detail(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
-    # Get recent movements for this product
+
     movimientos = HistorialMovimiento.objects.filter(producto_id=pk).order_by('-fecha')[:10]
     
-    # Get the referring page from HTTP_REFERER or 'next' parameter
+
     referer = request.GET.get('next') or request.META.get('HTTP_REFERER', '')
-    back_url = 'inventario'  # default
-    back_text = 'Inventario'  # default
+    back_url = 'inventario'  
+    back_text = 'Inventario'  
     
-    # Determine where to go back based on the referer
+
     if 'historial' in referer:
         back_url = 'historial'
         back_text = 'Historial'
@@ -484,7 +504,7 @@ def producto_update(request, pk):
             stock_nuevo = updated_producto.stock
             cambio_stock = stock_nuevo - stock_anterior
             
-            # Create history entry
+     
             HistorialMovimiento.objects.create(
                 producto_id=updated_producto.id,
                 nombre_producto=updated_producto.name,
@@ -498,7 +518,7 @@ def producto_update(request, pk):
             return redirect('inventario')
     else:
         form = ProductoForm(instance=producto)
-    return render(request, 'inv/edit_item.html', {  # Changed from producto_form.html
+    return render(request, 'inv/edit_item.html', {  
         'form': form, 
         'producto': producto
     })
@@ -508,7 +528,7 @@ def producto_update(request, pk):
 def producto_delete(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     
-    # Create history entry before deletion
+   
     HistorialMovimiento.objects.create(
         producto_id=producto.id,
         nombre_producto=producto.name,

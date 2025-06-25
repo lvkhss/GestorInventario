@@ -1,0 +1,60 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+<div class="add-product-container">
+  <form method="POST" class="add-product-form" action="{% url 'settings_view' %}">
+    <h4>Agregar Nuevo Tipo de Producto</h4>
+    {% csrf_token %}
+    <div class="add-product-group">
+      <label for="id_type" class="add-product-label">Tipo</label>
+      <div class="add-product-field">
+        <input type="text" name="type" id="id_type" class="form-control" placeholder="Ej: Sellante, Pintura, Herramienta" required>
+      </div>
+    </div>
+    <div class="add-product-group">
+      <label for="id_description" class="add-product-label">Descripción</label>
+      <div class="add-product-field">
+        <input type="text" name="description" id="id_description" class="form-control" placeholder="Descripción del tipo de producto">
+      </div>
+    </div>
+    <div class="add-product-btn-wrap">
+      <button type="submit" class="add-product-btn">Crear Tipo</button>
+    </div>
+
+    <div class="add-product-container" style="margin-top: 2rem;">
+  <h4>Tipos de Producto Existentes</h4>
+  <table class="table">
+    
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Descripción</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      {% for tipo in product_types %}
+      <tr>
+        <td>{{ tipo.name }}</td>
+        <td>{{ tipo.description }}</td>
+        <td>
+          <a href="{% url 'producto_delete' tipo.pk %}" class="btn btn-sm btn-danger"
+             onclick="return confirm('¿Está seguro que desea eliminar este tipo de producto?. Esto eliminará todos los productos con este tipo')">X</a>
+        </td>
+      </tr>
+      
+      {% empty %}
+      <tr>
+        <td colspan="3">No hay tipos de producto registrados.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+ <a href="/admin/" class="btn btn-primary mb-4" target="_blank">
+    Ir al Django Admin
+  </a>
+  </form>
+</div>
+{% endblock %}

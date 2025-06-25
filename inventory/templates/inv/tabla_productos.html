@@ -2,11 +2,11 @@
   <table class="table table-striped">
     <thead>
       <tr>
+        <th>Código de Barras</th>
         <th>Nombre</th>
         <th>Tipo</th>
         <th>Precio</th>
         <th>Stock</th>
-        <th>Código de Barras</th>
         <th>Fecha</th>
         <th>Acciones</th>
       </tr>
@@ -14,11 +14,11 @@
     <tbody>
       {% for producto in productos %}
       <tr>
+        <td>{{ producto.codigo_barras|default:"-" }}</td>
         <td>{{ producto.name }}</td>
         <td>{{ producto.product_type.name }}</td>
         <td>${{ producto.price }}</td>
         <td>{{ producto.stock }}</td>
-        <td>{{ producto.codigo_barras|default:"-" }}</td>
         <td>{{ producto.date_added|date:"d/m/Y H:i" }}</td>
         <td>
           <a href="{% url 'producto_update' producto.pk %}" class="btn btn-sm btn-warning">Editar</a>
