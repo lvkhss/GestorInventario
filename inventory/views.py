@@ -175,7 +175,7 @@ def inventario(request):
     product_types = ProductType.objects.filter(is_active=True)
     
     # Pagination
-    paginator = Paginator(productos, 20)
+    paginator = Paginator(productos, 20)  # Show 20 products per page
     page_number = request.GET.get('page')
     productos = paginator.get_page(page_number)
     
@@ -326,10 +326,27 @@ def producto_detail(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
     # Get recent movements for this product
     movimientos = HistorialMovimiento.objects.filter(producto_id=pk).order_by('-fecha')[:10]
+    
+    # Get the referring page from HTTP_REFERER or 'next' parameter
+    referer = request.GET.get('next') or request.META.get('HTTP_REFERER', '')
+    back_url = 'inventario'  # default
+    back_text = 'Inventario'  # default
+    
+    # Determine where to go back based on the referer
+    if 'historial' in referer:
+        back_url = 'historial'
+        back_text = 'Historial'
+    elif 'inventario' in referer:
+        back_url = 'inventario'
+        back_text = 'Inventario'
+    
     return render(request, 'inv/producto_detail.html', {
         'producto': producto,
-        'movimientos': movimientos
+        'movimientos': movimientos,
+        'back_url': back_url,
+        'back_text': back_text
     })
+
 @login_required
 def producto_update(request, pk):
     producto = get_object_or_404(Producto, pk=pk)

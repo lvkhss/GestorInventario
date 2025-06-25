@@ -1,39 +1,50 @@
 <div class="table-responsive">
-  <table class="table table-hover fixed-table">
+  <table class="table table-striped">
     <thead>
       <tr>
-        <th>Código de Barras</th>
         <th>Nombre</th>
         <th>Tipo</th>
         <th>Precio</th>
         <th>Stock</th>
+        <th>Código de Barras</th>
+        <th>Fecha</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-
       {% for producto in productos %}
-        <tr>
-          <td>{{ producto.codigo_barras|default:"Sin código" }}</td>
-          <td>{{ producto.name }}</td>
-          <td>{{ producto.product_type.name }}</td>
-          <td>${{ producto.price }}</td>
-          <td>{{ producto.stock }}</td>
-          <td>
-            <a href="{% url 'producto_update' producto.pk %}" class="btn btn-warning btn-sm">Editar</a>
-            <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-danger btn-sm delete-product-btn">X</a>
-          </td>
-        </tr>
+      <tr>
+        <td>{{ producto.name }}</td>
+        <td>{{ producto.product_type.name }}</td>
+        <td>${{ producto.price }}</td>
+        <td>{{ producto.stock }}</td>
+        <td>{{ producto.codigo_barras|default:"-" }}</td>
+        <td>{{ producto.date_added|date:"d/m/Y H:i" }}</td>
+        <td>
+          <a href="{% url 'producto_update' producto.pk %}" class="btn btn-sm btn-warning">Editar</a>
+          <!-- <a href="{% url 'producto_detail' producto.pk %}?next=inventario" class="btn btn-sm btn-info">
+            Ver</a> -->
+          <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-sm btn-danger">X</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-center">No hay productos disponibles</td>
+      </tr>
       {% endfor %}
+    </tbody>
   </table>
 </div>
 
-<script>
-  document.addEventListener('click', function(event) {
-    if (event.target.matches('.delete-product-btn')) {
-      if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-        event.preventDefault();
-      }
-    }
-  }, false);
-</script>
+<!-- Pagination controls (same as historial) -->
+<div class="pagination">
+  {% if productos.has_previous %}
+  <a
+    href="?page={{ productos.previous_page_number }}{% if current_query %}&q={{ current_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}">Anterior</a>
+  {% endif %}
+  <span>Página {{ productos.number }} de {{ productos.paginator.num_pages }}</span>
+  {% if productos.has_next %}
+  <a
+    href="?page={{ productos.next_page_number }}{% if current_query %}&q={{ current_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}">Siguiente</a>
+  {% endif %}
+</div>

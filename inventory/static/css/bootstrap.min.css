@@ -72,12 +72,12 @@ body {
 
 
 .btn {
+    align-items: center;
   border-width: 2px; 
   border-radius: 10px; 
     text-decoration: none;
     font-size: 1rem; 
-    padding: 10px 30px; 
-    margin: 5px 5px;
+    padding: 10px 20px; 
     font-weight: bold; 
     background-color: #ffc107;
     color: white;
@@ -95,12 +95,6 @@ body {
 
 
 .btn-danger {
-    white-space: nowrap;
-     min-width: 80px;
-    font-size: 1rem; 
-    padding: 10px 30px; 
-    margin: 5px 5px;
-    font-weight: bold; 
     background-color: #dc3545;
     border-color: #dc3545;
     color: white;

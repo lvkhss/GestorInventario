@@ -121,8 +121,8 @@
 
 .add-product-btn-wrap {
   display: flex;
-  gap: 20px; /* space between buttons */
-  justify-content: flex-end; /* align to the right */
+  gap: 20px; 
+  justify-content: flex-end; 
   align-items: center;
   text-decoration: none;
 }
@@ -163,7 +163,7 @@
     min-width: 150px;
 }
 
-/* Opcional: ajustar input y select para que no sean muy grandes */
+
 .add_buttons select#filterType {    
     border-radius: 6px;
     border: 1px solid #ced4da;
@@ -187,6 +187,11 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
+.agregar-producto:hover {
+    transform: translateY(-2px);
+    background-color: rgb(220, 160, 45);
+}
+
 .agregar-excel {
     border-top-right-radius: 50px;
     border-bottom-right-radius: 50px;
@@ -199,6 +204,11 @@
     background-color: #354e66;
     color: white;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.agregar-excel:hover {
+    transform: translateY(-2px);
+    background-color: #2a3d52;
 }
 
 .add_buttons {
@@ -319,7 +329,7 @@ form + p {
   margin: 40px auto;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.7);
   padding: 32px 24px 24px 24px;
 }
 

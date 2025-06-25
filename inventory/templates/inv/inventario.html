@@ -1,6 +1,5 @@
 {% extends 'inv/base.html' %}
 
-
 {% block body %}
 <h2>Inventario</h2>
 <div class="container-set-inventory">
@@ -10,7 +9,8 @@
         <input type="text" id="searchInput" placeholder="Buscar por nombre..."
           class="form-control d-inline-block w-auto" />
       </div>
-      <div class="button-group"> <select id="filterType" class="form-select d-inline-block w-auto">
+      <div class="button-group"> 
+        <select id="filterType" class="form-select d-inline-block w-auto">
           <option value="">Todos</option>
           {% for product_type in product_types %}
           <option value="{{ product_type.name }}">{{ product_type.name }}</option>
@@ -27,10 +27,8 @@
       </div>
     </div>
   </div>
-
-
-
 </div>
+
 <div id="tablaProductos">
   {% include 'inv/tabla_productos.html' %}
 </div>
@@ -57,7 +55,4 @@
   document.getElementById("searchInput").addEventListener("input", updateTable);
   document.getElementById("filterType").addEventListener("change", updateTable);
 </script>
-{% endblock %}
-{% block extra_scripts %}
-
 {% endblock %}
