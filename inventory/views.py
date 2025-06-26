@@ -216,6 +216,13 @@ def historial(request):
     return render(request, 'inv/historial.html', context)
 
 @login_required
+def profile(request):
+    """Vista para mostrar el perfil del usuario"""
+    return render(request, 'inv/profile.html', {
+        'user': request.user
+    })
+
+@login_required
 def index(request):
     
     latest_items = Producto.objects.all().order_by('-date_added')[:10]

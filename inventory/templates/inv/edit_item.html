@@ -1,4 +1,5 @@
 {% extends 'inv/base.html' %}
+{% load static %}
 {% load number_filters %}
 {% block body %}
 
@@ -53,49 +54,8 @@
     </div>
   </form>
 </div>
-
+<script src="{% static 'js/main.js' %}"></script>
 {% if form.instance.pk %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const motivoSelect = document.getElementById('id_motivo');
-  const motivoExtra = document.getElementById('motivo_extra');
-  const motivoHidden = document.getElementById('motivo_hidden');
-  const form = document.querySelector('form');
 
-  motivoSelect.addEventListener('change', function() {
-    if (motivoSelect.value === "Otro") {
-      motivoExtra.style.display = 'block';
-      motivoExtra.disabled = false;
-      motivoExtra.required = true;
-      motivoExtra.focus();
-    } else {
-      motivoExtra.style.display = 'none';
-      motivoExtra.disabled = true;
-      motivoExtra.required = false;
-      motivoExtra.value = "";
-    }
-  });
-
-  form.addEventListener('submit', function(e) {
-    if (motivoSelect.value === "") {
-      e.preventDefault();
-      alert('Por favor seleccione un motivo para el cambio.');
-      return false;
-    }
-    
-    if (motivoSelect.value === "Otro") {
-      if (motivoExtra.value.trim() === "") {
-        e.preventDefault();
-        alert('Por favor especifique el motivo.');
-        motivoExtra.focus();
-        return false;
-      }
-      motivoHidden.value = motivoExtra.value.trim();
-    } else {
-      motivoHidden.value = motivoSelect.value;
-    }
-  });
-});
-</script>
 {% endif %}
 {% endblock %}

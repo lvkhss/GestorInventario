@@ -1,23 +1,43 @@
 {% extends 'inv/base.html' %}
-
+{% load static %}
 {% block body %}
-
-<div class="add_buttons">
-<h2>Lista de Proveedores</h2>
-    <div class="button-group">
-     <a href="{% url 'supplier_create' %}" class="btn btn-success btn-md btn-trim" role="button">Agregar Proveedor</a>
+<h2>Proveedores</h2>
+<div class="container-set-inventory">
+  <div class="add_buttons">
+    <div class="inventory-left">
+      <div class="button-group">
+        <input type="text" id="searchInput" placeholder="Buscar por empresa..."
+          class="form-control d-inline-block w-auto" />
+      </div>
+      <div class="button-group"> 
+        <select id="filterType" class="form-select d-inline-block w-auto">
+          <option value="">Todos</option>
+          {% for supplier in suppliers %}
+          <option value="{{ supplier.empresa }}">{{ supplier.empresa }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="inventory-right">
+      <div class="button-group">
+        <div class="button-group-fused">
+          <a href="{% url 'supplier_create' %}" class="agregar-producto">Agregar Proveedor</a>
+        </div>
+      </div>
     </div>
   </div>
+</div>
 
-<table class="table table-striped">
+<table class="table table-striped" id="suppliersTable">
   <thead>
     <tr>
       <th>RUT</th>
       <th>Empresa</th>
       <th>Encargado</th>
       <th>Email</th>
-      <th>Numero Encargado</th>
+      <th>Teléfono</th>
       <th>Dirección</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
@@ -29,12 +49,20 @@
         <td>{{ supplier.email }}</td>
         <td>{{ supplier.numero }}</td>
         <td>{{ supplier.direccion }}</td>
+        <td>
+          <div class="btn-group" role="group">
+            <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+            <a href="{% url 'supplier_delete' supplier.pk %}" class="btn btn-sm btn-danger" 
+               onclick="return confirm('¿Estás seguro de que quieres eliminar este proveedor?')">X</a>
+          </div>
+        </td>
       </tr>
     {% empty %}
       <tr>
-        <td colspan="6">No hay proveedores.</td>
+        <td colspan="7">No hay proveedores.</td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
+<script src="{% static 'js/main.js' %}"></script>
 {% endblock %}

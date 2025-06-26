@@ -250,4 +250,42 @@ body {
   transform: translateY(-20%);
 
 }
+ /* tablas staticas*/
+.table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+}
 
+.table th,
+.table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+    border: 1px solid #dee2e6;
+}
+
+
+/* Columnas alternadas - solo cuando tiene la clase 'striped-columns' */
+.table.striped-columns th:nth-child(odd),
+.table.striped-columns td:nth-child(odd) {
+    background-color: #f8f9fa; 
+}
+
+.table.striped-columns th:nth-child(even),
+.table.striped-columns td:nth-child(even) {
+    background-color: #e9ecef; 
+}
+
+/* Mantener el estilo normal del header */
+.table th {
+    background-color: #354e66 !important;
+    color: white;
+    position: relative;
+}
+
+/* Hover solo cuando está activado */
+.table.striped-columns tbody tr:hover td {
+    background-color: #a8ebff !important;
+}

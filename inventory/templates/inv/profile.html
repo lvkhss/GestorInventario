@@ -1,0 +1,55 @@
+{% extends 'inv/base.html' %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Perfil de Usuario</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <h6>Nombre de Usuario:</h6>
+                        </div>
+                        <div class="col-sm-9">
+                            <p>{{ user.username }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <h6>Email:</h6>
+                        </div>
+                        <div class="col-sm-9">
+                            <p>{{ user.email|default:"No especificado" }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <h6>Tipo de Usuario:</h6>
+                        </div>
+                        <div class="col-sm-9">
+                            <p>
+                                {% if user.is_staff %}
+                                    <span class="badge bg-primary">Administrador</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Usuario</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-3">
+                            <h6>Fecha de Registro:</h6>
+                        </div>
+                        <div class="col-sm-9">
+                            <p>{{ user.date_joined|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

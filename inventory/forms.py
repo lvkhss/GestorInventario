@@ -106,8 +106,8 @@ class SupplierForm(forms.ModelForm):
             encargado = encargado.strip()
             if len(encargado) < 2:
                 raise ValidationError('El nombre del encargado debe tener al menos 2 caracteres.')
-            if not re.match(r'^[a-zA-Z\s\-]+$', encargado):
-                raise ValidationError('El nombre del encargado solo puede contener letras, espacios y guiones.')
+            if not re.match(r'^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s\-]+$', encargado):
+                raise ValidationError('El nombre solo puede contener letras, espacios, guiones y acentos.')
         return encargado
 
     def clean_email(self):

@@ -36,7 +36,7 @@
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5" />
           </svg>
-          Home
+          Inicio
         </a>
         <a href="{% url 'inventario' %}">
           <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -57,72 +57,65 @@
 
           Historial
         </a>
-         <a href="{% url 'suppliers_list' %}">
+        <a href="{% url 'suppliers_list' %}">
           <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
             width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
             <path fill-rule="evenodd"
               d="M4 4a2 2 0 0 0-2 2v9a1 1 0 0 0 1 1h.535a3.5 3.5 0 1 0 6.93 0h3.07a3.5 3.5 0 1 0 6.93 0H21a1 1 0 0 0 1-1v-4a.999.999 0 0 0-.106-.447l-2-4A1 1 0 0 0 19 6h-5a2 2 0 0 0-2-2H4Zm14.192 11.59.016.02a1.5 1.5 0 1 1-.016-.021Zm-10 0 .016.02a1.5 1.5 0 1 1-.016-.021Zm5.806-5.572v-2.02h4.396l1 2.02h-5.396Z"
               clip-rule="evenodd" />
           </svg>
+
+
           Proveedores
         </a>
-         {% if user.is_staff %}
+        {% if user.is_staff %}
         <a href="{% url 'users' %}">
-          <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-            fill="none" viewBox="0 0 24 24">
+          <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+            viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-width="2"
               d="M7 17v1a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1a3 3 0 0 0-3-3h-4a3 3 0 0 0-3 3Zm8-9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
           </svg>
           Usuarios
         </a>
 
-        <a href="{% url 'settings_view' %}"> 
-          <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-            fill="none" viewBox="0 0 24 24">
+        <a href="{% url 'settings_view' %}">
+          <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+            viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
               d="M20 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6h-2m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4m16 6H10m0 0a2 2 0 1 0-4 0m4 0a2 2 0 1 1-4 0m0 0H4" />
           </svg>
           Administrador
         </a>
+
+
+
         {% endif %}
+        <div class="sidebar-logo" style="padding-bottom: 180%;">
+          <div style="border-top: 1px solid #e5e7eb; margin: 15px -20px; opacity: 0.6;"></div>
+        </div>
+        <a href="{% url 'profile' %}">
+          <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M14.7141 15h4.268c.4043 0 .732-.3838.732-.8571V3.85714c0-.47338-.3277-.85714-.732-.85714H6.71411c-.55228 0-1 .44772-1 1v4m10.99999 7v-3h3v3h-3Zm-3 6H6.71411c-.55228 0-1-.4477-1-1 0-1.6569 1.34315-3 3-3h2.99999c1.6569 0 3 1.3431 3 3 0 .5523-.4477 1-1 1Zm-1-9.5c0 1.3807-1.1193 2.5-2.5 2.5s-2.49999-1.1193-2.49999-2.5S8.8334 9 10.2141 9s2.5 1.1193 2.5 2.5Z" />
+          </svg>
+          <strong>{{ user.username }}</strong>
+        </a>
+
+        <a href="{% url 'logout_custom' %}">
+          <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m15 9-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+
+          <strong>Cerrar sesión</strong>
+        </a>
 
       </div>
 
     </div>
 
-    <!-- Footer Links -->
-    <style>
-      .sidebar-footer {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        padding: 15%;
-        color: aliceblue;
-      }
-    </style>
-
-
-    <div class="sidebar-footer">
-      {% if user.is_authenticated %}
-      <span class="user-info">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill"
-          viewBox="0 0 16 16">
-          <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
-        </svg>
-        User: <strong>{{ user.username }}</strong>
-      </span>
-      <br>
-      <a href="{% url 'logout_custom' %}" class="logout-link" style="text-decoration: none; color: white;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill"
-          viewBox="0 0 16 16">
-          <path
-            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293z" />
-        </svg>
-        Cerrar sesión
-      </a>
-
-      {% endif %}
-    </div>
   </div>
 
   <div class="container" style="margin-left: 260px;">

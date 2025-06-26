@@ -55,6 +55,9 @@ urlpatterns = [
     
     # Error pages
     path('403/', views.permission_denied_view, name='permission_denied'),
+    
+    # Perfil de usuario
+    path('profile/', views.profile, name='profile'),
 ]
 
 # Servir archivos estáticos en modo DEBUG=False para desarrollo

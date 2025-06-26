@@ -1,4 +1,5 @@
 {% extends 'inv/base.html' %}
+{% load static %}
 
 {% block body %}
 <h2>Inventario</h2>
@@ -15,7 +16,10 @@
           {% for product_type in product_types %}
           <option value="{{ product_type.name }}">{{ product_type.name }}</option>
           {% endfor %}
+         
+          <button id="toggleColumns" class="btn btn-outline-secondary btn-sm"></button>
         </select>
+         <button type="submit">Entrar</button>
       </div>
     </div>
     <div class="inventory-right">
@@ -33,48 +37,5 @@
   {% include 'inv/tabla_productos.html' %}
 </div>
 
-<script>
-  function updateTable() {
-    const query = document.getElementById("searchInput").value;
-    const type = document.getElementById("filterType").value;
-
-    let url = `{% url 'inventario' %}?`;
-    if (query) url += `q=${encodeURIComponent(query)}&`;
-    if (type) url += `type=${encodeURIComponent(type)}`;
-
-    fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        const parser = new DOMParser();
-        const htmlDoc = parser.parseFromString(data, "text/html");
-        const newContent = htmlDoc.querySelector("#tablaProductos").innerHTML;
-        document.getElementById("tablaProductos").innerHTML = newContent;
-      });
-  }
-
-  document.getElementById("searchInput").addEventListener("input", updateTable);
-  document.getElementById("filterType").addEventListener("change", updateTable);
-</script>
-
-<script>
-function confirmDelete(productId, productName) {
-    if (confirm(`¿Está seguro que desea eliminar el producto "${productName}"?\n\nEsta acción no se puede deshacer.`)) {
-        // Create a form and submit it
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/productos/${productId}/delete/`;
-        
-        // Add CSRF token
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = 'csrfmiddlewaretoken';
-        csrfInput.value = csrfToken;
-        form.appendChild(csrfInput);
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-</script>
+<script src="{% static 'js/main.js' %}"></script>
 {% endblock %}
