@@ -10,16 +10,17 @@
         <input type="text" id="searchInput" placeholder="Buscar por nombre..."
           class="form-control d-inline-block w-auto" />
       </div>
-      <div class="button-group"> 
+      <div class="button-group-2">
         <select id="filterType" class="form-select d-inline-block w-auto">
           <option value="">Todos</option>
           {% for product_type in product_types %}
           <option value="{{ product_type.name }}">{{ product_type.name }}</option>
           {% endfor %}
-         
+
           <button id="toggleColumns" class="btn btn-outline-secondary btn-sm"></button>
         </select>
-         <button type="submit">Entrar</button>
+        <button type="submit" class="dynamic-table-button">Entrar</button>
+
       </div>
     </div>
     <div class="inventory-right">
@@ -27,15 +28,15 @@
         <div class="button-group-fused">
           <a href="{% url 'producto_create' %}" class=" agregar-producto">Agregar producto</a>
           <a href="{% url 'upload_products_excel' %}" class=" agregar-excel">Subir Excel</a>
-        </dican ypiv>
+          </dican ypiv>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div id="tablaProductos">
-  {% include 'inv/tabla_productos.html' %}
-</div>
+  <div id="tablaProductos">
+    {% include 'inv/tabla_productos.html' %}
+  </div>
 
-<script src="{% static 'js/main.js' %}"></script>
-{% endblock %}
+  <script src="{% static 'js/main.js' %}"></script>
+  {% endblock %}

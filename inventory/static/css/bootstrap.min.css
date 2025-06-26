@@ -1,55 +1,56 @@
 body {
     font-family: 'Nunito', Arial, sans-serif;
-    background-color: #ffffff; 
+    background-color: #ffffff;
     color: #333;
     margin: 0;
     padding: 0;
 }
 
-    .sidebar {  
-      display: flex;
-      flex-direction: column;
-      background-color: #354e66; 
-      width: 200px;     
-        height: 100%;
-      position: fixed; 
-      box-shadow: 6px 4px 6px rgba(0, 0, 0, 0.2);
-    }
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    background-color: #354e66;
+    width: 200px;
+    height: 100%;
+    position: fixed;
+    box-shadow: 6px 4px 6px rgba(0, 0, 0, 0.2);
+}
 
-   
-    .sidebar-logo {
-      color: rgb(255, 255, 255);
-      text-align: center;
-      padding: 20px;
-      font-size: 20px;
-      font-weight: bold;
-      border-bottom: 1px solid #ffffff33; 
-      align-items: center;
-      display: flex;
-    }
-    .sidebar-nav {
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-      flex: 1;
-    }
 
-    .sidebar-nav a {
-      color: white;
-      text-decoration: none;
-      font-size: 16px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px; 
-      padding: 10px;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-    }
+.sidebar-logo {
+    color: rgb(255, 255, 255);
+    text-align: center;
+    padding: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    border-bottom: 1px solid #ffffff33;
+    align-items: center;
+    display: flex;
+}
 
-    .sidebar-nav a:hover {
-      background-color: #425d75; 
-    }
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    flex: 1;
+}
+
+.sidebar-nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-nav a:hover {
+    background-color: #425d75;
+}
 
 
 
@@ -57,27 +58,28 @@ body {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-left: 240px; 
+    margin-left: 240px;
     padding: 20px;
     border-radius: 8px;
-   
+
 }
+
 .container {
-    margin-left: 240px; 
+    margin-left: 240px;
     padding: 20px;
     border-radius: 8px;
-    
+
 }
 
 
 .btn {
     align-items: center;
-  border-width: 2px; 
-  border-radius: 10px; 
+    border-width: 2px;
+    border-radius: 10px;
     text-decoration: none;
-    font-size: 1rem; 
-    padding: 10px 20px; 
-    font-weight: bold; 
+    font-size: 1rem;
+    padding: 10px 20px;
+    font-weight: bold;
     background-color: #ffc107;
     color: white;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
@@ -103,18 +105,19 @@ body {
     background-color: #bd2130;
     border-color: #b21f2d;
 }
- .table-container {
-    
-    display: flex; 
-    gap: 20px; 
-    justify-content: center; 
-    
-  }
+
+.table-container {
+
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+
+}
 
 
 
 .fixed-table {
-    
+
     table-layout: fixed;
     width: 900px;
     min-width: 900px;
@@ -123,7 +126,7 @@ body {
 
 .fixed-table th,
 .fixed-table td {
-    
+
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -131,9 +134,9 @@ body {
 
 .table {
     border-left: 1px solid #dee2e6;
-    border-right:  1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
     border-collapse: collapse;
-    width: 100%; 
+    width: 100%;
     background-color: white;
     overflow: hidden;
     margin-top: 20px;
@@ -143,7 +146,7 @@ body {
 
 
 .table th {
-     border-collapse: collapse;
+    border-collapse: collapse;
     background-color: #354e66;
     color: white;
     text-align: center;
@@ -154,7 +157,7 @@ body {
 }
 
 .table td {
-    
+
     text-align: center;
     padding: 15px;
     vertical-align: middle;
@@ -163,33 +166,33 @@ body {
 }
 
 .table-hover tbody tr:hover {
-    
+
     transition: background-color 0.3s;
 }
 
 
 .add_buttons .btn {
-    font-size: 1.2rem; 
-    padding: 15px 30px; 
-     margin: 10px 15px; 
-    font-weight: bold; 
+    font-size: 1.2rem;
+    padding: 15px 30px;
+    margin: 10px 15px;
+    font-weight: bold;
     transition: transform 0.2s, background-color 0.3s;
 }
 
 
 .add_buttons .btn-warning {
-    background-color: #ffc107; 
+    background-color: #ffc107;
     border-color: #ffc107;
     color: white;
 }
 
 .add_buttons .btn-warning:hover {
-    background-color: #e0a800; 
+    background-color: #e0a800;
 }
 
 .button-group {
     display: flex;
-    gap: 0; 
+    gap: 0;
     margin-bottom: 20px;
 }
 
@@ -228,29 +231,34 @@ body {
 .price-cell {
     white-space: nowrap;
 }
+
 .input-group {
-  position: relative;
+    position: relative;
 }
 
 .input-group-text {
-  cursor: pointer; opacity: 0.5; 
-  position: absolute;
-  right: 1px;
-  top: 50%;
-  right: 5%;
-  transform: translateY(-20%);
+    cursor: pointer;
+    opacity: 0.5;
+    position: absolute;
+    right: 1px;
+    top: 50%;
+    right: 5%;
+    transform: translateY(-20%);
 
 }
+
 .input-group-text2 {
-  cursor: pointer; opacity: 0.5; 
-  position: absolute;
-  right: 1px;
-  top: 50%;
-  right: 15%;
-  transform: translateY(-20%);
+    cursor: pointer;
+    opacity: 0.5;
+    position: absolute;
+    right: 1px;
+    top: 50%;
+    right: 15%;
+    transform: translateY(-20%);
 
 }
- /* tablas staticas*/
+
+/* tablas staticas*/
 .table {
     table-layout: fixed;
     width: 100%;
@@ -270,22 +278,43 @@ body {
 /* Columnas alternadas - solo cuando tiene la clase 'striped-columns' */
 .table.striped-columns th:nth-child(odd),
 .table.striped-columns td:nth-child(odd) {
-    background-color: #f8f9fa; 
+    background-color: #f8f9fa;
 }
 
 .table.striped-columns th:nth-child(even),
 .table.striped-columns td:nth-child(even) {
-    background-color: #e9ecef; 
+    background-color: #e9ecef;
 }
 
-/* Mantener el estilo normal del header */
+
 .table th {
     background-color: #354e66 !important;
     color: white;
     position: relative;
 }
 
-/* Hover solo cuando está activado */
+
 .table.striped-columns tbody tr:hover td {
     background-color: #a8ebff !important;
 }
+
+
+
+.button-group-2 {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+
+button.dynamic-table-button {
+    background-color: white;
+border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-top: 10px;
+  transition: border-color 0.2s;
+  
+}
+
