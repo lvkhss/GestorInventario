@@ -141,6 +141,46 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ===================================
+// HISTORIAL - Event listeners
+// ===================================
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById("searchInput");
+    const filterType = document.getElementById("filterType");
+    const startDate = document.getElementById("startDate");
+    const endDate = document.getElementById("endDate");
+
+    // Solo agregar listeners si estamos en la página de historial
+    if (window.location.pathname.includes('/historial/')) {
+        if (searchInput) {
+            searchInput.addEventListener("input", updateHistorialTable);
+        }
+
+        if (filterType) {
+            filterType.addEventListener("change", updateHistorialTable);
+        }
+
+        if (startDate) {
+            startDate.addEventListener("change", updateHistorialTable);
+        }
+
+        if (endDate) {
+            endDate.addEventListener("change", updateHistorialTable);
+        }
+    }
+    
+    // Solo agregar listeners si estamos en la página de inventario
+    if (window.location.pathname.includes('/inventario/')) {
+        if (searchInput) {
+            searchInput.addEventListener("input", updateTable);
+        }
+
+        if (filterType) {
+            filterType.addEventListener("change", updateTable);
+        }
+    }
+});
+
+// ===================================
 // INVENTARIO - Confirmación de eliminación
 // ===================================
 function confirmDelete(productId, productName) {
