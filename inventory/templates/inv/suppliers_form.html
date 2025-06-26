@@ -9,12 +9,12 @@
     <h4>{{ title|default:"Agregar nuevo proveedor" }}</h4>
 
 
- <!-- Empresa rut -->
+    <!-- Empresa rut -->
     <div class="add-product-group">
-      <label for="rut_empresa" class="add-product-label">{{ form.rut.label }}</label>
+      <label for="id_rut" class="add-product-label">{{ form.rut.label }}</label>
       <div class="add-product-field">
         {{ form.rut }}
-        {% if form.empresa.errors %}
+        {% if form.rut.errors %}
           <div class="text-danger">
             {% for error in form.rut.errors %}
               <small>{{ error }}</small>
@@ -113,5 +113,26 @@
     </div>
   </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rutInput = document.getElementById('id_rut');
+    
+    rutInput.addEventListener('input', function() {
+        let value = this.value.replace(/[^0-9kK]/g, ''); // Solo números y K
+        
+        if (value.length > 1) {
+            // Separar cuerpo y dígito verificador
+            let cuerpo = value.slice(0, -1);
+            let dv = value.slice(-1).toUpperCase();
+            
+            // Formatear con guión
+            this.value = cuerpo + '-' + dv;
+        } else {
+            this.value = value;
+        }
+    });
+});
+</script>
 
 {% endblock %}

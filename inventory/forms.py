@@ -86,7 +86,7 @@ class SupplierForm(forms.ModelForm):
             }),
             'rut': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': '0987654321-1'  
+                'placeholder': '99999999-9'  
             }),
         }
 
@@ -94,10 +94,10 @@ class SupplierForm(forms.ModelForm):
         empresa = self.cleaned_data.get('empresa')
         if empresa:
             empresa = empresa.strip()
-            if len(empresa) < 2:
-                raise ValidationError('El nombre de la empresa debe tener al menos 2 caracteres.')
-            if not re.match(r'^[a-zA-Z0-9\s\.\-]+$', empresa):
-                raise ValidationError('El nombre de la empresa solo puede contener letras, números, espacios, puntos y guiones.')
+            if len(empresa) < 3:
+                raise ValidationError('El nombre de la empresa debe tener al menos 3 caracteres.')
+            if not re.match(r'^[a-zA-ZÀ-ÿ\s\.\-]+$', empresa):
+                raise ValidationError('El nombre de la empresa solo puede contener letras, espacios, puntos y guiones.')
         return empresa
 
     def clean_encargado(self):
@@ -106,8 +106,8 @@ class SupplierForm(forms.ModelForm):
             encargado = encargado.strip()
             if len(encargado) < 2:
                 raise ValidationError('El nombre del encargado debe tener al menos 2 caracteres.')
-            if not re.match(r'^[a-zA-Z\s\.\-]+$', encargado):
-                raise ValidationError('El nombre del encargado solo puede contener letras, espacios, puntos y guiones.')
+            if not re.match(r'^[a-zA-Z\s\-]+$', encargado):
+                raise ValidationError('El nombre del encargado solo puede contener letras, espacios y guiones.')
         return encargado
 
     def clean_email(self):
@@ -147,6 +147,72 @@ class SupplierForm(forms.ModelForm):
             if len(direccion) > 500:
                 raise ValidationError('La dirección no puede exceder 500 caracteres.')
         return direccion
+
+    def clean_rut(self):
+        rut = self.cleaned_data.get('rut')
+        if rut:
+            # Convert to string and clean
+            rut_original = str(rut).strip().upper()
+            
+            # Remove dots and hyphens for validation
+            rut_limpio = re.sub(r'[.\-]', '', rut_original)
+            
+            # Verificar longitud mínima
+            if len(rut_limpio) < 2:
+                raise ValidationError('El RUT debe tener al menos 2 caracteres.')
+            
+            # Separar cuerpo y dígito verificador
+            cuerpo = rut_limpio[:-1]
+            dv = rut_limpio[-1]
+            
+            # Validar que el cuerpo sean solo dígitos
+            if not re.match(r'^\d+$', cuerpo):
+                raise ValidationError('El cuerpo del RUT solo puede contener números.')
+            
+            # Validar longitud del cuerpo (7-8 dígitos)
+            if len(cuerpo) < 7 or len(cuerpo) > 8:
+                raise ValidationError('El RUT debe tener entre 7 y 8 dígitos.')
+            
+            # Validar que no empiece con 0
+            if cuerpo.startswith('0'):
+                raise ValidationError('El RUT no puede empezar con 0.')
+            
+            # Calcular dígito verificador esperado (Módulo 11)
+            reverso = cuerpo[::-1]  # Invertir string
+            multiplicador = 2
+            suma = 0
+            
+            for digito in reverso:
+                suma += int(digito) * multiplicador
+                multiplicador += 1
+                if multiplicador == 8:
+                    multiplicador = 2
+            
+            dv_calculado = 11 - (suma % 11)
+            
+            if dv_calculado == 11:
+                dv_esperado = '0'
+            elif dv_calculado == 10:
+                dv_esperado = 'K'
+            else:
+                dv_esperado = str(dv_calculado)
+            
+            # Comparar dígito verificador
+            if dv != dv_esperado:
+                raise ValidationError(f'Rut no válido.')
+            
+            # Formatear RUT con guión para guardar
+            rut_formateado = f"{cuerpo}-{dv}"
+            
+            # Validar unicidad
+            if self.instance.pk:
+                if Suppliers.objects.exclude(pk=self.instance.pk).filter(rut=rut_formateado).exists():
+                    raise ValidationError('Ya existe un proveedor con este RUT.')
+            else:
+                if Suppliers.objects.filter(rut=rut_formateado).exists():
+                    raise ValidationError('Ya existe un proveedor con este RUT.')
+        
+        return rut_formateado
 
 class ExcelUploadForm(forms.Form):
     file = forms.FileField(label="Archivo Excel")

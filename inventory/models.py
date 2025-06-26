@@ -4,15 +4,15 @@ from django.contrib.auth.models import User
 
 
 class Suppliers(models.Model):
+    rut = models.CharField(max_length=12, unique=True)  # Change from FloatField/DecimalField to CharField
     empresa = models.CharField(max_length=100)
     encargado = models.CharField(max_length=100)
-    email = models.EmailField()
-    numero = models.CharField(max_length=20)
-    direccion = models.CharField(max_length=200)
-    rut = models.CharField(max_length=12, unique=True, blank=True, null=True) 
-
+    email = models.EmailField(unique=True)
+    numero = models.CharField(max_length=15)
+    direccion = models.TextField()
+    
     def __str__(self):
-        return f"{self.empresa} - {self.encargado}"
+        return self.empresa
 
 
 class ProductType(models.Model):

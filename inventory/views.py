@@ -31,7 +31,7 @@ def delete_product_type(request, pk):
 @login_required
 def settings_view(request):
     if request.method == 'POST':
-        name_value = request.POST.get('type', '').strip()  # 'type' from the form, but maps to 'name' in the model
+        name_value = request.POST.get('type', '').strip() 
         description = request.POST.get('description', '').strip()
         if not name_value:
             messages.error(request, "El tipo es obligatorio.")
