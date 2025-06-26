@@ -1,4 +1,58 @@
 // ===================================
+// TABLAS - Toggle columnas alternadas (FUNCIÓN GLOBAL)
+// ===================================
+let toggleButton, table, stripedColumns;
+const inactiveSVG = `<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12.0001 20v-4M7.00012 4h9.99998M9.00012 5v5c0 .5523-.46939 1.0045-.94861 1.279-1.43433.8217-2.60135 3.245-2.25635 4.3653.07806.2535.35396.3557.61917.3557H17.5859c.2652 0 .5411-.1022.6192-.3557.3449-1.1204-.8221-3.5436-2.2564-4.3653-.4792-.2745-.9486-.7267-.9486-1.279V5c0-.55228-.4477-1-1-1h-4c-.55226 0-.99998.44772-.99998 1Z"/></svg>`;
+const activeSVG = `<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v4.997a.31.31 0 0 1-.068.113c-.08.098-.213.207-.378.301-.947.543-1.713 1.54-2.191 2.488A6.237 6.237 0 0 0 4.82 14.4c-.1.48-.138 1.031.018 1.539C5.12 16.846 6.02 17 6.414 17H11v3a1 1 0 1 0 2 0v-3h4.586c.395 0 1.295-.154 1.575-1.061.156-.508.118-1.059.017-1.539a6.241 6.241 0 0 0-.541-1.5c-.479-.95-1.244-1.946-2.191-2.489a1.393 1.393 0 0 1-.378-.301.309.309 0 0 1-.068-.113V5h1a1 1 0 1 0 0-2H7a1 1 0 1 0 0 2h1Z"/></svg>`;
+
+function initializeToggleButton() {
+    toggleButton = document.querySelector('.dynamic-table-button') || document.querySelector('#toggleColumns');
+    table = document.querySelector('.table');
+
+    if (toggleButton && table) {
+        // Recuperar estado desde localStorage
+        stripedColumns = localStorage.getItem('stripedColumns') === 'true';
+
+        // Aplicar estado inicial
+        updateToggleState();
+
+        // Remover listeners anteriores y agregar nuevo
+        toggleButton.replaceWith(toggleButton.cloneNode(true));
+        toggleButton = document.querySelector('.dynamic-table-button') || document.querySelector('#toggleColumns');
+        
+        toggleButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            stripedColumns = !stripedColumns;
+            updateToggleState();
+        });
+    }
+}
+
+function updateToggleState() {
+    if (stripedColumns) {
+        table.classList.add('striped-columns');
+        toggleButton.innerHTML = activeSVG;
+        toggleButton.classList.add('active');
+    } else {
+        table.classList.remove('striped-columns');
+        toggleButton.innerHTML = inactiveSVG;
+        toggleButton.classList.remove('active');
+    }
+    localStorage.setItem('stripedColumns', stripedColumns);
+}
+
+function reapplyToggleState() {
+    const savedState = localStorage.getItem('stripedColumns') === 'true';
+    const currentTable = document.querySelector('.table');
+    if (currentTable && savedState) {
+        currentTable.classList.add('striped-columns');
+    }
+}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', initializeToggleButton);
+
+// ===================================
 // INVENTARIO - Actualización de tabla
 // ===================================
 function updateTable() {
@@ -16,6 +70,57 @@ function updateTable() {
             const htmlDoc = parser.parseFromString(data, "text/html");
             const newContent = htmlDoc.querySelector("#tablaProductos").innerHTML;
             document.getElementById("tablaProductos").innerHTML = newContent;
+            
+            // RE-INICIALIZAR el botón toggle
+            initializeToggleButton();
+        });
+}
+
+// ===================================
+// HISTORIAL - Actualización de tabla
+// ===================================
+function updateHistorialTable() {
+    const query = document.getElementById("searchInput").value;
+    const type = document.getElementById("filterType").value;
+    const startDateInput = document.getElementById("startDate");
+    const endDateInput = document.getElementById("endDate");
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+        alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
+        endDateInput.value = "";
+
+        fetch('/historial/')
+            .then(response => response.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const htmlDoc = parser.parseFromString(data, "text/html");
+                const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
+                document.getElementById("tablaHistorial").innerHTML = newContent;
+                
+                // RE-INICIALIZAR el botón toggle
+                initializeToggleButton();
+            });
+        return;
+    }
+
+    let url = '/historial/?';
+    if (query) url += `q=${encodeURIComponent(query)}&`;
+    if (type) url += `type=${encodeURIComponent(type)}&`;
+    if (startDate) url += `start=${encodeURIComponent(startDate)}&`;
+    if (endDate) url += `end=${encodeURIComponent(endDate)}`;
+
+    fetch(url)
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(data, "text/html");
+            const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
+            document.getElementById("tablaHistorial").innerHTML = newContent;
+            
+            // RE-INICIALIZAR el botón toggle
+            initializeToggleButton();
         });
 }
 
@@ -55,74 +160,6 @@ function confirmDelete(productId, productName) {
         form.submit();
     }
 }
-
-// ===================================
-// TABLAS - Toggle columnas alternadas (con persistencia)
-// ===================================
-document.addEventListener('DOMContentLoaded', function () {
-    // Buscar el botón tanto con .dynamic-table-button como con #toggleColumns
-    const toggleButton = document.querySelector('.dynamic-table-button') || document.querySelector('#toggleColumns');
-    const table = document.querySelector('.table');
-
-    if (toggleButton && table) {
-        // SVG para estado inactivo (bombilla apagada)
-        const inactiveSVG = `<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24">
-  <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12.0001 20v-4M7.00012 4h9.99998M9.00012 5v5c0 .5523-.46939 1.0045-.94861 1.279-1.43433.8217-2.60135 3.245-2.25635 4.3653.07806.2535.35396.3557.61917.3557H17.5859c.2652 0 .5411-.1022.6192-.3557.3449-1.1204-.8221-3.5436-2.2564-4.3653-.4792-.2745-.9486-.7267-.9486-1.279V5c0-.55228-.4477-1-1-1h-4c-.55226 0-.99998.44772-.99998 1Z"/>
-</svg>
-`;
-
-        // SVG para estado activo (bombilla encendida)
-        const activeSVG = `<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
-  <path d="M8 5v4.997a.31.31 0 0 1-.068.113c-.08.098-.213.207-.378.301-.947.543-1.713 1.54-2.191 2.488A6.237 6.237 0 0 0 4.82 14.4c-.1.48-.138 1.031.018 1.539C5.12 16.846 6.02 17 6.414 17H11v3a1 1 0 1 0 2 0v-3h4.586c.395 0 1.295-.154 1.575-1.061.156-.508.118-1.059.017-1.539a6.241 6.241 0 0 0-.541-1.5c-.479-.95-1.244-1.946-2.191-2.489a1.393 1.393 0 0 1-.378-.301.309.309 0 0 1-.068-.113V5h1a1 1 0 1 0 0-2H7a1 1 0 1 0 0 2h1Z"/>
-</svg>
-`;
-
-        // Recuperar estado desde localStorage
-        let stripedColumns = localStorage.getItem('stripedColumns') === 'true';
-
-        // Aplicar estado inicial
-        updateToggleState();
-
-        function updateToggleState() {
-            if (stripedColumns) {
-                table.classList.add('striped-columns');
-                toggleButton.innerHTML = activeSVG;
-                toggleButton.classList.add('active');
-            } else {
-                table.classList.remove('striped-columns');
-                toggleButton.innerHTML = inactiveSVG;
-                toggleButton.classList.remove('active');
-            }
-
-            // Guardar estado en localStorage
-            localStorage.setItem('stripedColumns', stripedColumns);
-        }
-
-        toggleButton.addEventListener('click', function (e) {
-            e.preventDefault();
-            stripedColumns = !stripedColumns;
-            updateToggleState();
-        });
-    }
-});
-
-// ===================================
-// TABLAS - Aplicar estado persistente a todas las tablas
-// ===================================
-document.addEventListener('DOMContentLoaded', function () {
-    // Aplicar el estado guardado a cualquier tabla en cualquier página
-    const allTables = document.querySelectorAll('.table');
-    const savedState = localStorage.getItem('stripedColumns') === 'true';
-
-    allTables.forEach(table => {
-        if (savedState) {
-            table.classList.add('striped-columns');
-        } else {
-            table.classList.remove('striped-columns');
-        }
-    });
-});
-
 
 // ===================================
 // EDIT_ITEM - Manejo de motivos
@@ -168,79 +205,88 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-
 // ===================================
-// HISTORIAL - Actualización de tabla
-// ===================================
-function updateHistorialTable() {
-    const query = document.getElementById("searchInput").value;
-    const type = document.getElementById("filterType").value;
-    const startDateInput = document.getElementById("startDate");
-    const endDateInput = document.getElementById("endDate");
-    const startDate = startDateInput.value;
-    const endDate = endDateInput.value;
-
-    // Validar si las fechas están bien puestas
-    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-        alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
-        endDateInput.value = "";
-
-        fetch('/historial/')
-            .then(response => response.text())
-            .then(data => {
-                const parser = new DOMParser();
-                const htmlDoc = parser.parseFromString(data, "text/html");
-                const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
-                document.getElementById("tablaHistorial").innerHTML = newContent;
-            });
-
-        return;
-    }
-
-    let url = '/historial/?';
-
-    if (query) url += `q=${encodeURIComponent(query)}&`;
-    if (type) url += `type=${encodeURIComponent(type)}&`;
-    if (startDate) url += `start=${encodeURIComponent(startDate)}&`;
-    if (endDate) url += `end=${encodeURIComponent(endDate)}`;
-
-    fetch(url)
-        .then(response => response.text())
-        .then(data => {
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(data, "text/html");
-            const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
-            document.getElementById("tablaHistorial").innerHTML = newContent;
-        });
-}
-
-// ===================================
-// HISTORIAL - Event listeners
+// SUPPLIERS_FORM - Formateo de RUT
 // ===================================
 document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById("searchInput");
-    const filterType = document.getElementById("filterType");
-    const startDate = document.getElementById("startDate");
-    const endDate = document.getElementById("endDate");
+    const rutInput = document.getElementById('id_rut');
 
-    if (searchInput && document.getElementById("tablaHistorial")) {
-        searchInput.addEventListener("input", updateHistorialTable);
-    }
+    if (rutInput) {
+        rutInput.addEventListener('input', function () {
+            let value = this.value.replace(/[^0-9kK]/g, ''); // Solo números y K
 
-    if (filterType && document.getElementById("tablaHistorial")) {
-        filterType.addEventListener("change", updateHistorialTable);
-    }
+            if (value.length > 1) {
+                // Separar cuerpo y dígito verificador
+                let cuerpo = value.slice(0, -1);
+                let dv = value.slice(-1).toUpperCase();
 
-    if (startDate && document.getElementById("tablaHistorial")) {
-        startDate.addEventListener("change", updateHistorialTable);
-    }
+                // Formatear con guión
+                this.value = cuerpo + '-' + dv;
+            } else {
+                this.value = value;
+            }
+        });
 
-    if (endDate && document.getElementById("tablaHistorial")) {
-        endDate.addEventListener("change", updateHistorialTable);
+        // Validación adicional para RUT chileno
+        rutInput.addEventListener('blur', function () {
+            const rutValue = this.value;
+            if (rutValue && !validateRUT(rutValue)) {
+                this.style.borderColor = '#dc3545';
+                // Mostrar mensaje de error si no existe
+                let errorMsg = this.parentNode.querySelector('.rut-error');
+                if (!errorMsg) {
+                    errorMsg = document.createElement('small');
+                    errorMsg.className = 'text-danger rut-error';
+                    errorMsg.textContent = 'RUT inválido';
+                    this.parentNode.appendChild(errorMsg);
+                }
+            } else {
+                this.style.borderColor = '';
+                // Remover mensaje de error si existe
+                const errorMsg = this.parentNode.querySelector('.rut-error');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+            }
+        });
     }
 });
 
+// ===================================
+// SUPPLIERS_FORM - Validación de RUT
+// ===================================
+function validateRUT(rut) {
+    // Eliminar puntos y guión
+    const cleanRUT = rut.replace(/[.-]/g, '');
 
+    // Verificar formato básico (mínimo 8 caracteres, máximo 9)
+    if (cleanRUT.length < 8 || cleanRUT.length > 9) {
+        return false;
+    }
+
+    // Separar cuerpo y dígito verificador
+    const cuerpo = cleanRUT.slice(0, -1);
+    const dv = cleanRUT.slice(-1).toLowerCase();
+
+    // Verificar que el cuerpo sean solo números
+    if (!/^\d+$/.test(cuerpo)) {
+        return false;
+    }
+
+    // Calcular dígito verificador
+    let suma = 0;
+    let multiplicador = 2;
+
+    for (let i = cuerpo.length - 1; i >= 0; i--) {
+        suma += parseInt(cuerpo[i]) * multiplicador;
+        multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+    }
+
+    const resto = suma % 11;
+    const dvCalculado = resto === 0 ? '0' : resto === 1 ? 'k' : (11 - resto).toString();
+
+    return dv === dvCalculado;
+}
 
 // ===================================
 // REGISTER - Generar contraseña
@@ -335,90 +381,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-
-
-// ===================================
-// SUPPLIERS_FORM - Formateo de RUT
-// ===================================
-document.addEventListener('DOMContentLoaded', function () {
-    const rutInput = document.getElementById('id_rut');
-
-    if (rutInput) {
-        rutInput.addEventListener('input', function () {
-            let value = this.value.replace(/[^0-9kK]/g, ''); // Solo números y K
-
-            if (value.length > 1) {
-                // Separar cuerpo y dígito verificador
-                let cuerpo = value.slice(0, -1);
-                let dv = value.slice(-1).toUpperCase();
-
-                // Formatear con guión
-                this.value = cuerpo + '-' + dv;
-            } else {
-                this.value = value;
-            }
-        });
-
-        // Validación adicional para RUT chileno
-        rutInput.addEventListener('blur', function () {
-            const rutValue = this.value;
-            if (rutValue && !validateRUT(rutValue)) {
-                this.style.borderColor = '#dc3545';
-                // Mostrar mensaje de error si no existe
-                let errorMsg = this.parentNode.querySelector('.rut-error');
-                if (!errorMsg) {
-                    errorMsg = document.createElement('small');
-                    errorMsg.className = 'text-danger rut-error';
-                    errorMsg.textContent = 'RUT inválido';
-                    this.parentNode.appendChild(errorMsg);
-                }
-            } else {
-                this.style.borderColor = '';
-                // Remover mensaje de error si existe
-                const errorMsg = this.parentNode.querySelector('.rut-error');
-                if (errorMsg) {
-                    errorMsg.remove();
-                }
-            }
-        });
-    }
-});
-
-// ===================================
-// SUPPLIERS_FORM - Validación de RUT
-// ===================================
-function validateRUT(rut) {
-    // Eliminar puntos y guión
-    const cleanRUT = rut.replace(/[.-]/g, '');
-
-    // Verificar formato básico (mínimo 8 caracteres, máximo 9)
-    if (cleanRUT.length < 8 || cleanRUT.length > 9) {
-        return false;
-    }
-
-    // Separar cuerpo y dígito verificador
-    const cuerpo = cleanRUT.slice(0, -1);
-    const dv = cleanRUT.slice(-1).toLowerCase();
-
-    // Verificar que el cuerpo sean solo números
-    if (!/^\d+$/.test(cuerpo)) {
-        return false;
-    }
-
-    // Calcular dígito verificador
-    let suma = 0;
-    let multiplicador = 2;
-
-    for (let i = cuerpo.length - 1; i >= 0; i--) {
-        suma += parseInt(cuerpo[i]) * multiplicador;
-        multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
-    }
-
-    const resto = suma % 11;
-    const dvCalculado = resto === 0 ? '0' : resto === 1 ? 'k' : (11 - resto).toString();
-
-    return dv === dvCalculado;
-}
 
 // ===================================
 // SUPPLIERS_LIST - Filtrado de tabla
