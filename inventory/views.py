@@ -15,6 +15,7 @@ from django.contrib.auth import logout
 from django.core.validators import RegexValidator, EmailValidator
 from django.core.exceptions import ValidationError
 from django.contrib import messages
+from .decorators import staff_required
 
 MODEL_MAP = {
     'producto': Producto,  
@@ -22,13 +23,13 @@ MODEL_MAP = {
 
 from django.contrib import messages
 from .models import ProductType
-@login_required
+@staff_required
 def delete_product_type(request, pk):
     ProductType.objects.filter(pk=pk).delete()
     messages.success(request, "Tipo de producto eliminado.")
     return redirect('settings_view')
 
-@login_required
+@staff_required
 def settings_view(request):
     if request.method == 'POST':
         name_value = request.POST.get('type', '').strip() 
@@ -104,29 +105,45 @@ def supplier_delete(request, pk):
         return redirect('suppliers_list')
     return render(request, 'inv/supplier_confirm_delete.html', {'supplier': supplier})
 
-@login_required
+@staff_required
 def users_view(request):
     users = User.objects.all()
     return render(request, 'inv/users.html', {'users': users})
 
+@staff_required
 def register_view(request):
     error = None
+    success_message = None
     if request.method == 'POST':
+        print(f"POST data received: {request.POST}")
         username = request.POST.get('username')
         email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
+        
+        print(f"Username: {username}, Email: {email}")
+        print(f"Password1: {'presente' if password1 else 'ausente'}")
+        print(f"Password2: {'presente' if password2 else 'ausente'}")
+        
         if password1 != password2:
             error = "Las contraseñas no coinciden."
+            print("ERROR: Las contraseñas no coinciden")
         elif User.objects.filter(username=username).exists():
             error = "El usuario ya existe."
+            print(f"ERROR: Usuario {username} ya existe")
         elif User.objects.filter(email=email).exists():
             error = "El email ya está registrado."
+            print(f"ERROR: Email {email} ya está registrado")
         else:
-            user = User.objects.create_user(username=username, password=password1, email=email)
-            login(request, user)
-            return redirect('index')
-    return render(request, 'inv/register.html', {'error': error})
+            try:
+                print("Intentando crear usuario...")
+                user = User.objects.create_user(username=username, password=password1, email=email)
+                print(f"Usuario creado exitosamente: {username}")
+                success_message = f"Usuario '{username}' creado exitosamente"
+            except Exception as e:
+                print(f"Error creando usuario: {e}")
+                error = f"Error al crear usuario: {e}"
+    return render(request, 'inv/register.html', {'error': error, 'success_message': success_message})
 
 def login_view(request):
     error = None
@@ -533,3 +550,6 @@ def producto_delete(request, pk):
     )
     producto.delete()
     return redirect('inventario')
+
+def permission_denied_view(request, exception=None):
+    return render(request, 'inv/403.html', status=403)
