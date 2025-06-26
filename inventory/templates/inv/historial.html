@@ -3,12 +3,11 @@
 
 {% block body %}
 <h2>Historial de movimientos</h2>
-
 <div class="container-set-inventory">
   <div class="add_buttons">
     <div class="inventory-left">
       <div class="button-group">
-        <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="form-control" />
+        <input type="text" id="searchInput" placeholder="Buscar..." class="form-control" />
       </div>
 
       <div class="button-group">
@@ -18,9 +17,10 @@
           <option value="{{ product_type }}">{{ product_type }}</option>
           {% endfor %}
         </select>
+<button type="submit" class="dynamic-table-button">Entrar</button>
       </div>
     </div>
-    <div class="button-group">
+    <div class="button-group-2">
       <label for="startDate">Desde:</label>
       <input type="date" id="startDate" class="form-control">
       <label for="endDate">Hasta:</label>

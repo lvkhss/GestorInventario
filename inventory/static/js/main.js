@@ -22,14 +22,14 @@ function updateTable() {
 // ===================================
 // INVENTARIO - Event listeners
 // ===================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById("searchInput");
     const filterType = document.getElementById("filterType");
-    
+
     if (searchInput) {
         searchInput.addEventListener("input", updateTable);
     }
-    
+
     if (filterType) {
         filterType.addEventListener("change", updateTable);
     }
@@ -43,48 +43,47 @@ function confirmDelete(productId, productName) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/productos/${productId}/delete/`;
-        
+
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         const csrfInput = document.createElement('input');
         csrfInput.type = 'hidden';
         csrfInput.name = 'csrfmiddlewaretoken';
         csrfInput.value = csrfToken;
         form.appendChild(csrfInput);
-        
+
         document.body.appendChild(form);
         form.submit();
     }
 }
 
 // ===================================
-// TABLAS - Toggle columnas alternadas
+// TABLAS - Toggle columnas alternadas (con persistencia)
 // ===================================
-document.addEventListener('DOMContentLoaded', function() {
-    const toggleButton = document.querySelector('.dynamic-table-button');
+document.addEventListener('DOMContentLoaded', function () {
+    // Buscar el botón tanto con .dynamic-table-button como con #toggleColumns
+    const toggleButton = document.querySelector('.dynamic-table-button') || document.querySelector('#toggleColumns');
     const table = document.querySelector('.table');
-    
+
     if (toggleButton && table) {
-        let stripedColumns = false;
-        
         // SVG para estado inactivo (bombilla apagada)
         const inactiveSVG = `<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24">
-  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4.988 19.012 5.41-5.41m2.366-6.424 4.058 4.058-2.03 5.41L5.3 20 4 18.701l3.355-9.494 5.41-2.029Zm4.626 4.625L12.197 6.61 14.807 4 20 9.194l-2.61 2.61Z"/>
+  <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12.0001 20v-4M7.00012 4h9.99998M9.00012 5v5c0 .5523-.46939 1.0045-.94861 1.279-1.43433.8217-2.60135 3.245-2.25635 4.3653.07806.2535.35396.3557.61917.3557H17.5859c.2652 0 .5411-.1022.6192-.3557.3449-1.1204-.8221-3.5436-2.2564-4.3653-.4792-.2745-.9486-.7267-.9486-1.279V5c0-.55228-.4477-1-1-1h-4c-.55226 0-.99998.44772-.99998 1Z"/>
 </svg>
 `;
-        
+
         // SVG para estado activo (bombilla encendida)
         const activeSVG = `<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
-  <path fill-rule="evenodd" d="M15.514 3.293a1 1 0 0 0-1.415 0L12.151 5.24a.93.93 0 0 1 .056.052l6.5 6.5a.97.97 0 0 1 .052.056L20.707 9.9a1 1 0 0 0 0-1.415l-5.193-5.193ZM7.004 8.27l3.892-1.46 6.293 6.293-1.46 3.893a1 1 0 0 1-.603.591l-9.494 3.355a1 1 0 0 1-.98-.18l6.452-6.453a1 1 0 0 0-1.414-1.414l-6.453 6.452a1 1 0 0 1-.18-.98l3.355-9.494a1 1 0 0 1 .591-.603Z" clip-rule="evenodd"/>
+  <path d="M8 5v4.997a.31.31 0 0 1-.068.113c-.08.098-.213.207-.378.301-.947.543-1.713 1.54-2.191 2.488A6.237 6.237 0 0 0 4.82 14.4c-.1.48-.138 1.031.018 1.539C5.12 16.846 6.02 17 6.414 17H11v3a1 1 0 1 0 2 0v-3h4.586c.395 0 1.295-.154 1.575-1.061.156-.508.118-1.059.017-1.539a6.241 6.241 0 0 0-.541-1.5c-.479-.95-1.244-1.946-2.191-2.489a1.393 1.393 0 0 1-.378-.301.309.309 0 0 1-.068-.113V5h1a1 1 0 1 0 0-2H7a1 1 0 1 0 0 2h1Z"/>
 </svg>
 `;
-        
-        // Estado inicial
-        toggleButton.innerHTML = inactiveSVG;
-        
-        toggleButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            stripedColumns = !stripedColumns;
-            
+
+        // Recuperar estado desde localStorage
+        let stripedColumns = localStorage.getItem('stripedColumns') === 'true';
+
+        // Aplicar estado inicial
+        updateToggleState();
+
+        function updateToggleState() {
             if (stripedColumns) {
                 table.classList.add('striped-columns');
                 toggleButton.innerHTML = activeSVG;
@@ -94,53 +93,79 @@ document.addEventListener('DOMContentLoaded', function() {
                 toggleButton.innerHTML = inactiveSVG;
                 toggleButton.classList.remove('active');
             }
+
+            // Guardar estado en localStorage
+            localStorage.setItem('stripedColumns', stripedColumns);
+        }
+
+        toggleButton.addEventListener('click', function (e) {
+            e.preventDefault();
+            stripedColumns = !stripedColumns;
+            updateToggleState();
         });
     }
+});
+
+// ===================================
+// TABLAS - Aplicar estado persistente a todas las tablas
+// ===================================
+document.addEventListener('DOMContentLoaded', function () {
+    // Aplicar el estado guardado a cualquier tabla en cualquier página
+    const allTables = document.querySelectorAll('.table');
+    const savedState = localStorage.getItem('stripedColumns') === 'true';
+
+    allTables.forEach(table => {
+        if (savedState) {
+            table.classList.add('striped-columns');
+        } else {
+            table.classList.remove('striped-columns');
+        }
+    });
 });
 
 
 // ===================================
 // EDIT_ITEM - Manejo de motivos
 // ===================================
-document.addEventListener('DOMContentLoaded', function() {
-  const motivoSelect = document.getElementById('id_motivo');
-  const motivoExtra = document.getElementById('motivo_extra');
-  const motivoHidden = document.getElementById('motivo_hidden');
-  const form = document.querySelector('form');
+document.addEventListener('DOMContentLoaded', function () {
+    const motivoSelect = document.getElementById('id_motivo');
+    const motivoExtra = document.getElementById('motivo_extra');
+    const motivoHidden = document.getElementById('motivo_hidden');
+    const form = document.querySelector('form');
 
-  motivoSelect.addEventListener('change', function() {
-    if (motivoSelect.value === "Otro") {
-      motivoExtra.style.display = 'block';
-      motivoExtra.disabled = false;
-      motivoExtra.required = true;
-      motivoExtra.focus();
-    } else {
-      motivoExtra.style.display = 'none';
-      motivoExtra.disabled = true;
-      motivoExtra.required = false;
-      motivoExtra.value = "";
-    }
-  });
+    motivoSelect.addEventListener('change', function () {
+        if (motivoSelect.value === "Otro") {
+            motivoExtra.style.display = 'block';
+            motivoExtra.disabled = false;
+            motivoExtra.required = true;
+            motivoExtra.focus();
+        } else {
+            motivoExtra.style.display = 'none';
+            motivoExtra.disabled = true;
+            motivoExtra.required = false;
+            motivoExtra.value = "";
+        }
+    });
 
-  form.addEventListener('submit', function(e) {
-    if (motivoSelect.value === "") {
-      e.preventDefault();
-      alert('Por favor seleccione un motivo para el cambio.');
-      return false;
-    }
-    
-    if (motivoSelect.value === "Otro") {
-      if (motivoExtra.value.trim() === "") {
-        e.preventDefault();
-        alert('Por favor especifique el motivo.');
-        motivoExtra.focus();
-        return false;
-      }
-      motivoHidden.value = motivoExtra.value.trim();
-    } else {
-      motivoHidden.value = motivoSelect.value;
-    }
-  });
+    form.addEventListener('submit', function (e) {
+        if (motivoSelect.value === "") {
+            e.preventDefault();
+            alert('Por favor seleccione un motivo para el cambio.');
+            return false;
+        }
+
+        if (motivoSelect.value === "Otro") {
+            if (motivoExtra.value.trim() === "") {
+                e.preventDefault();
+                alert('Por favor especifique el motivo.');
+                motivoExtra.focus();
+                return false;
+            }
+            motivoHidden.value = motivoExtra.value.trim();
+        } else {
+            motivoHidden.value = motivoSelect.value;
+        }
+    });
 });
 
 
@@ -169,7 +194,7 @@ function updateHistorialTable() {
                 document.getElementById("tablaHistorial").innerHTML = newContent;
             });
 
-        return; 
+        return;
     }
 
     let url = '/historial/?';
@@ -192,24 +217,24 @@ function updateHistorialTable() {
 // ===================================
 // HISTORIAL - Event listeners
 // ===================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById("searchInput");
     const filterType = document.getElementById("filterType");
     const startDate = document.getElementById("startDate");
     const endDate = document.getElementById("endDate");
-    
+
     if (searchInput && document.getElementById("tablaHistorial")) {
         searchInput.addEventListener("input", updateHistorialTable);
     }
-    
+
     if (filterType && document.getElementById("tablaHistorial")) {
         filterType.addEventListener("change", updateHistorialTable);
     }
-    
+
     if (startDate && document.getElementById("tablaHistorial")) {
         startDate.addEventListener("change", updateHistorialTable);
     }
-    
+
     if (endDate && document.getElementById("tablaHistorial")) {
         endDate.addEventListener("change", updateHistorialTable);
     }
@@ -284,23 +309,23 @@ function togglePasswordVisibility() {
 // ===================================
 // REGISTER - Validación de formulario
 // ===================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const registerForm = document.querySelector('form[method="POST"]');
-    
+
     if (registerForm && document.getElementById('id_username')) {
-        registerForm.addEventListener('submit', function(e) {
+        registerForm.addEventListener('submit', function (e) {
             const username = document.getElementById('id_username').value;
             const email = document.getElementById('id_email').value;
             const password1 = document.getElementById('id_password1').value;
             const password2 = document.getElementById('id_password2').value;
-            
+
             // Verificar que todos los campos estén llenos
             if (!username || !email || !password1 || !password2) {
                 e.preventDefault();
                 alert('Por favor complete todos los campos');
                 return false;
             }
-            
+
             // Verificar que las contraseñas coincidan
             if (password1 !== password2) {
                 e.preventDefault();
@@ -315,18 +340,18 @@ document.addEventListener('DOMContentLoaded', function() {
 // ===================================
 // SUPPLIERS_FORM - Formateo de RUT
 // ===================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const rutInput = document.getElementById('id_rut');
-    
+
     if (rutInput) {
-        rutInput.addEventListener('input', function() {
+        rutInput.addEventListener('input', function () {
             let value = this.value.replace(/[^0-9kK]/g, ''); // Solo números y K
-            
+
             if (value.length > 1) {
                 // Separar cuerpo y dígito verificador
                 let cuerpo = value.slice(0, -1);
                 let dv = value.slice(-1).toUpperCase();
-                
+
                 // Formatear con guión
                 this.value = cuerpo + '-' + dv;
             } else {
@@ -335,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Validación adicional para RUT chileno
-        rutInput.addEventListener('blur', function() {
+        rutInput.addEventListener('blur', function () {
             const rutValue = this.value;
             if (rutValue && !validateRUT(rutValue)) {
                 this.style.borderColor = '#dc3545';
@@ -365,44 +390,44 @@ document.addEventListener('DOMContentLoaded', function() {
 function validateRUT(rut) {
     // Eliminar puntos y guión
     const cleanRUT = rut.replace(/[.-]/g, '');
-    
+
     // Verificar formato básico (mínimo 8 caracteres, máximo 9)
     if (cleanRUT.length < 8 || cleanRUT.length > 9) {
         return false;
     }
-    
+
     // Separar cuerpo y dígito verificador
     const cuerpo = cleanRUT.slice(0, -1);
     const dv = cleanRUT.slice(-1).toLowerCase();
-    
+
     // Verificar que el cuerpo sean solo números
     if (!/^\d+$/.test(cuerpo)) {
         return false;
     }
-    
+
     // Calcular dígito verificador
     let suma = 0;
     let multiplicador = 2;
-    
+
     for (let i = cuerpo.length - 1; i >= 0; i--) {
         suma += parseInt(cuerpo[i]) * multiplicador;
         multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
     }
-    
+
     const resto = suma % 11;
     const dvCalculado = resto === 0 ? '0' : resto === 1 ? 'k' : (11 - resto).toString();
-    
+
     return dv === dvCalculado;
 }
 
 // ===================================
 // SUPPLIERS_LIST - Filtrado de tabla
 // ===================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchInput');
     const filterType = document.getElementById('filterType');
     const table = document.getElementById('suppliersTable');
-    
+
     if (searchInput && filterType && table) {
         const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
@@ -418,13 +443,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     const empresa = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
                     const encargado = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
                     const email = row.cells[3] ? row.cells[3].textContent.toLowerCase() : '';
-                    
-                    const matchesSearch = rut.includes(searchTerm) || 
-                                        empresa.includes(searchTerm) || 
-                                        encargado.includes(searchTerm) || 
-                                        email.includes(searchTerm);
+
+                    const matchesSearch = rut.includes(searchTerm) ||
+                        empresa.includes(searchTerm) ||
+                        encargado.includes(searchTerm) ||
+                        email.includes(searchTerm);
                     const matchesFilter = filterValue === '' || empresa === filterValue;
-                    
+
                     if (matchesSearch && matchesFilter) {
                         row.style.display = '';
                     } else {

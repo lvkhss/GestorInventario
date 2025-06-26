@@ -1,8 +1,26 @@
 .button-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.button-group-2 {
     display: inline-block;
     margin-right: 10px;
     vertical-align: middle;
 }
+
+
+button.dynamic-table-button {
+    background-color: white;
+border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-top: 10px;
+  transition: border-color 0.2s;
+  
+}
+
 
 .form-select {
     padding: 6px 12px;
@@ -426,3 +444,4 @@ margin-top: 20px;
     background-color: #bd2130;
     border-color: #b21f2d;
 }
+
