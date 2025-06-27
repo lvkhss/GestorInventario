@@ -30,6 +30,7 @@
           <th>Usuario</th>
           <th>Email</th>
           <th>Fecha de Registro</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -47,17 +48,95 @@
           <td>{{ user.username }}</td>
           <td>{{ user.email }}</td>
           <td>{{ user.date_joined|date:"Y-m-d H:i:s" }}</td>
-
+          <td>
+            <a href="{% url 'user_edit' user.pk %}" class="btn btn-sm btn-warning">Editar</a>
+            <a href="{% url 'user_delete' user.pk %}" class="btn btn-sm btn-danger"
+               onclick="return confirm('¿Está seguro que desea eliminar este usuario?')">X</a>
+          </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="4" class="text-center">No hay usuarios registrados.</td>
+          <td colspan="5" class="text-center">No hay usuarios registrados.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-
+ <script src="{% static 'js/main.js' %}"></script>
+ 
+ <script>
+ // Script específico para búsqueda de usuarios
+ document.addEventListener('DOMContentLoaded', function() {
+     console.log('Script de usuarios cargado');
+     
+     const searchInput = document.getElementById('searchInput');
+     const table = document.getElementById('usersTable');
+     
+     console.log('SearchInput:', searchInput);
+     console.log('Table:', table);
+     
+     if (searchInput && table) {
+         const tbody = table.querySelector('tbody');
+         console.log('Tbody:', tbody);
+         
+         searchInput.addEventListener('input', function() {
+             const searchTerm = this.value.toLowerCase().trim();
+             console.log('Buscando:', searchTerm);
+             
+             const rows = tbody.querySelectorAll('tr');
+             let visibleCount = 0;
+             
+             rows.forEach((row, index) => {
+                 // Skip the "No hay usuarios" row
+                 if (row.cells.length <= 1 || row.classList.contains('no-results-row')) {
+                     return;
+                 }
+                 
+                 // Get text content from cells
+                 const userTypeBadge = row.cells[0].querySelector('span.badge');
+                 const userType = userTypeBadge ? userTypeBadge.textContent.toLowerCase().trim() : '';
+                 const username = row.cells[1] ? row.cells[1].textContent.toLowerCase().trim() : '';
+                 const email = row.cells[2] ? row.cells[2].textContent.toLowerCase().trim() : '';
+                 
+                 console.log(`Fila ${index}: tipo="${userType}", usuario="${username}", email="${email}"`);
+                 
+                 // Check if search term matches
+                 const matches = searchTerm === '' || 
+                               userType.includes(searchTerm) || 
+                               username.includes(searchTerm) || 
+                               email.includes(searchTerm);
+                 
+                 if (matches) {
+                     row.style.display = '';
+                     visibleCount++;
+                 } else {
+                     row.style.display = 'none';
+                 }
+             });
+             
+             // Handle no results message
+             let noResultsRow = tbody.querySelector('.no-results-row');
+             
+             if (visibleCount === 0 && searchTerm !== '') {
+                 if (!noResultsRow) {
+                     noResultsRow = document.createElement('tr');
+                     noResultsRow.className = 'no-results-row';
+                     noResultsRow.innerHTML = '<td colspan="5" class="text-center text-muted">No se encontraron usuarios que coincidan con la búsqueda.</td>';
+                     tbody.appendChild(noResultsRow);
+                 }
+                 noResultsRow.style.display = '';
+             } else if (noResultsRow) {
+                 noResultsRow.style.display = 'none';
+             }
+             
+             console.log(`Filas visibles: ${visibleCount}`);
+         });
+         
+         console.log('Event listener agregado correctamente');
+     } else {
+         console.error('No se encontraron los elementos necesarios');
+     }
+ });
+ </script>
 
 {% endblock %}
-  <script src="{% static 'js/main.js' %}"></script>

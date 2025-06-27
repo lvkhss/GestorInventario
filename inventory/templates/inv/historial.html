@@ -14,10 +14,17 @@
         <select id="filterType" class="form-select">
           <option value="">Todos</option>
           {% for product_type in product_types %}
-          <option value="{{ product_type }}">{{ product_type }}</option>
+          <option value="{{ product_type }}" {% if product_type == current_type %}selected{% endif %}>{{ product_type }}</option>
           {% endfor %}
         </select>
-
+        {% if user.is_staff %}
+        <select id="filterUser" class="form-select">
+          <option value="">Usuarios</option>
+          {% for usuario in users %}
+          <option value="{{ usuario.username }}" {% if usuario.username == current_user %}selected{% endif %}>{{ usuario.username }}</option>
+          {% endfor %}
+        </select>
+        {% endif %}
         <button type="submit" class="dynamic-table-button"></button>
       </div>
     </div>

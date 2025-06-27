@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import HistorialMovimiento, Suppliers 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Count, Sum
 from datetime import datetime
 from .forms import *
+from .forms import UserRegistrationForm, ProductTypeForm
 import pandas as pd
 from .forms import ExcelUploadForm
 from django.core.paginator import Paginator
@@ -17,10 +18,6 @@ from django.core.exceptions import ValidationError
 from django.contrib import messages
 from .decorators import staff_required
 
-MODEL_MAP = {
-    'producto': Producto,  
-}
-
 from django.contrib import messages
 from .models import ProductType
 @staff_required
@@ -32,17 +29,22 @@ def delete_product_type(request, pk):
 @staff_required
 def settings_view(request):
     if request.method == 'POST':
-        name_value = request.POST.get('type', '').strip() 
-        description = request.POST.get('description', '').strip()
-        if not name_value:
-            messages.error(request, "El tipo es obligatorio.")
-        elif ProductType.objects.filter(name__iexact=name_value).exists():
-            messages.error(request, "Ya existe un tipo de producto con ese nombre.")
-        else:
-            ProductType.objects.create(name=name_value, description=description)
+        form = ProductTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
             messages.success(request, "Tipo de producto creado exitosamente.")
+            return redirect('settings_view')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error[0])
+    else:
+        form = ProductTypeForm()
+    
     product_types = ProductType.objects.all()
-    return render(request, 'inv/settings.html', {'product_types': product_types})
+    return render(request, 'inv/settings.html', {
+        'product_types': product_types,
+        'form': form
+    })
 def logout_custom(request):
     logout(request)
     return redirect('login') 
@@ -114,38 +116,23 @@ def users_view(request):
 
 @staff_required
 def register_view(request):
-    error = None
-    success_message = None
     if request.method == 'POST':
-        print(f"POST data received: {request.POST}")
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        
-        print(f"Username: {username}, Email: {email}")
-        print(f"Password1: {'presente' if password1 else 'ausente'}")
-        print(f"Password2: {'presente' if password2 else 'ausente'}")
-        
-        if password1 != password2:
-            error = "Las contraseñas no coinciden."
-            print("ERROR: Las contraseñas no coinciden")
-        elif User.objects.filter(username=username).exists():
-            error = "El usuario ya existe."
-            print(f"ERROR: Usuario {username} ya existe")
-        elif User.objects.filter(email=email).exists():
-            error = "El email ya está registrado."
-            print(f"ERROR: Email {email} ya está registrado")
-        else:
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
             try:
-                print("Intentando crear usuario...")
-                user = User.objects.create_user(username=username, password=password1, email=email)
-                print(f"Usuario creado exitosamente: {username}")
-                success_message = f"Usuario '{username}' creado exitosamente"
+                user = User.objects.create_user(
+                    username=form.cleaned_data['username'],
+                    password=form.cleaned_data['password1'],
+                    email=form.cleaned_data['email']
+                )
+                messages.success(request, f"Usuario '{user.username}' creado exitosamente")
+                return redirect('users_view')
             except Exception as e:
-                print(f"Error creando usuario: {e}")
-                error = f"Error al crear usuario: {e}"
-    return render(request, 'inv/register.html', {'error': error, 'success_message': success_message})
+                messages.error(request, f"Error al crear usuario: {e}")
+    else:
+        form = UserRegistrationForm()
+    
+    return render(request, 'inv/register.html', {'form': form})
 
 def login_view(request):
     error = None
@@ -165,10 +152,11 @@ def login_view(request):
 def historial(request):
     query = request.GET.get('q', '')
     product_type_filter = request.GET.get('type', '')
+    user_filter = request.GET.get('user', '')
     start_date = request.GET.get('start')
     end_date = request.GET.get('end')
     
-    movimientos = HistorialMovimiento.objects.all().order_by('-fecha')
+    movimientos = HistorialMovimiento.objects.select_related('usuario').all().order_by('-fecha')
     
     # Apply filters
     if query:
@@ -179,6 +167,9 @@ def historial(request):
     
     if product_type_filter:
         movimientos = movimientos.filter(tipo_producto=product_type_filter)
+    
+    if user_filter:
+        movimientos = movimientos.filter(usuario__username=user_filter)
     
     if start_date:
         try:
@@ -205,12 +196,17 @@ def historial(request):
     
 
     product_types = HistorialMovimiento.objects.values_list('tipo_producto', flat=True).distinct().order_by('tipo_producto')
+    # Obtener usuarios que han hecho movimientos
+    user_ids = HistorialMovimiento.objects.exclude(usuario__isnull=True).values_list('usuario_id', flat=True).distinct()
+    users = User.objects.filter(id__in=user_ids).order_by('username')
     
     context = {
         'movimientos': movimientos,
-        'product_types': product_types,  
+        'product_types': product_types,
+        'users': users,
         'current_query': query,
         'current_type': product_type_filter,
+        'current_user': user_filter,
         'current_start': request.GET.get('start', ''),
         'current_end': request.GET.get('end', ''),
     }
@@ -221,7 +217,7 @@ def historial(request):
 def profile(request):
     user = request.user
     
-    # Productos creados por el usuario
+
     productos_creados = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo='Producto creado'
@@ -233,8 +229,8 @@ def profile(request):
     ).filter(
         Q(motivo='Producto editado') |
         Q(motivo='Edición manual') |
-        Q(motivo='Corrección precio') |          # ✅ ESTE MOTIVO EXISTE
-        Q(motivo='Corrección nombre') |          # ✅ ESTE MOTIVO EXISTE
+        Q(motivo='Corrección precio') |          
+        Q(motivo='Corrección nombre') |          
         Q(motivo__icontains='ajuste de inventario') |
         Q(motivo__icontains='uso interno') |
         Q(motivo__icontains='otro')
@@ -275,7 +271,7 @@ def profile(request):
     return render(request, 'inv/profile.html', context)
 
 @login_required
-def user_movements(request):
+def user_mov(request):
     """Vista para mostrar los movimientos del usuario logueado"""
     query = request.GET.get('q', '')
     product_type_filter = request.GET.get('type', '')
@@ -331,18 +327,45 @@ def user_movements(request):
         'user': request.user
     }
     
-    return render(request, 'inv/user_movements.html', context)
+    return render(request, 'inv/user_mov.html', context)
 
 @login_required
 def index(request):
     
-    latest_items = Producto.objects.all().order_by('-date_added')[:10]
-    
-   
+    # Productos más vendidos (por cantidad de ventas en historial)
+    ventas = (
+        HistorialMovimiento.objects
+        .filter(motivo__iexact='venta')
+        .values('producto_id', 'nombre_producto', 'tipo_producto')
+        .annotate(
+            ventas=Count('id'),
+            recaudado=Sum('precio')
+        )
+        .order_by('-ventas', 'nombre_producto')[:10]
+    )
+
+    # Obtener info de producto para stock y precio actual
+    productos_ids = [v['producto_id'] for v in ventas]
+    productos_map = {p.id: p for p in Producto.objects.filter(id__in=productos_ids)}
+    productos_mas_vendidos = []
+    for v in ventas:
+        # Solo productos que existen actualmente
+        productos_ids_existentes = set(Producto.objects.values_list('id', flat=True))
+        productos_mas_vendidos = []
+        for v in ventas:
+            if v['producto_id'] in productos_ids_existentes:
+                prod = productos_map.get(v['producto_id'])
+                productos_mas_vendidos.append({
+                    'name': v['nombre_producto'],
+                    'tipo': v['tipo_producto'],
+                    'ventas': v['ventas'],
+                    'stock': prod.stock if prod else '-',
+                })
+
     least_stock_items = Producto.objects.all().order_by('stock', 'date_added')[:10]
     
     context = {
-        'latest_items': latest_items,
+        'productos_mas_vendidos': productos_mas_vendidos,
         'least_stock_items': least_stock_items
     }
     
@@ -368,7 +391,7 @@ def inventario(request):
         productos = productos.filter(product_type__name=product_type_filter)
     
   
-    product_types = ProductType.objects.filter(is_active=True)
+    product_types = ProductType.objects.filter(is_active=True).order_by('name')
     
 
     paginator = Paginator(productos, 20)  
@@ -397,137 +420,68 @@ def add_item(request, cls):
     return render(request, 'inv/add_new.html', {'form': form})
 
 @login_required
-def edit_item(request, pk, model, cls):
-    item = get_object_or_404(model, pk=pk)
-    stock_field = 'stock'
-    stock_anterior = getattr(item, stock_field, None)
-
-    if request.method == "POST":
-        form = cls(request.POST, instance=item)
-        motivo = request.POST.get('motivo', 'Edición manual')
-        if form.is_valid():
-            updated_item = form.save(commit=False)
-            stock_nuevo = getattr(updated_item, stock_field, None)
-            cambio_stock = 0
-            stock_final = stock_anterior
-            if stock_anterior is not None and stock_nuevo is not None and stock_anterior != stock_nuevo:
-                cambio_stock = stock_nuevo - stock_anterior
-                stock_final = stock_nuevo
-            # Always create historial entry
-            HistorialMovimiento.objects.create(
-                producto_id=producto.id,
-    nombre_producto=producto.name,
-    tipo_producto=producto.product_type.name,
-    codigo_barras=producto.codigo_barras,
-    cambio_stock=cambio_stock,
-    stock_final=producto.stock,
-    motivo=motivo,
-    usuario=request.user,
-    precio=producto.price, 
-)
-            updated_item.save()
-            return redirect('inventario')
-    else:
-        form = cls(instance=item)
-    return render(request, 'inv/edit_item.html', {'form': form})
-
-@login_required
 def upload_products_excel(request):
-    success_message = None
-    debug_info = [] 
-    
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
-        if form.is_valid():
+        if form.is_valid():  # Validaciones de archivo se ejecutan automáticamente
             excel_file = request.FILES['file']
             
             try:
-               
                 df = pd.read_excel(excel_file)
-                
-               
                 existing_types = ProductType.objects.filter(is_active=True)
-                existing_type_names = [pt.name.lower() for pt in existing_types]
                 type_mapping = {pt.name.lower(): pt for pt in existing_types}
                 
                 success_count = 0
                 error_count = 0
+                errors_list = []
                 
                 for index, row in df.iterrows():
                     try:
-                        tipo_input = str(row.get('tipo', '')).strip()
-                        nombre = str(row.get('nombre', '')).strip()
-                        codigo_barras = str(row.get('codigo de barras', '')).strip()
+                        # Crear form para cada producto para usar validaciones automáticas
+                        product_data = {
+                            'name': str(row.get('nombre', '')).strip(),
+                            'product_type': None,
+                            'price': float(row.get('precio', 0)),
+                            'stock': int(row.get('stock', 0)),
+                            'codigo_barras': str(row.get('codigo de barras', '')).strip() or None
+                        }
                         
-          
-                        debug_info.append(f"Row {index+1}: nombre='{nombre}', tipo='{tipo_input}'")
+                        # Buscar tipo de producto
+                        tipo_input = str(row.get('tipo', '')).strip().lower()
+                        if tipo_input in type_mapping:
+                            product_data['product_type'] = type_mapping[tipo_input].id
                         
-             
-                        if not nombre:
+                        # Usar ProductoForm para validaciones automáticas
+                        product_form = ProductoForm(product_data)
+                        if product_form.is_valid():
+                            product_form.save()
+                            success_count += 1
+                        else:
                             error_count += 1
-                            debug_info.append(f"Row {index+1}: SKIPPED - No name")
-                            continue
-                        
-               
-                        if not tipo_input:
-                            error_count += 1
-                            debug_info.append(f"Row {index+1}: SKIPPED - No product type")
-                            continue
-                            
-                        tipo_lower = tipo_input.lower()
-                        if tipo_lower not in existing_type_names:
-                            error_count += 1
-                            debug_info.append(f"Row {index+1}: SKIPPED - Product type '{tipo_input}' not found")
-                            continue
-    
-                        if Producto.objects.filter(name__iexact=nombre).exists():
-                            error_count += 1
-                            debug_info.append(f"Row {index+1}: SKIPPED - Duplicate name '{nombre}'")
-                            continue
-                        
-            
-                        if codigo_barras and Producto.objects.filter(codigo_barras=codigo_barras).exists():
-                            error_count += 1
-                            debug_info.append(f"Row {index+1}: SKIPPED - Duplicate barcode '{codigo_barras}'")
-                            continue
-                        
-                      
-                        product_type = type_mapping[tipo_lower]
-            
-                        product = Producto.objects.create(
-                            name=nombre,
-                            product_type=product_type,
-                            price=float(row.get('precio', 0)),
-                            stock=int(row.get('stock', 0)),
-                            codigo_barras=codigo_barras if codigo_barras else None
-                        )
-                        
-                        success_count += 1
-                        debug_info.append(f"Row {index+1}: SUCCESS - Created '{nombre}'")
+                            errors_list.append(f"Fila {index+1}: {'; '.join([f'{field}: {error[0]}' for field, error in product_form.errors.items()])}")
                         
                     except Exception as e:
                         error_count += 1
-                        debug_info.append(f"Row {index+1}: ERROR - {str(e)}")
+                        errors_list.append(f"Fila {index+1}: Error - {str(e)}")
                 
-              
+                # Mostrar resultados
                 if success_count > 0:
-                    success_message = f"Productos subidos exitosamente: {success_count}"
+                    messages.success(request, f"Productos subidos exitosamente: {success_count}")
                 
-               
-                if debug_info:
-                    debug_message = "<br>".join(debug_info[:10])
-                    messages.info(request, f"Debug info: {debug_message}")
+                if error_count > 0:
+                    messages.warning(request, f"Productos con errores: {error_count}")
+                    for error in errors_list[:5]:  # Mostrar solo los primeros 5 errores
+                        messages.error(request, error)
                 
             except Exception as e:
-                messages.error(request, f"Error processing file: {str(e)}")
+                messages.error(request, f"Error procesando archivo: {str(e)}")
+        else:
+            messages.error(request, 'Por favor corrija los errores en el archivo.')
                 
     else:
         form = ExcelUploadForm()
     
-    return render(request, 'inv/upload_excel.html', {
-        'form': form,
-        'success_message': success_message
-    })
+    return render(request, 'inv/upload_excel.html', {'form': form})
 
 def detalle_historial(request, pk):
     movimiento = get_object_or_404(HistorialMovimiento, pk=pk)
@@ -538,11 +492,11 @@ def detalle_historial(request, pk):
     })
 
 @login_required
-def detalle_user_movement(request, pk):
+def detalle_user_mov(request, pk):
     # Verificar que el movimiento pertenece al usuario logueado
     movimiento = get_object_or_404(HistorialMovimiento, pk=pk, usuario=request.user)
     stock_inicial = movimiento.stock_final - movimiento.cambio_stock
-    return render(request, 'inv/detalle_user_movement.html', {
+    return render(request, 'inv/detalle_user_mov.html', {
         'movimiento': movimiento,
         'stock_inicial': stock_inicial,
     })
@@ -551,7 +505,7 @@ def detalle_user_movement(request, pk):
 def producto_create(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST)
-        if form.is_valid():
+        if form.is_valid():  # Todas las validaciones se ejecutan automáticamente aquí
             producto = form.save()
             
             HistorialMovimiento.objects.create(
@@ -563,9 +517,12 @@ def producto_create(request):
                 stock_final=producto.stock,
                 motivo='Producto creado',
                 usuario=request.user,
-                precio=producto.price  # Add this line
+                precio=producto.price
             )
+            messages.success(request, f'Producto "{producto.name}" creado exitosamente.')
             return redirect('inventario')
+        else:
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
     else:
         form = ProductoForm()
     return render(request, 'inv/add_new.html', {'form': form})
@@ -634,7 +591,7 @@ def producto_update(request, pk):
     if request.method == 'POST':
         form = ProductoForm(request.POST, instance=producto)
         motivo = request.POST.get('motivo', 'Producto editado')
-        if form.is_valid():
+        if form.is_valid():  # Todas las validaciones se ejecutan automáticamente aquí
             updated_producto = form.save()
             stock_nuevo = updated_producto.stock
             cambio_stock = stock_nuevo - stock_anterior
@@ -648,9 +605,12 @@ def producto_update(request, pk):
                 stock_final=stock_nuevo,
                 motivo=motivo,
                 usuario=request.user,
-                precio=updated_producto.price  # <-- agrega esto
+                precio=updated_producto.price
             )
+            messages.success(request, f'Producto "{updated_producto.name}" actualizado exitosamente.')
             return redirect('inventario')
+        else:
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
     else:
         form = ProductoForm(instance=producto)
     return render(request, 'inv/edit_item.html', {  
@@ -679,3 +639,57 @@ def producto_delete(request, pk):
 
 def permission_denied_view(request, exception=None):
     return render(request, 'inv/403.html', status=403)
+
+@login_required
+def user_edit(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    
+    if request.method == 'POST':
+        # Datos básicos del usuario
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        is_staff = request.POST.get('is_staff') == 'on'
+        is_superuser = request.POST.get('is_superuser') == 'on'
+        
+        # Validaciones básicas
+        if User.objects.exclude(pk=pk).filter(username=username).exists():
+            messages.error(request, 'Ya existe un usuario con ese nombre.')
+        elif User.objects.exclude(pk=pk).filter(email=email).exists():
+            messages.error(request, 'Ya existe un usuario con ese email.')
+        else:
+            # Actualizar usuario
+            user.username = username
+            user.email = email.lower()
+            user.is_staff = is_staff
+            user.is_superuser = is_superuser
+            
+            # Cambiar contraseña si se proporciona
+            new_password = request.POST.get('new_password', '').strip()
+            if new_password:
+                user.set_password(new_password)
+            
+            user.save()
+            messages.success(request, f'Usuario "{username}" actualizado exitosamente.')
+            return redirect('users_view')
+    
+    return render(request, 'inv/user_edit.html', {'user_obj': user})
+
+@staff_required
+def user_delete(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    
+    # No permitir que se elimine a sí mismo
+    if user == request.user:
+        messages.error(request, 'No puedes eliminar tu propia cuenta.')
+        return redirect('users_view')
+    
+    # No permitir eliminar al último superusuario
+    if user.is_superuser and User.objects.filter(is_superuser=True).count() <= 1:
+        messages.error(request, 'No se puede eliminar al último superusuario del sistema.')
+        return redirect('users_view')
+    
+    username = user.username
+    user.delete()
+    messages.success(request, f'Usuario "{username}" eliminado exitosamente.')
+    return redirect('users_view')
+

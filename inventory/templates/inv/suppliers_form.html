@@ -1,5 +1,5 @@
 {% extends 'inv/base.html' %}
-
+{% load static %}
 {% block body %}
 
 <div class="add-product-container">
@@ -113,5 +113,5 @@
     </div>
   </form>
 </div>
-
+<script src="{% static 'js/main.js' %}"></script>
 {% endblock %}

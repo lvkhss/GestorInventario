@@ -1,6 +1,7 @@
 from django import forms
 from .models import Suppliers, Producto, ProductType
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 import re
 
 
@@ -28,6 +29,48 @@ class ProductoForm(forms.ModelForm):
         self.fields['product_type'].widget.can_change_related = False
         self.fields['product_type'].widget.can_delete_related = False
 
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name:
+            name = name.strip().title()  # Capitalizar automáticamente
+            if len(name) < 2:
+                raise ValidationError('El nombre debe tener al menos 2 caracteres.')
+            
+            # Verificar duplicados
+            if self.instance.pk:
+                if Producto.objects.exclude(pk=self.instance.pk).filter(name__iexact=name).exists():
+                    raise ValidationError('Ya existe un producto con este nombre.')
+            else:
+                if Producto.objects.filter(name__iexact=name).exists():
+                    raise ValidationError('Ya existe un producto con este nombre.')
+        return name
+
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if price is not None and price <= 0:
+            raise ValidationError('El precio debe ser mayor a 0.')
+        return price
+
+    def clean_stock(self):
+        stock = self.cleaned_data.get('stock')
+        if stock is not None and stock < 0:
+            raise ValidationError('El stock no puede ser negativo.')
+        return stock
+
+    def clean_codigo_barras(self):
+        codigo = self.cleaned_data.get('codigo_barras')
+        if codigo:
+            codigo = codigo.strip()
+            
+            # Verificar duplicados
+            if self.instance.pk:
+                if Producto.objects.exclude(pk=self.instance.pk).filter(codigo_barras=codigo).exists():
+                    raise ValidationError('Ya existe un producto con este código de barras.')
+            else:
+                if Producto.objects.filter(codigo_barras=codigo).exists():
+                    raise ValidationError('Ya existe un producto con este código de barras.')
+        return codigo
+
     def clean_product_type(self):
         product_type = self.cleaned_data.get('product_type')
         if not product_type:
@@ -49,6 +92,22 @@ class ProductTypeForm(forms.ModelForm):
             'description': 'Descripción',
             'is_active': 'Activo'
         }
+    
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name:
+            name = name.strip().title()
+            if len(name) < 2:
+                raise ValidationError('El nombre del tipo debe tener al menos 2 caracteres.')
+            
+            # Verificar duplicados
+            if self.instance.pk:
+                if ProductType.objects.exclude(pk=self.instance.pk).filter(name__iexact=name).exists():
+                    raise ValidationError('Ya existe un tipo de producto con este nombre.')
+            else:
+                if ProductType.objects.filter(name__iexact=name).exists():
+                    raise ValidationError('Ya existe un tipo de producto con este nombre.')
+        return name
 
 class SupplierForm(forms.ModelForm):
     class Meta:
@@ -170,7 +229,7 @@ class SupplierForm(forms.ModelForm):
                 raise ValidationError('El cuerpo del RUT solo puede contener números.')
             
             # Validar longitud del cuerpo (7-8 dígitos)
-            if len(cuerpo) < 7 or len(cuerpo) > 8:
+            if len(cuerpo) < 7 or len(cuerpo) > 6:
                 raise ValidationError('El RUT debe tener entre 7 y 8 dígitos.')
             
             # Validar que no empiece con 0
@@ -215,5 +274,66 @@ class SupplierForm(forms.ModelForm):
         return rut_formateado
 
 class ExcelUploadForm(forms.Form):
-    file = forms.FileField(label="Archivo Excel")
+    file = forms.FileField(
+        label="Archivo Excel",
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.xlsx,.xls'})
+    )
+    
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            # Validar extensión
+            if not file.name.endswith(('.xlsx', '.xls')):
+                raise ValidationError('Solo se permiten archivos Excel (.xlsx, .xls)')
+            
+            # Validar tamaño (máximo 5MB)
+            if file.size > 5 * 1024 * 1024:
+                raise ValidationError('El archivo no puede exceder 5MB.')
+            
+            # Validar que no esté vacío
+            if file.size == 0:
+                raise ValidationError('El archivo está vacío.')
+                
+        return file
+
+class UserRegistrationForm(forms.Form):
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username:
+            username = username.strip()
+            if User.objects.filter(username=username).exists():
+                raise ValidationError('El usuario ya existe.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            email = email.lower().strip()
+            if User.objects.filter(email=email).exists():
+                raise ValidationError('El email ya está registrado.')
+        return email
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
+        
+        if password1 and password2 and password1 != password2:
+            raise ValidationError('Las contraseñas no coinciden.')
+        
+        return cleaned_data
 

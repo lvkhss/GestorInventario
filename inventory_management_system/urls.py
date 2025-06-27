@@ -49,7 +49,9 @@ urlpatterns = [
     
     # Administración (solo staff)
     path('register/', views.register_view, name='register'),
-    path('usuarios/', views.users_view, name='users'),
+    path('usuarios/', views.users_view, name='users_view'),
+    path('usuarios/<int:pk>/edit/', views.user_edit, name='user_edit'),
+    path('usuarios/<int:pk>/delete/', views.user_delete, name='user_delete'),
     path('settings/', views.settings_view, name='settings_view'),
     path('product_types/<int:pk>/delete/', views.delete_product_type, name='delete_product_type'),
     
@@ -58,8 +60,8 @@ urlpatterns = [
     
     # Perfil de usuario
     path('profile/', views.profile, name='profile'),
-    path('user-movements/', views.user_movements, name='user_movements'),
-    path('user-movements/<int:pk>/', views.detalle_user_movement, name='detalle_user_movement'),
+    path('user-mov/', views.user_mov, name='user_mov'),
+    path('user-mov/<int:pk>/', views.detalle_user_mov, name='detalle_user_mov'),
 ]
 
 # Servir archivos estáticos en modo DEBUG=False para desarrollo

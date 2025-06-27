@@ -3,6 +3,7 @@
     <tr>
       <th>Codigo</th>
       <th>Producto</th>
+      <!-- <th>Usuario</th> -->
       <th>Fecha</th>
       <th>Stock Inicial</th>
       <th>Stock Final</th>
@@ -16,6 +17,13 @@
       <tr>
         <td>{{ mov.codigo_barras }}</td>
         <td>{{ mov.nombre_producto }}</td>
+        <!-- <td>
+          {% if mov.usuario %}
+            {{ mov.usuario.username }}
+          {% else %}
+            <span class="text-muted">-</span>
+          {% endif %}
+        </td> -->
         <td>{{ mov.fecha|date:"d-m-Y H:i" }}</td>
         <td>
           {% if mov.stock_inicial %}
@@ -32,17 +40,17 @@
         </td>
       </tr>
     {% empty %}
-      <tr><td colspan="8">No hay movimientos.</td></tr>
+      <tr><td colspan="9">No hay movimientos.</td></tr>
     {% endfor %}
   </tbody>
 </table>
 
 <div class="pagination">
   {% if movimientos.has_previous %}
-    <a href="?page={{ movimientos.previous_page_number }}">Anterior</a>
+    <a href="?page={{ movimientos.previous_page_number }}&q={{ current_query }}&type={{ current_type }}&user={{ current_user }}&start={{ current_start }}&end={{ current_end }}">Anterior</a>
   {% endif %}
   <span>Página {{ movimientos.number }} de {{ movimientos.paginator.num_pages }}</span>
   {% if movimientos.has_next %}
-    <a href="?page={{ movimientos.next_page_number }}">Siguiente</a>
+    <a href="?page={{ movimientos.next_page_number }}&q={{ current_query }}&type={{ current_type }}&user={{ current_user }}&start={{ current_start }}&end={{ current_end }}">Siguiente</a>
   {% endif %}
 </div>
