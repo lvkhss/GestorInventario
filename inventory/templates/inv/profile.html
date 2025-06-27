@@ -1,49 +1,7 @@
 {% extends 'inv/base.html' %}
 {% load static %}
 {% block extra_css %}
-<style>
-    .btn-view-mov {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        border-radius: 12px;
-        padding: 12px;
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .btn-view-mov:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-    }
-    
-    .btn-view-mov svg {
-        transition: transform 0.3s ease;
-    }
-    
-    .btn-view-mov:hover svg {
-        transform: scale(1.1);
-    }
-    
-    .module-card {
-        transition: transform 0.3s ease;
-    }
-    
-    .module-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .btns {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-    }
-</style>
+
 {% endblock %}
 
 {% block body %}
@@ -51,8 +9,7 @@
 
 <div class="dashboard">
 
-  <!-- Perfil -->
-  <div class="card profile" style="margin-left: 1px;">
+  <div class="card profile" style="margin-left: 1px; padding-top: 10%;">
     <p><strong>Perfil de Usuario</strong></p>
     <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Profile" />
     <p class="role">{{ user.username }}</p>
@@ -73,15 +30,114 @@
   <div class="card">
     <div class="welcome">
       <div>
-        <h2>Welcome Admin</h2>
-        <p>Have a nice day</p>
+        <h2>Estadisticas de {{ user.username }}</h2>
       </div>
     </div>
 
-    <div class="orders">
-      <h3>Orders</h3>
-      <p>Here you can make a new Order and print invoices</p>
-      <button>New Order</button>
+    <div class="user-stats">
+      <div class="row">
+  
+        <div class="col-md-6">
+          <!-- Información de la cuenta -->
+          <div class="stat-item mb-3">
+            <div class="stat-icon">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h5>Cuenta Creada</h5>
+              <p>{{ user.date_joined|date:"d/m/Y" }}</p>
+            </div>
+          </div>
+
+          <!-- Productos Creados -->
+          <div class="stat-item mb-3">
+            <div class="stat-icon text-success">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h5>Productos Creados</h5>
+              <p class="stat-number">{{ productos_creados }}</p>
+            </div>
+          </div>
+
+          <!-- Productos Editados -->
+          <div class="stat-item mb-3">
+            <div class="stat-icon text-primary">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h5>Productos Editados</h5>
+              <p class="stat-number">{{ productos_editados }}</p>
+            </div>
+          </div>
+
+          <!-- Último movimiento -->
+          <div class="stat-item mb-3" style="height: 80px;">
+            <div class="stat-icon text-warning">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h5>Último Movimiento</h5>
+              {% if ultimo_movimiento %}
+                <p>{{ ultimo_movimiento.fecha|date:"d/m/Y H:i" }} - {{ ultimo_movimiento.motivo }}</p>
+                <small class="text-muted">{{ ultimo_movimiento.nombre_producto }}</small>
+              {% else %}
+                <p class="text-muted">Sin movimientos registrados</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna derecha -->
+        <div class="col-md-6">
+          <!-- Total de ventas -->
+          <div class="stat-item mb-3">
+            <div class="stat-icon text-success">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h5>Total Ventas</h5>
+              <p class="stat-number">{{ total_ventas }}</p>
+            </div>
+          </div>
+
+          <!-- Movimientos totales -->
+          <div class="stat-item mb-3">
+            <div class="stat-icon text-info">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 11H7v6h2v-6zm4 0h-2v6h2v-6zm4 0h-2v6h2v-6zm2.5-9H6v2h12V2h3.5l-1 1zm-2.5 3H7v14h10V5z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h5>Movimientos Totales</h5>
+              <p class="stat-number">{{ total_movimientos }}</p>
+            </div>
+          </div>
+
+          <!-- Productos Eliminados -->
+          <div class="stat-item mb-3">
+            <div class="stat-icon text-danger">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h5>Productos Eliminados</h5>
+              <p class="stat-number">{{ productos_eliminados }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -90,7 +146,7 @@
 <div class="modules">
   <div class="module-card">
     <h4>Movimientos</h4>
-    <p>Movimientos hechos por el usuario</p>
+    <p>Movimientos hechos por {{ user.username }}</p>
     <div class="btns">
       <button class="btn-view-mov" onclick="window.location.href='{% url 'user_movements' %}'"><svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
   <path stroke="currentColor" stroke-width="2" d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"/>

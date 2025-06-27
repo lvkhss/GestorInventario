@@ -219,10 +219,60 @@ def historial(request):
 
 @login_required
 def profile(request):
-    """Vista para mostrar el perfil del usuario"""
-    return render(request, 'inv/profile.html', {
-        'user': request.user
-    })
+    user = request.user
+    
+    # Productos creados por el usuario
+    productos_creados = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo='Producto creado'
+    ).count()
+    
+    # Productos editados por el usuario (todos los motivos que representan edición)
+    productos_editados = HistorialMovimiento.objects.filter(
+        usuario=user
+    ).filter(
+        Q(motivo='Producto editado') |
+        Q(motivo='Edición manual') |
+        Q(motivo='Corrección precio') |          # ✅ ESTE MOTIVO EXISTE
+        Q(motivo='Corrección nombre') |          # ✅ ESTE MOTIVO EXISTE
+        Q(motivo__icontains='ajuste de inventario') |
+        Q(motivo__icontains='uso interno') |
+        Q(motivo__icontains='otro')
+    ).count()
+    
+    # Productos eliminados por el usuario
+    productos_eliminados = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo='Producto eliminado'
+    ).count()
+    
+    # Total de ventas (motivo: venta)
+    total_ventas = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta'
+    ).count()
+    
+    # Movimientos totales del usuario
+    total_movimientos = HistorialMovimiento.objects.filter(
+        usuario=user
+    ).count()
+    
+    # Último movimiento del usuario
+    ultimo_movimiento = HistorialMovimiento.objects.filter(
+        usuario=user
+    ).order_by('-fecha').first()
+    
+    context = {
+        'user': user,
+        'productos_creados': productos_creados,
+        'productos_editados': productos_editados,
+        'productos_eliminados': productos_eliminados,
+        'total_ventas': total_ventas,
+        'total_movimientos': total_movimientos,
+        'ultimo_movimiento': ultimo_movimiento,
+    }
+    
+    return render(request, 'inv/profile.html', context)
 
 @login_required
 def user_movements(request):
