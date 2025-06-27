@@ -2,19 +2,21 @@
 {% load static %}
 
 {% block body %}
-<h2>Historial de movimientos</h2>
+<h2>Mis Movimientos de {{ user.username }}</h2>
+
+
 <div class="container-set-inventory">
   <div class="add_buttons">
     <div class="inventory-left">
       <div class="button-group">
-        <input type="text" id="searchInput" placeholder="Buscar..." class="form-control" />
+        <input type="text" id="searchInput" placeholder="Buscar..." class="form-control" value="{{ current_query }}" />
       </div>
 
       <div class="button-group">
         <select id="filterType" class="form-select">
           <option value="">Todos</option>
           {% for product_type in product_types %}
-          <option value="{{ product_type }}">{{ product_type }}</option>
+          <option value="{{ product_type }}" {% if product_type == current_type %}selected{% endif %}>{{ product_type }}</option>
           {% endfor %}
         </select>
 
@@ -23,16 +25,16 @@
     </div>
     <div class="button-group-2">
       <label for="startDate">Desde:</label>
-      <input type="date" id="startDate" class="form-control">
+      <input type="date" id="startDate" class="form-control" value="{{ current_start }}">
       <label for="endDate">Hasta:</label>
-      <input type="date" id="endDate" class="form-control">
+      <input type="date" id="endDate" class="form-control" value="{{ current_end }}">
     </div>
   </div>
 </div>
 
-
 <div id="tablaHistorial">
-  {% include 'inv/tabla_historial.html' %}
+  {% include 'inv/tabla_user_movements.html' %}
 </div>
+
 <script src="{% static 'js/main.js' %}"></script>
 {% endblock %}

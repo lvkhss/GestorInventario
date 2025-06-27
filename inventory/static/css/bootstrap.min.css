@@ -1,9 +1,14 @@
+html {
+    overflow-y: scroll !important;
+}
+
 body {
     font-family: 'Nunito', Arial, sans-serif;
     background-color: #ffffff;
     color: #333;
     margin: 0;
     padding: 0;
+
 }
 
 .sidebar {
@@ -298,5 +303,126 @@ body {
     background-color: #a8ebff !important;
 }
 
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      grid-gap: 20px;
+    }
+
+    .card  {
+    
+       margin-left: -10px;
+      background: rgb(255, 255, 255);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .profile {
+      text-align: center;
+    }
+
+    .profile img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    .profile p {
+      margin: 6px 0;
+      color: #333;
+    }
+
+    .profile .role {
+      color: #666;
+    }
+
+    .profile .btn {
+      margin-top: 12px;
+      padding: 8px 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .welcome {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .welcome h2 {
+      margin: 0;
+    }
+
+    .orders {
+      padding: 0 20px 20px;
+    }
+
+    .orders button {
+      padding: 8px 14px;
+      background: #007bff;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .modules {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .module-card {
+      background: rgb(255, 255, 255);
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .module-card h4 {
+      margin-bottom: 8px;
+    }
+
+    .module-card p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    .module-card .btns button {
+      padding: 6px 12px;
+      margin-right: 8px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .btn-view-mov {
+      background: #28a745;
+    }
+
+    .btn-manage-mov{
+      background: #17a2b8;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .welcome {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+ 
 
 

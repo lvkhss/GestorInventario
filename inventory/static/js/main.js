@@ -125,6 +125,81 @@ function updateHistorialTable() {
 }
 
 // ===================================
+// USER MOVEMENTS - Actualización de tabla
+// ===================================
+function updateUserMovementsTable() {
+    const query = document.getElementById("searchInput").value;
+    const type = document.getElementById("filterType").value;
+    const startDateInput = document.getElementById("startDate");
+    const endDateInput = document.getElementById("endDate");
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+        alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
+        endDateInput.value = "";
+
+        fetch('/user-movements/')
+            .then(response => response.text())
+            .then(data => {
+                const parser = new DOMParser();
+                const htmlDoc = parser.parseFromString(data, "text/html");
+                const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
+                document.getElementById("tablaHistorial").innerHTML = newContent;
+                
+                // RE-INICIALIZAR el botón toggle
+                initializeToggleButton();
+            });
+        return;
+    }
+
+    let url = '/user-movements/?';
+    if (query) url += `q=${encodeURIComponent(query)}&`;
+    if (type) url += `type=${encodeURIComponent(type)}&`;
+    if (startDate) url += `start=${encodeURIComponent(startDate)}&`;
+    if (endDate) url += `end=${encodeURIComponent(endDate)}`;
+
+    fetch(url)
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(data, "text/html");
+            const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
+            document.getElementById("tablaHistorial").innerHTML = newContent;
+            
+            // RE-INICIALIZAR el botón toggle
+            initializeToggleButton();
+        });
+}
+
+// Detectar si estamos en la página de movimientos del usuario
+document.addEventListener('DOMContentLoaded', function () {
+    // Verificar si estamos en la página de user-movements
+    if (window.location.pathname === '/user-movements/') {
+        const searchInput = document.getElementById("searchInput");
+        const filterType = document.getElementById("filterType");
+        const startDate = document.getElementById("startDate");
+        const endDate = document.getElementById("endDate");
+
+        if (searchInput) {
+            searchInput.addEventListener("input", updateUserMovementsTable);
+        }
+
+        if (filterType) {
+            filterType.addEventListener("change", updateUserMovementsTable);
+        }
+
+        if (startDate) {
+            startDate.addEventListener("change", updateUserMovementsTable);
+        }
+
+        if (endDate) {
+            endDate.addEventListener("change", updateUserMovementsTable);
+        }
+    }
+});
+
+// ===================================
 // INVENTARIO - Event listeners
 // ===================================
 document.addEventListener('DOMContentLoaded', function () {
@@ -465,6 +540,19 @@ document.addEventListener('DOMContentLoaded', function () {
         filterType.addEventListener('change', filterSuppliersTable);
     }
 });
+
+document.getElementById('filterUser').addEventListener('change', function() {
+    filtrarHistorial();
+});
+
+function filtrarHistorial() {
+    const filterType = document.getElementById('filterType').value;
+    const filterUser = document.getElementById('filterUser').value;
+    const searchInput = document.getElementById('searchInput').value;
+    
+    // Aplicar filtros según tus necesidades
+    // Ejemplo de AJAX call o filtrado del DOM
+}
 
 
 

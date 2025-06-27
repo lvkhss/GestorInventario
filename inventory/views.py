@@ -225,6 +225,65 @@ def profile(request):
     })
 
 @login_required
+def user_movements(request):
+    """Vista para mostrar los movimientos del usuario logueado"""
+    query = request.GET.get('q', '')
+    product_type_filter = request.GET.get('type', '')
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+    
+    # Filtrar movimientos por el usuario logueado
+    movimientos = HistorialMovimiento.objects.filter(usuario=request.user).order_by('-fecha')
+    
+    # Apply filters (same as historial view)
+    if query:
+        movimientos = movimientos.filter(
+            Q(nombre_producto__icontains=query) | 
+            Q(codigo_barras__icontains=query)
+        )
+    
+    if product_type_filter:
+        movimientos = movimientos.filter(tipo_producto=product_type_filter)
+    
+    if start_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            movimientos = movimientos.filter(fecha__date__gte=start_date)
+        except ValueError:
+            pass
+    
+    if end_date:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            movimientos = movimientos.filter(fecha__date__lte=end_date)
+        except ValueError:
+            pass
+    
+    # Calculate stock inicial for each movement
+    for mov in movimientos:
+        mov.stock_inicial = mov.stock_final - mov.cambio_stock
+    
+    # Pagination
+    paginator = Paginator(movimientos, 20)
+    page_number = request.GET.get('page')
+    movimientos = paginator.get_page(page_number)
+    
+    # Get product types from user's movements only
+    product_types = HistorialMovimiento.objects.filter(usuario=request.user).values_list('tipo_producto', flat=True).distinct().order_by('tipo_producto')
+    
+    context = {
+        'movimientos': movimientos,
+        'product_types': product_types,  
+        'current_query': query,
+        'current_type': product_type_filter,
+        'current_start': request.GET.get('start', ''),
+        'current_end': request.GET.get('end', ''),
+        'user': request.user
+    }
+    
+    return render(request, 'inv/user_movements.html', context)
+
+@login_required
 def index(request):
     
     latest_items = Producto.objects.all().order_by('-date_added')[:10]
