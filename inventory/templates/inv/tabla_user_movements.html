@@ -28,7 +28,7 @@
         <td>{% if mov.cambio_stock > 0 %}+{% endif %}{{ mov.cambio_stock }}</td>
         <td>{{ mov.motivo }}</td>
         <td style="padding-right:30px;">
-          <a href="{% url 'detalle_historial' mov.pk %}" class="btn btn-sm btn-primary">Detalles</a>
+          <a href="{% url 'detalle_user_movement' mov.pk %}" class="btn btn-sm btn-primary">Detalles</a>
         </td>
       </tr>
     {% empty %}

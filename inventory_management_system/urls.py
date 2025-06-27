@@ -59,6 +59,7 @@ urlpatterns = [
     # Perfil de usuario
     path('profile/', views.profile, name='profile'),
     path('user-movements/', views.user_movements, name='user_movements'),
+    path('user-movements/<int:pk>/', views.detalle_user_movement, name='detalle_user_movement'),
 ]
 
 # Servir archivos estáticos en modo DEBUG=False para desarrollo

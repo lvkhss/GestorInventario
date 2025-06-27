@@ -487,7 +487,15 @@ def detalle_historial(request, pk):
         'stock_inicial': stock_inicial,
     })
 
-
+@login_required
+def detalle_user_movement(request, pk):
+    # Verificar que el movimiento pertenece al usuario logueado
+    movimiento = get_object_or_404(HistorialMovimiento, pk=pk, usuario=request.user)
+    stock_inicial = movimiento.stock_final - movimiento.cambio_stock
+    return render(request, 'inv/detalle_user_movement.html', {
+        'movimiento': movimiento,
+        'stock_inicial': stock_inicial,
+    })
 
 @login_required
 def producto_create(request):

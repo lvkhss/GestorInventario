@@ -11,6 +11,7 @@
   <form class="form-register" method="POST">
     {% csrf_token %}
     <div class="form-group mb-3">
+      
       <label for="id_username">Usuario</label>
       <input type="text" class="form-control" id="id_username" name="username" required>
     </div>
@@ -46,8 +47,9 @@
       <label for="id_password2">Confirmar Contraseña</label>
       <input type="password" class="form-control" id="id_password2" name="password2" required>
     </div>
-    <button type="button" class="btn btn-primary w-100 mb-3" onclick="enablePassword()">Generar Contraseña</button>
+    <button type="button" class="btn btn-primary w-100" onclick="enablePassword()">Generar Contraseña</button>
     <button type="submit" class="btn btn-primary w-100">Registrar</button>
+<button type="button" class="btn btn-primary w-100" onclick="window.location.href='{% url 'users' %}'">Volver</button>
   </form>
 
 </div>

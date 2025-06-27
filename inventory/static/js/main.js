@@ -554,5 +554,156 @@ function filtrarHistorial() {
     // Ejemplo de AJAX call o filtrado del DOM
 }
 
+// ===================================
+// USERS TABLE - Filtrado en tiempo real (Simplified version)
+// ===================================
+function filterUsersTable() {
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('usersTable');
+    
+    // Validate elements exist
+    if (!searchInput || !table) {
+        return;
+    }
+    
+    const tbody = table.querySelector('tbody');
+    if (!tbody) {
+        return;
+    }
+    
+
+    
+
+// Dedicated search functionality for users page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Users page DOM loaded');
+    
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('usersTable');
+    
+    if (!searchInput || !table) {
+        console.error('Required elements not found:', {
+            searchInput: !!searchInput,
+            table: !!table
+        });
+        return;
+    }
+    
+    console.log('Elements found, setting up search...');
+    
+    const tbody = table.querySelector('tbody');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        console.log('Searching for:', searchTerm);
+        
+        const rows = tbody.querySelectorAll('tr:not(.no-results-row)');
+        let visibleCount = 0;
+        
+        rows.forEach((row, index) => {
+            // Skip empty state rows
+            if (row.cells.length <= 1) {
+                return;
+            }
+            
+            // Get user type from badge in first column
+            const userTypeBadge = row.cells[0].querySelector('span.badge');
+            const userType = userTypeBadge ? userTypeBadge.textContent.toLowerCase().trim() : '';
+            
+            // Get username from second column
+            const username = row.cells[1] ? row.cells[1].textContent.toLowerCase().trim() : '';
+            
+            console.log(`Row ${index}: userType="${userType}", username="${username}"`);
+            
+            // Check if search term matches
+            const matches = searchTerm === '' || 
+                          userType.includes(searchTerm) || 
+                          username.includes(searchTerm);
+            
+            if (matches) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Handle no results message
+        let noResultsRow = tbody.querySelector('.no-results-row');
+        
+        if (visibleCount === 0 && searchTerm !== '') {
+            if (!noResultsRow) {
+                noResultsRow = document.createElement('tr');
+                noResultsRow.className = 'no-results-row';
+                noResultsRow.innerHTML = '<td colspan="4" class="text-center text-muted">No se encontraron usuarios que coincidan con la búsqueda.</td>';
+                tbody.appendChild(noResultsRow);
+            }
+            noResultsRow.style.display = '';
+        } else if (noResultsRow) {
+            noResultsRow.style.display = 'none';
+        }
+        
+        console.log(`Found ${visibleCount} matching rows`);
+    });
+    
+    console.log('Search functionality initialized successfully');
+});
+
+    // Only add event listener if it doesn't already exist
+    if (!searchInput.hasAttribute('data-filter-initialized')) {
+        searchInput.setAttribute('data-filter-initialized', 'true');
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const rows = tbody.querySelectorAll('tr:not(.no-results-row)');
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                if (row.cells.length <= 1) return;
+                
+                const userTypeBadge = row.cells[0]?.querySelector('span.badge');
+                const userType = userTypeBadge?.textContent?.toLowerCase().trim() || '';
+                const username = row.cells[1]?.textContent?.toLowerCase().trim() || '';
+                
+                const matches = searchTerm === '' || userType.includes(searchTerm) || username.includes(searchTerm);
+                
+                if (matches) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Handle empty state
+            let emptyRow = tbody.querySelector('.no-results-row');
+            if (visibleCount === 0 && searchTerm !== '') {
+                if (!emptyRow) {
+                    emptyRow = document.createElement('tr');
+                    emptyRow.className = 'no-results-row';
+                    emptyRow.innerHTML = '<td colspan="4" class="text-center text-muted">No se encontraron usuarios que coincidan con la búsqueda.</td>';
+                    tbody.appendChild(emptyRow);
+                }
+                emptyRow.style.display = '';
+            } else if (emptyRow) {
+                emptyRow.style.display = 'none';
+            }
+        });
+    }
+}
+
+// ===================================
+// USERS PAGE - Inicializar filtrado
+// ===================================
+document.addEventListener('DOMContentLoaded', function () {
+    // Check if we're on the users page
+    const isUsersPage = window.location.pathname.includes('/usuarios');
+    
+    if (isUsersPage) {
+        // Small delay to ensure all elements are rendered
+        setTimeout(filterUsersTable, 50);
+    }
+});
+
 
 
