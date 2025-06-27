@@ -1,55 +1,129 @@
 {% extends 'inv/base.html' %}
+{% load static %}
+{% block extra_css %}
+{% endblock %}
 
 {% block body %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
+<style>
+    body {
+        background-color: #f4f6f9;
+    }
+
+    .perfil-container {
+        min-height: 100vh;
+        display: grid;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .perfil-card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        background-color: #fff;
+        margin-bottom: 1rem;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .card-header h4,
+    .card-header h5 {
+        margin-bottom: 0;
+        font-weight: 600;
+        color: #343a40;
+    }
+
+    .perfil-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 1.5rem;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    .perfil-label {
+        font-weight: 500;
+        color: #6c757d;
+    }
+
+    .perfil-value {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .perfil-value .badge {
+        font-size: 0.875rem;
+        padding: 0.35em 0.6em;
+        border-radius: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .perfil-container {
+            align-items: flex-start;
+            padding-top: 2rem;
+        }
+    }
+</style>
+
+<div class="container perfil-container">
+    <div class="row w-100" style="max-width: 900px;">
+
+        <div class="col-md-6">
+            <div class="card perfil-card h-100">
                 <div class="card-header">
                     <h4>Perfil de Usuario</h4>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-sm-3">
-                            <h6>Nombre de Usuario:</h6>
-                        </div>
-                        <div class="col-sm-9">
-                            <p>{{ user.username }}</p>
-                        </div>
+
+                    <div class="perfil-item">
+                        <span class="perfil-label">Nombre de Usuario:</span>
+                        <span class="perfil-value">{{ user.username }}</span>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-sm-3">
-                            <h6>Email:</h6>
-                        </div>
-                        <div class="col-sm-9">
-                            <p>{{ user.email|default:"No especificado" }}</p>
-                        </div>
+
+                    <div class="perfil-item">
+                        <span class="perfil-label">Email:</span>
+                        <span class="perfil-value">{{ user.email|default:"No especificado" }}</span>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-sm-3">
-                            <h6>Tipo de Usuario:</h6>
-                        </div>
-                        <div class="col-sm-9">
-                            <p>
-                                {% if user.is_staff %}
-                                    <span class="badge bg-primary">Administrador</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Usuario</span>
-                                {% endif %}
-                            </p>
-                        </div>
+
+                    <div class="perfil-item">
+                        <span class="perfil-label">Tipo de Usuario:</span>
+                        <span class="perfil-value">
+                            {% if user.is_staff %}
+                                <span class="badge bg-primary">Administrador</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Usuario</span>
+                            {% endif %}
+                        </span>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-sm-3">
-                            <h6>Fecha de Registro:</h6>
-                        </div>
-                        <div class="col-sm-9">
-                            <p>{{ user.date_joined|date:"d/m/Y" }}</p>
-                        </div>
+
+                    <div class="perfil-item">
+                        <span class="perfil-label">Fecha de Registro:</span>
+                        <span class="perfil-value">{{ user.date_joined|date:"d/m/Y" }}</span>
                     </div>
+
                 </div>
             </div>
         </div>
+
+
+        <div class="col-md-6">
+            <div class="card perfil-card h-100">
+                <div class="card-header">
+                    <h5>Actividad del Usuario</h5>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center text-center">
+                    <p class="text-muted mb-0">
+                        Aquí se mostrará el historial de productos añadidos, editados, etc.
+                    </p>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
+
 {% endblock %}

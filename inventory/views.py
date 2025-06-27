@@ -98,12 +98,14 @@ def supplier_update(request, pk):
 
 @login_required
 def supplier_delete(request, pk):
-    supplier = get_object_or_404(Suppliers, pk=pk)
-    if request.method == 'POST':
+    try:
+        supplier = Suppliers.objects.get(pk=pk)
         supplier.delete()
-        messages.success(request, f'Proveedor "{supplier.empresa}" eliminado exitosamente.')
-        return redirect('suppliers_list')
-    return render(request, 'inv/supplier_confirm_delete.html', {'supplier': supplier})
+        messages.success(request, 'Proveedor eliminado exitosamente')
+    except Suppliers.DoesNotExist:
+        messages.error(request, 'El proveedor no existe o ya fue eliminado')
+    
+    return redirect('suppliers_list')
 
 @staff_required
 def users_view(request):

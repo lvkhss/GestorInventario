@@ -34,18 +34,6 @@ border-radius: 6px;
     transition: border-color 0.2s;
 }
 
-.form-select:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
-}
-
-.d-inline-block {
-    display: inline-block;
-}
-
-.w-auto {
-    width: auto;
-}
 
 
 .container-login {
@@ -274,7 +262,10 @@ form {
   border-radius: 10px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
+.form-login {
 
+  box-shadow: none;
+}
 form h2 {
   text-align: center;
   margin-bottom: 18px;
@@ -299,10 +290,6 @@ form button[type="submit"] {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
-}
-
-form button[type="submit"]:hover {
-  background-color: #0056b3;
 }
 
 form + p {
@@ -511,4 +498,15 @@ background-color: #354e66;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
+}
+
+.form-register{
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 50px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: none; 
+
+
 }

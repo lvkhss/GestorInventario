@@ -4,11 +4,11 @@
 <div class="container-login" style="max-width: 400px; margin-top: 60px;">
   {% if error %}
   <div class="alert alert-danger" role="alert">
-      {{ error }}
+    {{ error }}
   </div>
   {% endif %}
-  
-  <form method="POST">
+
+  <form class="form-register" method="POST">
     {% csrf_token %}
     <div class="form-group mb-3">
       <label for="id_username">Usuario</label>
