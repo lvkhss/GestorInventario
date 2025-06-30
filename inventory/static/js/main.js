@@ -250,17 +250,6 @@ document.addEventListener('DOMContentLoaded', function () {
             endDate.addEventListener("change", updateHistorialTable);
         }
     }
-    
-    // Solo agregar listeners si estamos en la página de inventario
-    if (window.location.pathname.includes('/inventario/')) {
-        if (searchInput) {
-            searchInput.addEventListener("input", updateTable);
-        }
-
-        if (filterType) {
-            filterType.addEventListener("change", updateTable);
-        }
-    }
 });
 
 // ===================================
@@ -415,8 +404,8 @@ function validateRUT(rut) {
 // REGISTER - Generar contraseña
 // ===================================
 function enablePassword() {
-    const passwordField = document.getElementById('id_password1');
-    const confirmField = document.getElementById('id_password2');
+    const passwordField = document.getElementById('id_password');
+    const confirmField = document.getElementById('id_confirm_password');
 
     // Generar contraseña automáticamente
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
@@ -432,13 +421,13 @@ function enablePassword() {
 // REGISTER - Copiar contraseña
 // ===================================
 function copyPassword() {
-    const passwordField = document.getElementById('id_password1');
+    const passwordField = document.getElementById('id_password');
     if (passwordField.value) {
         passwordField.select();
         document.execCommand('copy');
 
         // Mostrar toast flotante
-        const toast = document.getElementById('copyToast');
+        const toast = document.querySelector('.registro-toast.copy');
         if (toast) {
             toast.style.display = 'block';
             setTimeout(() => {
@@ -452,7 +441,7 @@ function copyPassword() {
 // REGISTER - Toggle visibilidad contraseña
 // ===================================
 function togglePasswordVisibility() {
-    const passwordField = document.getElementById('id_password1');
+    const passwordField = document.getElementById('id_password');
     const toggleBtn = document.getElementById('togglePassword');
 
     if (passwordField && toggleBtn) {
@@ -571,7 +560,7 @@ function filtrarHistorial() {
 // Nota: La funcionalidad de búsqueda de usuarios está implementada
 // directamente en el template users.html para mejor compatibilidad
 // ===================================
-// USER EDIT FORM - Password match validation (for all users with password fields)
+// USER EDIT FORM - Password match validation (solo coincidencia, longitud solo backend)
 document.addEventListener('DOMContentLoaded', function () {
     const userEditForm = document.querySelector('.add-product-form');
     if (!userEditForm) return;
@@ -579,10 +568,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const password2 = document.getElementById('new_password2');
     const errorSpan = document.getElementById('password2-error');
 
-    // Only apply if repeat password field exists (for all users with password fields)
-    if (password2 && errorSpan) {
+    // Validar solo coincidencia de contraseñas
+    if (password1 && password2 && errorSpan) {
         userEditForm.addEventListener('submit', function (e) {
-            // Only validate if at least one password field is filled
             if (password1.value || password2.value) {
                 if (!password1.value || !password2.value) {
                     e.preventDefault();
@@ -600,12 +588,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     return false;
                 }
             } else {
-                // Both fields empty: allow form submit, no error
+                // Ambos campos vacíos: permitir submit
                 errorSpan.textContent = '';
                 errorSpan.style.display = 'none';
             }
         });
-        // Hide error on input
+        // Ocultar error al escribir
         password2.addEventListener('input', function () {
             errorSpan.textContent = '';
             errorSpan.style.display = 'none';

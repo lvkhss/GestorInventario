@@ -17,6 +17,7 @@ from django.core.validators import RegexValidator, EmailValidator
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 from .decorators import staff_required
+from django.contrib.auth.password_validation import validate_password, ValidationError as PasswordValidationError
 
 from django.contrib import messages
 from .models import ProductType
@@ -660,11 +661,16 @@ def user_edit(request, pk):
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
 
-        # Only require repeat for non-staff
-        if not is_staff and new_password:
+        # Password match validation (always required if changing password)
+        if new_password or new_password2:
             if new_password != new_password2:
                 messages.error(request, 'Las contraseñas no coinciden.')
-                # Render the form again with errors
+                return render(request, 'inv/user_edit.html', {'user_obj': user})
+            # Password strength validation
+            try:
+                validate_password(new_password, user)
+            except PasswordValidationError as e:
+                messages.error(request, e.messages[0])
                 return render(request, 'inv/user_edit.html', {'user_obj': user})
 
         # Validaciones básicas
@@ -680,16 +686,12 @@ def user_edit(request, pk):
             user.last_name = last_name
             user.is_staff = is_staff
             user.is_superuser = is_superuser
-            
-            # Cambiar contraseña si se proporciona
-            new_password = request.POST.get('new_password', '').strip()
+            # Cambiar contraseña si se proporciona y es válida
             if new_password:
                 user.set_password(new_password)
-            
             user.save()
             messages.success(request, f'Usuario "{username}" actualizado exitosamente.')
             return redirect('users_view')
-    
     return render(request, 'inv/user_edit.html', {'user_obj': user})
 
 @staff_required

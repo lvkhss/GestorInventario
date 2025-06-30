@@ -75,31 +75,35 @@
 {% endif %}
     <!-- New Password -->
     <div class="add-product-group">
-  <label for="new_password" class="add-product-label">Nueva contraseña</label>
-  <div class="add-product-field">
-    <input type="password" 
-           id="new_password" 
-           name="new_password" 
-           class="form-control" 
-           placeholder="Dejar en blanco para mantener la actual">
-    <small class="text-muted">Solo completar si desea cambiar la contraseña</small>
-  </div>
-</div>
-
-{% if not user.is_staff %}
-<div class="add-product-group">
-  <label for="new_password2" class="add-product-label">Repetir nueva contraseña</label>
-  <div class="add-product-field">
-    <input type="password" 
-           id="new_password2" 
-           name="new_password2" 
-           class="form-control" 
-           placeholder="Repita la nueva contraseña">
-    <small class="text-muted">Repita la nueva contraseña para confirmar</small>
-    <span id="password2-error" class="text-danger" style="display:none;"></span>
-  </div>
-</div>
-{% endif %}
+      <label for="new_password" class="add-product-label">Nueva contraseña</label>
+      <div class="add-product-field">
+        <input type="password" 
+               id="new_password" 
+               name="new_password" 
+               class="form-control" 
+               placeholder="Dejar en blanco para mantener la actual">
+        <small class="text-muted">Solo completar si desea cambiar la contraseña</small>
+        {% if form.new_password.errors %}
+          <span class="text-danger">{{ form.new_password.errors.0 }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <!-- Repeat password: SIEMPRE visible y requerido si se cambia la contraseña -->
+    <div class="add-product-group">
+      <label for="new_password2" class="add-product-label">Repetir nueva contraseña</label>
+      <div class="add-product-field">
+        <input type="password" 
+               id="new_password2" 
+               name="new_password2" 
+               class="form-control" 
+               placeholder="Repita la nueva contraseña" required>
+        <small class="text-muted">Repita la nueva contraseña para confirmar</small>
+        <span id="password2-error" class="text-danger" style="display:none;"></span>
+        {% if form.new_password2.errors %}
+          <span class="text-danger">{{ form.new_password2.errors.0 }}</span>
+        {% endif %}
+      </div>
+    </div>
 
      <!-- Permissions  -->
     {% if user.is_staff %}

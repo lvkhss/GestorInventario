@@ -331,9 +331,8 @@ class UserRegistrationForm(forms.Form):
         cleaned_data = super().clean()
         password1 = cleaned_data.get('password1')
         password2 = cleaned_data.get('password2')
-        
+        # Solo validar coincidencia, no longitud ni fortaleza aquí
         if password1 and password2 and password1 != password2:
             raise ValidationError('Las contraseñas no coinciden.')
-        
         return cleaned_data
 
