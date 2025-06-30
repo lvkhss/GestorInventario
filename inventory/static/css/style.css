@@ -79,7 +79,7 @@ button.dynamic-table-button {
   margin: 16px auto 0;
   display: block;
   text-align: center;
-    font-size: 1rem;
+  font-size: 1rem;
   font-weight: bold;
   background-color: #354e66;
   color: #fff;
@@ -91,12 +91,12 @@ button.dynamic-table-button {
   text-decoration: none;
 }
 
-.bnt-django-admin{
+.bnt-django-admin {
   width: 80%;
   margin: 16px auto 0;
   display: block;
   text-align: center;
-    font-size: 1rem;
+  font-size: 1rem;
   font-weight: bold;
   background-color: #354e66;
   color: #fff;
@@ -115,6 +115,25 @@ button.dynamic-table-button {
 
 /* añadir producto edit */
 
+.btn-dj-admin {
+  margin-left: 80%;
+  font-size: 1rem;
+  font-weight: bold;
+  background-color: #354e66;
+  color: #fff;
+  padding: 1vh;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+
+.btn-dj-admin:hover {
+
+  background-color: #223146;
+
+}
 
 .add-product-label {
   display: block;
@@ -258,7 +277,7 @@ button.dynamic-table-button {
 }
 
 form {
-  max-width: 400px;
+  max-width: 70vh;
   margin: 32px auto 0 auto;
   padding: 24px 28px;
   background: #ffffff;
@@ -363,6 +382,7 @@ form+p {
   background-color: #dc3545;
   color: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
 .btn-product-type-delete-primary {
@@ -429,19 +449,6 @@ form+p {
 .text-muted {
   color: #666;
   font-weight: bold;
-}
-
-.btn-volver-his {
-  background-color: #354e66;
-  color: #fff;
-  margin-top: 5%;
-  padding: 10px 10px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
 }
 
 .form-register {

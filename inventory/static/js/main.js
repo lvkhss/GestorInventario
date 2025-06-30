@@ -142,7 +142,7 @@ function updateUserMovementsTable() {
         alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
         endDateInput.value = "";
 
-        fetch('/user-movements/')
+        fetch('/user-mov/')
             .then(response => response.text())
             .then(data => {
                 const parser = new DOMParser();
@@ -156,7 +156,7 @@ function updateUserMovementsTable() {
         return;
     }
 
-    let url = '/user-movements/?';
+    let url = '/user-mov/?';
     if (query) url += `q=${encodeURIComponent(query)}&`;
     if (type) url += `type=${encodeURIComponent(type)}&`;
     if (startDate) url += `start=${encodeURIComponent(startDate)}&`;
@@ -177,8 +177,8 @@ function updateUserMovementsTable() {
 
 // Detectar si estamos en la página de movimientos del usuario
 document.addEventListener('DOMContentLoaded', function () {
-    // Verificar si estamos en la página de user-movements
-    if (window.location.pathname === '/user-movements/') {
+    // Verificar si estamos en la página de user-movimientos (soporta /user-mov/ y /user-mov)
+    if (window.location.pathname.startsWith('/user-mov')) {
         const searchInput = document.getElementById("searchInput");
         const filterType = document.getElementById("filterType");
         const startDate = document.getElementById("startDate");

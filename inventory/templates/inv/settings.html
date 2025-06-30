@@ -5,6 +5,9 @@
 
 <div class="add-product-container">
   <form method="POST" class="add-product-form" action="{% url 'settings_view' %}">
+    <a href="/admin/" class="btn-dj-admin" target="_blank">
+      Django Admin
+    </a>
     <h4>Agregar Nuevo Tipo de Producto</h4>
     {% csrf_token %}
     <div class="add-product-group">
@@ -50,11 +53,10 @@
           </tr>
           {% endfor %}
         </tbody>
+        
       </table>
+      
     </div>
-    <a href="/admin/" class="bnt-django-admin" target="_blank">
-      Ir al Django Admin
-    </a>
   </form>
 
 </div>
