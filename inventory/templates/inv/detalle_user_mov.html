@@ -2,8 +2,8 @@
 {% load static %}
 {% load number_filters %}
 {% block body %}
-
-  <ul class="list-group detalle-boleta">
+<div class="center-content">
+  <ul class="detalle-boleta">
     <li class="list-group-item">
       <span class="label">Producto :</span>
       <span class="dots"></span>
@@ -57,7 +57,7 @@
       <span class="dots"></span>
       <span class="value">{{ movimiento.usuario.username|default:"Desconocido" }}</span>
     </li>
-    <button type="button" class="btn-login" onclick="window.location.href='{% url 'user_mov' %}'">Volver a Mis
+    <button  class="btn-login" onclick="window.location.href='{% url 'user_mov' %}'">Volver a Mis
       Movimientos</button>
   </ul>
 </div>

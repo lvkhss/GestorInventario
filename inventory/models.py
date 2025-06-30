@@ -60,7 +60,7 @@ class HistorialMovimiento(models.Model):
     nombre_producto = models.CharField(max_length=200)
     tipo_producto = models.CharField(max_length=50)
     codigo_barras = models.CharField(max_length=100, blank=True, null=True) 
-    fecha = models.DateTimeField(auto_now_add=True)
+    fecha = models.DateTimeField(default=now)
     cambio_stock = models.IntegerField()
     stock_final = models.IntegerField()
     motivo = models.CharField(max_length=255, blank=True)

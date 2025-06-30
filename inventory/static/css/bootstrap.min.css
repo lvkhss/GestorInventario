@@ -13,6 +13,7 @@ body {
 
 
 .sidebar {
+  overflow-x: auto;
     display: flex;
     flex-direction: column;
     background-color: #354e66;
@@ -20,6 +21,7 @@ body {
     height: 100%;
     position: fixed;
     box-shadow: 6px 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
 }
 
 
@@ -58,15 +60,29 @@ body {
     background-color: #425d75;
 }
 
+.btn-detalles{
+align-items: center;
+    border-radius: 1vh;
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 1vh 2vh;
+    font-weight: bold;
+    background-color: #354e66;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.btn-detalles:hover {
+    background-color: #223146;
+}
 
 
 .btn {
     align-items: center;
-    border-width: 2px;
-    border-radius: 10px;
+    border-radius: 1vh;
     text-decoration: none;
     font-size: 1rem;
-    padding: 10px 20px;
+    padding: 1vh 2vh;
     font-weight: bold;
     background-color: #ffc107;
     color: white;
@@ -95,24 +111,25 @@ body {
 }
 
 .table-container {
-
     display: flex;
-    gap: 20px;
+    gap: 2vw;
     justify-content: center;
-
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    padding-bottom: 2em;
 }
 
 .fixed-table {
-
     table-layout: fixed;
-    width: 900px;
-    min-width: 900px;
+    width: 90vw;
+    min-width: 320px;
     max-width: 100%;
 }
 
 .fixed-table th,
 .fixed-table td {
-
+  
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -124,57 +141,33 @@ body {
     border-collapse: collapse;
     width: 100%;
     background-color: white;
-    overflow: hidden;
-    margin-top: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    overflow-x: auto;
+    margin-top: 2vh;
+    box-shadow: 0 0.4rem 0.6rem rgba(0, 0, 0, 0.2);
 }
 
 
 
 .table th {
+  
     border-collapse: collapse;
     background-color: #354e66;
     color: white;
     text-align: center;
-    padding: 15px;
+    padding: 1em;
     font-weight: bold;
     text-transform: uppercase;
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .table td {
-
     text-align: center;
-    padding: 15px;
+    padding: 1em;
     vertical-align: middle;
     border-bottom: 1px solid #dee2e6;
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
-.table-hover tbody tr:hover {
-
-    transition: background-color 0.3s;
-}
-
-
-.add_buttons .btn {
-    font-size: 1.2rem;
-    padding: 15px 30px;
-    margin: 10px 15px;
-    font-weight: bold;
-    transition: transform 0.2s, background-color 0.3s;
-}
-
-
-.add_buttons .btn-warning {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: white;
-}
-
-.add_buttons .btn-warning:hover {
-    background-color: #e0a800;
-}
 
 .button-group {
     display: flex;
@@ -413,6 +406,38 @@ body {
     font-weight: bold;
     text-transform: uppercase;
     font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .table-container {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+  .fixed-table {
+    width: 100vw;
+    min-width: 0;
+  }
+  .table th, .table td {
+    padding: 0.6em;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .table-container {
+    flex-direction: column;
+    gap: 1vw;
+    padding: 0 0.2em 2em 0.2em;
+    overflow-x: auto;
+  }
+  .fixed-table {
+    width: 100vw;
+    min-width: 0;
+  }
+  .table th, .table td {
+    padding: 0.4em;
+    font-size: 0.8rem;
+  }
 }
 
 
