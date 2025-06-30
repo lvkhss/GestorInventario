@@ -423,6 +423,15 @@ body {
         align-items: flex-start;
       }
     }
- 
+ .table-type th {
+     border-collapse: collapse;
+    background-color: #354e66;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
 
 

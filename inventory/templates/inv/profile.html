@@ -11,7 +11,7 @@
   <div class="dashboard">
 
     <div class="card profile" style="margin-left: 1px; padding-top: 10%;">
-      <p><strong>Perfil de Usuario</strong></p>
+      <p><strong>Perfil de {{ user.first_name }} {{ user.last_name }}</strong></p>
       <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Profile" />
       <p class="role">{{ user.username }}</p>
       <p>{{ user.email|default:"No especificado" }}</p>
@@ -31,7 +31,7 @@
     <div class="card">
       <div class="welcome">
         <div>
-          <h2>Estadisticas de {{ user.username }}</h2>
+          <h2>Estadisticas de {{ user.first_name }}</h2>
         </div>
       </div>
 

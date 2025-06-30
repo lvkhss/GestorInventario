@@ -26,6 +26,7 @@ def delete_product_type(request, pk):
     messages.success(request, "Tipo de producto eliminado.")
     return redirect('settings_view')
 
+
 @staff_required
 def settings_view(request):
     if request.method == 'POST':
