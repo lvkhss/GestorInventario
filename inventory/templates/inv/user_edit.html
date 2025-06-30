@@ -7,21 +7,45 @@
 
     <h4>Editar Usuario</h4>
 
+    <!-- Toast flotante para errores -->
+    <div id="errorToast"
+      style="position: fixed; top: 20px; right: 20px; z-index: 1050; background-color: #dc3545; color: white; padding: 10px 15px; border-radius: 5px; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <span id="errorToastMsg">¡Error!</span>
+    </div>
 
+    {% if messages %}
+      <div class="alert-messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" role="alert" style="display:none;">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
 
+{% if user.is_staff %}
     <!-- First Name -->
     <div class="add-product-group">
-      <label for="username" class="add-product-label">Nombre de usuario</label>
+      <label for="first_name" class="add-product-label">Nombre Trabajador</label>
       <div class="add-product-field">
         <input type="text" 
-               id="username" 
-               name="username" 
+               id="first_name" 
+               name="first_name" 
                class="form-control" 
-               value="{{ user_obj.ufirst_name }}" 
+               value="{{ request.POST.first_name|default:user_obj.first_name|default_if_none:'' }}" 
                required>
       </div>
     </div>
-
+    <div class="add-product-group">
+      <label for="last_name" class="add-product-label">Apellido Trabajador</label>
+      <div class="add-product-field">
+        <input type="text" 
+               id="last_name" 
+               name="last_name" 
+               class="form-control" 
+               value="{{ request.POST.last_name|default:user_obj.last_name|default_if_none:'' }}" 
+               required>
+      </div>
+    </div>
+{% endif %}
     <!-- Username -->
     <div class="add-product-group">
       <label for="username" class="add-product-label">Nombre de usuario</label>
@@ -36,6 +60,7 @@
     </div>
 
     <!-- Email -->
+     {% if user.is_staff %}
     <div class="add-product-group">
       <label for="email" class="add-product-label">Email</label>
       <div class="add-product-field">
@@ -47,19 +72,34 @@
                required>
       </div>
     </div>
-
+{% endif %}
     <!-- New Password -->
     <div class="add-product-group">
-      <label for="new_password" class="add-product-label">Nueva contraseña (opcional)</label>
-      <div class="add-product-field">
-        <input type="password" 
-               id="new_password" 
-               name="new_password" 
-               class="form-control" 
-               placeholder="Dejar en blanco para mantener la actual">
-        <small class="text-muted">Solo completar si desea cambiar la contraseña</small>
-      </div>
-    </div>
+  <label for="new_password" class="add-product-label">Nueva contraseña</label>
+  <div class="add-product-field">
+    <input type="password" 
+           id="new_password" 
+           name="new_password" 
+           class="form-control" 
+           placeholder="Dejar en blanco para mantener la actual">
+    <small class="text-muted">Solo completar si desea cambiar la contraseña</small>
+  </div>
+</div>
+
+{% if not user.is_staff %}
+<div class="add-product-group">
+  <label for="new_password2" class="add-product-label">Repetir nueva contraseña</label>
+  <div class="add-product-field">
+    <input type="password" 
+           id="new_password2" 
+           name="new_password2" 
+           class="form-control" 
+           placeholder="Repita la nueva contraseña">
+    <small class="text-muted">Repita la nueva contraseña para confirmar</small>
+    <span id="password2-error" class="text-danger" style="display:none;"></span>
+  </div>
+</div>
+{% endif %}
 
      <!-- Permissions  -->
     {% if user.is_staff %}
@@ -73,8 +113,7 @@
           <input type="checkbox" 
                  id="is_staff" 
                  name="is_staff" 
-                 class="form-check-input"
-                 {% if user_obj.is_staff %}checked{% endif %}>
+                 class="form-check-input" {% if user_obj.is_staff %}checked{% endif %}>
         </div>
         
         <div class="form-check mt-2">
@@ -84,14 +123,15 @@
           <input type="checkbox" 
                  id="is_superuser" 
                  name="is_superuser" 
-                 class="form-check-input"
-                 {% if user_obj.is_superuser %}checked{% endif %}>
+                 class="form-check-input" {% if user_obj.is_superuser %}checked{% endif %}>
         </div>
       </div>
     </div>
+    
     {% endif %}
 
-    <!-- User Info -->
+    <!-- User Info (solo staff/admin) -->
+    {% if user.is_staff %}
     <div class="add-product-group">
       <div class="add-product-field">
         <p class="text-muted mb-1">
@@ -105,16 +145,9 @@
             Nunca
           {% endif %}
         </p>
-        <p class="text-muted mb-0">
-          <strong>Estado:</strong> 
-          {% if user_obj.is_active %}
-            <span class="badge bg-success">Activo</span>
-          {% else %}
-            <span class="badge bg-secondary">Inactivo</span>
-          {% endif %}
-        </p>
       </div>
     </div>
+    {% endif %}
 
     <div class="add-product-group">
       <div class="add-product-btn-wrap">
@@ -128,4 +161,26 @@
     </div>
   </form>
 </div>
+<script>
+  // Función para mostrar el toast de error
+  function showErrorToast(message) {
+    document.getElementById('errorToastMsg').innerText = message;
+    var toast = document.getElementById('errorToast');
+    toast.style.display = 'block';
+    setTimeout(function() {
+      toast.style.display = 'none';
+    }, 3000);
+  }
+
+  // Ejemplo de uso: mostrar el toast en caso de error de email o contraseña
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.tags == 'error' %}
+        showErrorToast("{{ message }}");
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+</script>
+
 {% endblock %}
+

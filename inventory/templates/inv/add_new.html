@@ -35,8 +35,8 @@
 
     <div class="add-product-group">
       <div class="add-product-btn-wrap">
-        <button type="button" class="add-product-btn" onclick="window.location.href='{% url 'inventario' %}'">Volver</button>
-        <button type="submit" class="add-product-btn">
+        <button  class="add-product-btn" onclick="window.location.href='{% url 'inventario' %}'">Volver</button>
+        <button  class="add-product-btn">
           {% if form.instance.pk %}Guardar Cambios{% else %}Crear Producto{% endif %}
         </button>
       </div>

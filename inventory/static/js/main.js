@@ -570,6 +570,78 @@ function filtrarHistorial() {
 // ===================================
 // Nota: La funcionalidad de búsqueda de usuarios está implementada
 // directamente en el template users.html para mejor compatibilidad
+// ===================================
+// USER EDIT FORM - Password match validation (for all users with password fields)
+document.addEventListener('DOMContentLoaded', function () {
+    const userEditForm = document.querySelector('.add-product-form');
+    if (!userEditForm) return;
+    const password1 = document.getElementById('new_password');
+    const password2 = document.getElementById('new_password2');
+    const errorSpan = document.getElementById('password2-error');
+
+    // Only apply if repeat password field exists (for all users with password fields)
+    if (password2 && errorSpan) {
+        userEditForm.addEventListener('submit', function (e) {
+            // Only validate if at least one password field is filled
+            if (password1.value || password2.value) {
+                if (!password1.value || !password2.value) {
+                    e.preventDefault();
+                    errorSpan.textContent = 'Debe completar ambos campos.';
+                    errorSpan.style.display = 'block';
+                    if (!password1.value) password1.focus();
+                    else password2.focus();
+                    return false;
+                }
+                if (password1.value !== password2.value) {
+                    e.preventDefault();
+                    errorSpan.textContent = 'Las contraseñas no coinciden.';
+                    errorSpan.style.display = 'block';
+                    password2.focus();
+                    return false;
+                }
+            } else {
+                // Both fields empty: allow form submit, no error
+                errorSpan.textContent = '';
+                errorSpan.style.display = 'none';
+            }
+        });
+        // Hide error on input
+        password2.addEventListener('input', function () {
+            errorSpan.textContent = '';
+            errorSpan.style.display = 'none';
+        });
+        password1.addEventListener('input', function () {
+            errorSpan.textContent = '';
+            errorSpan.style.display = 'none';
+        });
+    }
+});
+
+// USER EDIT FORM - Toast for Django messages (error only)
+document.addEventListener('DOMContentLoaded', function () {
+    // Find hidden Django alert messages (error only)
+    const alertMessages = document.querySelectorAll('.alert-messages .alert');
+    if (alertMessages.length > 0) {
+        alertMessages.forEach(function(alert) {
+            // Show toast for any message with 'alert' class (Django uses alert-danger for errors)
+            if (alert.classList.contains('alert-danger') || alert.classList.contains('alert-error') || alert.classList.contains('alert')) {
+                showErrorToast(alert.textContent.trim());
+            }
+        });
+    }
+});
+
+function showErrorToast(msg) {
+    const toast = document.getElementById('errorToast');
+    const toastMsg = document.getElementById('errorToastMsg');
+    if (toast && toastMsg) {
+        toastMsg.textContent = msg;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3500);
+    }
+}
 
 
 

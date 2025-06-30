@@ -22,6 +22,10 @@ from django.contrib import messages
 from .models import ProductType
 @staff_required
 def delete_product_type(request, pk):
+    if request.method != 'POST':
+        messages.error(request, "La eliminación de tipos de producto solo se permite por POST.")
+        return redirect('settings_view')
+    # Extra: puedes pedir confirmación aquí si quieres
     ProductType.objects.filter(pk=pk).delete()
     messages.success(request, "Tipo de producto eliminado.")
     return redirect('settings_view')
@@ -649,9 +653,20 @@ def user_edit(request, pk):
         # Datos básicos del usuario
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
+        new_password = request.POST.get('new_password', '').strip()
+        new_password2 = request.POST.get('new_password2', '').strip()
         is_staff = request.POST.get('is_staff') == 'on'
         is_superuser = request.POST.get('is_superuser') == 'on'
-        
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+
+        # Only require repeat for non-staff
+        if not is_staff and new_password:
+            if new_password != new_password2:
+                messages.error(request, 'Las contraseñas no coinciden.')
+                # Render the form again with errors
+                return render(request, 'inv/user_edit.html', {'user_obj': user})
+
         # Validaciones básicas
         if User.objects.exclude(pk=pk).filter(username=username).exists():
             messages.error(request, 'Ya existe un usuario con ese nombre.')
@@ -661,6 +676,8 @@ def user_edit(request, pk):
             # Actualizar usuario
             user.username = username
             user.email = email.lower()
+            user.first_name = first_name
+            user.last_name = last_name
             user.is_staff = is_staff
             user.is_superuser = is_superuser
             

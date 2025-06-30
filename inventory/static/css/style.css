@@ -1,104 +1,120 @@
+/* checkbox Admin y superuser*/
 .button-group {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
 }
+
 .button-group-2 {
-    display: inline-block;
-    margin-right: 10px;
-    vertical-align: middle;
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: middle;
 }
 
 
+/* Hightligher mode*/
 button.dynamic-table-button {
-    background-color: white;
-border-radius: 6px;
+  background-color: white;
+  border-radius: 6px;
   border: 1px solid #ced4da;
   padding: 10px 12px;
   font-size: 1rem;
   margin-top: 10px;
   transition: border-color 0.2s;
-  
+
 }
 
-
+/* Filtro */
 .form-select {
-    padding: 6px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    background: #fff;
-    font-size: 1rem;
-    color: #333;
-    min-width: 140px;
-    outline: none;
-    transition: border-color 0.2s;
+  padding: 6px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 1rem;
+  color: #333;
+  min-width: 140px;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
 
+/* login */
+
+.form-login {
+
+  box-shadow: none;
+}
 
 .container-login {
-    font-family: 'Nunito', Arial, sans-serif;
-    border-radius: 8%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    padding: 32px 24px 24px 24px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
-}
-
-
-.group-form {
-    align-items: center;
-}
-
-.container-login h3 {
-    font-weight: 600;
-    margin-bottom: 24px;
-    color: #354e66;
+  font-family: 'Nunito', Arial, sans-serif;
+  border-radius: 8%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  padding: 5vh;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
 }
 
 .form-group label {
-    display: flex;
-    font-weight: 500;
-    color: #354e66;
-    margin-bottom: 6px;
+  display: flex;
+  font-weight: 500;
+  color: #354e66;
+  margin-bottom: 6px;
 }
 
 .form-control {
 
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-top: 10px;
+  transition: border-color 0.2s;
+}
+
+.btn-login {
+  width: 80%;
+  margin: 16px auto 0;
+  display: block;
+  text-align: center;
     font-size: 1rem;
-        margin-top: 10px;
-    transition: border-color 0.2s;
+  font-weight: bold;
+  background-color: #354e66;
+  color: #fff;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
 }
 
-.form-control:focus {
-    border-color: #354e66;
-    outline: none;
-    box-shadow: 0 0 0 2px #354e6633;
+.bnt-django-admin{
+  width: 80%;
+  margin: 16px auto 0;
+  display: block;
+  text-align: center;
+    font-size: 1rem;
+  font-weight: bold;
+  background-color: #354e66;
+  color: #fff;
+  padding: 10px 28px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+
 }
 
-.btn-primary {
-    width: 80%;
-    margin: 16px auto 0;
-    display: block;
-    text-align: center;
+.btn-login:hover {
+  background-color: #223146;
 }
 
+/* añadir producto edit */
 
-
-.btn-primary:hover {
-    background-color: #223146;
-}
-
-
-.add-product-group {
-  margin-bottom: 20px;
-}
 
 .add-product-label {
   display: block;
@@ -119,111 +135,48 @@ border-radius: 6px;
   transition: border-color 0.2s;
 }
 
-.add-product-field input:focus,
-.add-product-field select:focus,
-.add-product-field textarea:focus {
-  border-color: #007bff;
-  outline: none;
-}
-
 .add-product-btn-wrap {
   display: flex;
-  gap: 20px; 
-  justify-content: flex-end; 
+  gap: 20px;
+  justify-content: flex-end;
   align-items: center;
   text-decoration: none;
 }
 
 .add-product-btn {
+  font-size: 1rem;
+  font-weight: bold;
   background-color: #354e66;
   color: #fff;
   padding: 10px 28px;
   border: none;
   border-radius: 6px;
-  font-size: 1.1rem;
-  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
   text-decoration: none;
 }
 
 .add-product-btn:hover {
-  background-color: #0056b3;
+  background-color: #223146;
 }
 
-.add_buttons {
-    display: flex;
-    align-items: center;
-    /* Centrar verticalmente */
-    gap: 15px;
-    /* Espacio entre los elementos */
-    margin-bottom: 20px;
-    /* Espacio debajo del contenedor */
-    flex-wrap: wrap;
-    max-width: 1500px;
-    max-height: 70px;
-    /* Que se envuelvan si no hay espacio */
+/* filtros inventario*/
+.add_buttons select#filterType {
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-top: 10px;
+  transition: border-color 0.2s;
 }
 
-.add_buttons .button-group {
-
-    min-width: 150px;
-}
-
-
-.add_buttons select#filterType {    
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    padding: 10px 12px;
-    font-size: 1rem;
-        margin-top: 10px;
-    transition: border-color 0.2s;
-}
-.add_buttons select#filterUser {    
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    padding: 10px 12px;
-    font-size: 1rem;
-        margin-top: 10px;
-    transition: border-color 0.2s;
-}
-
-.agregar-producto {
-    border-top-left-radius: 50px;
-    border-bottom-left-radius: 50px;
-    text-decoration: none;
-    font-size: 1.2rem;
-    padding: 15px 30px;
-    margin: 10px 1px;
-    font-weight: bold;
-    transition: transform 0.2s, background-color 0.3s;
-    background-color: rgb(236, 175, 61);
-    color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-.agregar-producto:hover {
-    transform: translateY(-2px);
-    background-color: rgb(220, 160, 45);
-}
-
-.agregar-excel {
-    border-top-right-radius: 50px;
-    border-bottom-right-radius: 50px;
-    text-decoration: none;
-    font-size: 1.2rem;
-    padding: 15px 30px;
-    margin: 1px 1px;
-    font-weight: bold;
-    transition: transform 0.2s, background-color 0.3s;
-    background-color: #354e66;
-    color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-.agregar-excel:hover {
-    transform: translateY(-2px);
-    background-color: #2a3d52;
+.add_buttons select#filterUser {
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 10px 12px;
+  font-size: 1rem;
+  margin-top: 10px;
+  transition: border-color 0.2s;
 }
 
 .add_buttons {
@@ -233,16 +186,49 @@ border-radius: 6px;
   flex-wrap: wrap;
 }
 
+.agregar-producto {
+  border-top-left-radius: 50px;
+  border-bottom-left-radius: 50px;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 15px 30px;
+  margin: 10px 1px;
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.3s;
+  background-color: rgb(236, 175, 61);
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.agregar-producto:hover {
+  transform: translateY(-2px);
+  background-color: rgb(220, 160, 45);
+}
+
+.agregar-excel {
+  border-top-right-radius: 50px;
+  border-bottom-right-radius: 50px;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 15px 30px;
+  margin: 1px 1px;
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.3s;
+  background-color: #354e66;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.agregar-excel:hover {
+  transform: translateY(-2px);
+  background-color: #2a3d52;
+}
+
 .inventory-left {
   display: flex;
   align-items: center;
   gap: 15px;
 }
-
-.inventory-left h2 {
-  margin-right: 20px;
-}
-
 
 .button-group-fused a {
   border-radius: 0;
@@ -260,8 +246,16 @@ border-radius: 6px;
   margin-right: 0;
 }
 
+/*formularios*/
 
-/* EXCEL */
+.col-nombre {
+  /* Nombre en tablas de inicio mas grandes*/
+  min-width: 220px;
+  max-width: 400px;
+  width: 40%;
+  white-space: normal;
+  word-break: break-word;
+}
 
 form {
   max-width: 400px;
@@ -269,12 +263,9 @@ form {
   padding: 24px 28px;
   background: #ffffff;
   border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
-.form-login {
 
-  box-shadow: none;
-}
 form h2 {
   text-align: center;
   margin-bottom: 18px;
@@ -289,25 +280,45 @@ form input[type="file"] {
   margin-bottom: 18px;
 }
 
-form button[type="submit"] {
-  background-color: #354e66;
-  color: #fff;
-  padding: 10px 28px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-form + p {
+form+p {
   text-align: center;
   margin-top: 18px;
   color: #28a745;
   font-weight: 500;
 }
 
+
+.table-type {
+  border-left: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+  border-collapse: collapse;
+  width: 100%;
+
+  overflow: hidden;
+  margin-top: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.table-type th {
+  border-collapse: collapse;
+  background-color: #354e66;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.table-type td {
+  text-align: center;
+  padding: 5px;
+  vertical-align: middle;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 0.9rem;
+}
+
+/*paginacion*/
 .pagination {
   display: flex;
   justify-content: center;
@@ -335,118 +346,33 @@ form + p {
   font-weight: 500;
 }
 
-
-/* EXCEL */
-
-.detalle-mov-container {
-  max-width: 500px;
-  margin: 40px auto;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.7);
-  padding: 32px 24px 24px 24px;
-}
-
-.detalle-mov-container h2 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
-  text-align: center;
-}
-
-.detalle-mov-container .list-group {
-  margin-bottom: 1.5rem;
-}
-
-.detalle-mov-container .list-group-item {
-  font-size: 1.1rem;
-  border: none;
-  padding: 14px 10px;
-}
-
-.detalle-mov-container .list-group-item:last-child {
-  border-bottom: none;
-}
-
-.detalle-mov-container .btn {
-  background-color: #354e66;
-  width: 100%;
-  font-size: 1.1rem;
-}
-
-.add-product-btn-wrap{
-margin-top: 20px;
-}
-
-.table-type {
-    border-left: 1px solid #dee2e6;
-    border-right:  1px solid #dee2e6;
-    border-collapse: collapse;
-    width: 100%; 
-
-    overflow: hidden;
-    margin-top: 20px;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-
-
-.table-type th {
-     border-collapse: collapse;
-    background-color: #354e66;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    font-weight: bold;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-}
-
-.table-type td {
-    text-align: center;
-    padding: 5px;
-    vertical-align: middle;
-    border-bottom: 1px solid #dee2e6;
-    font-size: 0.9rem;
-}
-
-.col-nombre {
-  min-width: 220px;
-  max-width: 400px;
-  width: 40%;
-  white-space: normal;
-  word-break: break-word;
+/*Agregar nuevo tipo de producto*/
+.add-product-btn-wrap {
+  margin-top: 20px;
 }
 
 
 .btn-product-type-delete {
-    align-items: center;
-  border-width: 2px; 
-  border-radius: 5px; 
-    text-decoration: none;
-    font-size: 1rem; 
-    padding: 2px 8px; 
-    font-weight: bold; 
-    background-color: #dc3545;
-    color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  align-items: center;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: .1vh .5vh;
+  font-weight: bold;
+  background-color: #dc3545;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .btn-product-type-delete-primary {
-    background-color: #354e66;
-    color: white;
-}
-
-
-.btn-product-type-delete-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
-    color: white;
+  background-color: #354e66;
+  color: white;
 }
 
 .btn-product-type-delete:hover {
-    background-color: #bd2130;
-    border-color: #b21f2d;
+  background-color: #bd2130;
+  border-color: #b21f2d;
 }
 
 .detalle-boleta {
@@ -459,8 +385,9 @@ margin-top: 20px;
   border-radius: 10px;
   max-width: 500px;
   padding: 2rem;
-  box-shadow: 0 0 15px rgba(0,0,0,0.05);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
 }
+
 
 .detalle-boleta .list-group-item {
   display: flex;
@@ -504,8 +431,8 @@ margin-top: 20px;
   font-weight: bold;
 }
 
-.btn-volver-his{
-background-color: #354e66;
+.btn-volver-his {
+  background-color: #354e66;
   color: #fff;
   margin-top: 5%;
   padding: 10px 10px;
@@ -517,45 +444,46 @@ background-color: #354e66;
   text-decoration: none;
 }
 
-.form-register{
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 50px;
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: none; 
+.form-register {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 50px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: none;
 
 
 }
-.btn-view-mov {
-        border: none;
-        border-radius: 12px;
-        padding: 12px;
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    
-    .module-card {
-        transition: transform 0.3s ease;
-    }
-    
-    .module-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .btns {
-        display: flex;
-        gap: 10px;
-    }
 
-    .user-stats {
-  max-height: 400px; 
+.btn-view-mov {
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.module-card {
+  transition: transform 0.3s ease;
+}
+
+.module-card:hover {
+  transform: translateY(-5px);
+}
+
+.btns {
+  display: flex;
+  gap: 10px;
+}
+
+.user-stats {
+  max-height: 400px;
 }
 
 
@@ -566,7 +494,7 @@ background-color: #354e66;
 }
 
 .stat-item {
-  border : 1px solid #ced4da;
+  border: 1px solid #ced4da;
   display: flex;
   align-items: center;
   margin-bottom: 10px !important;
@@ -575,13 +503,14 @@ background-color: #354e66;
   transition: all 0.3s ease;
   width: 300px;
   height: 60px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .stat-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
 .stat-icon {
   margin: 10px;
   width: 40px;
@@ -594,11 +523,30 @@ background-color: #354e66;
   margin-right: 15px;
 }
 
-.stat-icon.text-success { background: #d4edda; color: #155724; }
-.stat-icon.text-primary { background: #d1ecf1; color: #0c5460; }
-.stat-icon.text-danger { background: #f8d7da; color: #721c24; }
-.stat-icon.text-info { background: #f5ead6; color: #604c0c; }
-.stat-icon.text-warning { background: #fff3cd; color: #856404; }
+.stat-icon.text-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.stat-icon.text-primary {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.stat-icon.text-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.stat-icon.text-info {
+  background: #f5ead6;
+  color: #604c0c;
+}
+
+.stat-icon.text-warning {
+  background: #fff3cd;
+  color: #856404;
+}
 
 
 .stat-content h5 {
@@ -624,31 +572,29 @@ background-color: #354e66;
 
 
 .add-product-field:has(.form-check) {
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    padding: 15px;
-    background-color: #fafafa;
-    display: flex;
-    gap: 20px; 
-    align-items: center;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 5px;
+  background-color: #fafafa;
+  display: flex;
+  gap: 20px;
+  align-items: center;
 }
 
 
 .form-check {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-bottom: none; 
-    transition: background-color 0.2s ease;
-    flex: 1; 
-    border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 1vh;
+  border-bottom: none;
+  flex: 1vh;
+  transition: background-color 0.2s ease;
+  border-radius: 6px;
 }
 
 
 .form-check-input:checked {
-    background-color: #007bff;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  background-color: #007bff;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
-
-
