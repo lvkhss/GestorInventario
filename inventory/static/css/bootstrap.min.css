@@ -382,6 +382,9 @@ align-items: center;
     .btn-view-mov {
       background: #28a745;
     }
+    .btn-view-mov:hover {
+      background: #1a772f;
+    }
 
     .btn-manage-mov{
       background: #17a2b8;

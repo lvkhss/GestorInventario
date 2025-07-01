@@ -129,15 +129,18 @@ def register_view(request):
                 user = User.objects.create_user(
                     username=form.cleaned_data['username'],
                     password=form.cleaned_data['password1'],
-                    email=form.cleaned_data['email']
+                    email=form.cleaned_data['email'],
+                    first_name=request.POST.get('first_name', ''),
+                    last_name=request.POST.get('last_name', '')
                 )
                 messages.success(request, f"Usuario '{user.username}' creado exitosamente")
                 return redirect('users_view')
             except Exception as e:
                 messages.error(request, f"Error al crear usuario: {e}")
+        else:
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
     else:
         form = UserRegistrationForm()
-    
     return render(request, 'inv/register.html', {'form': form})
 
 def login_view(request):
@@ -264,6 +267,16 @@ def profile(request):
         usuario=user
     ).order_by('-fecha').first()
     
+    # Producto más vendido por el usuario
+    mas_vendido = (
+        HistorialMovimiento.objects
+        .filter(usuario=user, motivo__iexact='venta')
+        .values('nombre_producto')
+        .annotate(total_vendido=Count('id'))
+        .order_by('-total_vendido', 'nombre_producto')
+        .first()
+    )
+
     context = {
         'user': user,
         'productos_creados': productos_creados,
@@ -272,6 +285,7 @@ def profile(request):
         'total_ventas': total_ventas,
         'total_movimientos': total_movimientos,
         'ultimo_movimiento': ultimo_movimiento,
+        'mas_vendido': mas_vendido,
     }
     
     return render(request, 'inv/profile.html', context)
@@ -661,7 +675,7 @@ def user_edit(request, pk):
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
 
-        # Password match validation (always required if changing password)
+        # Password validation: only if user filled either field
         if new_password or new_password2:
             if new_password != new_password2:
                 messages.error(request, 'Las contraseñas no coinciden.')
@@ -686,7 +700,7 @@ def user_edit(request, pk):
             user.last_name = last_name
             user.is_staff = is_staff
             user.is_superuser = is_superuser
-            # Cambiar contraseña si se proporciona y es válida
+            # Cambiar contraseña solo si el campo está lleno y es válido
             if new_password:
                 user.set_password(new_password)
             user.save()

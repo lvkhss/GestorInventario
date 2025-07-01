@@ -13,16 +13,17 @@
     <div class="card profile" style="margin-left: 1px; padding-top: 10%;">
       <p><strong>Perfil de {{ user.first_name }} {{ user.last_name }}</strong></p>
       <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Profile" />
-      <p class="role">{{ user.username }}</p>
+      <p class="role">@{{ user.username }}</p>
       <p>{{ user.email|default:"No especificado" }}</p>
       <p> <span class="perfil-value">
           {% if user.is_staff %}
-          <span class="badge bg-primary">Administrador</span>
+          <strong><span class="badge bg-primary">Administrador</span></strong>
           {% else %}
-          <span class="badge bg-secondary">Usuario</span>
+          <strong><span class="badge bg-secondary">Usuario</span></strong>
           {% endif %}
         </span></p>
-      <button class="btn" onclick="window.location.href='{% url 'user_edit' user.pk %}'">Editar Perfil</button>
+      <button class="add-product-btn" onclick="window.location.href='{% url 'user_edit' user.pk %}'">Editar
+        Perfil</button>
     </div>
 
 
@@ -78,7 +79,7 @@
               </div>
               <div class="stat-content">
                 <h5>Productos Editados</h5>
-                <p class="stat-number">{{ productos_editados }} </p>  
+                <p class="stat-number">{{ productos_editados }} </p>
               </div>
             </div>
 
@@ -96,7 +97,7 @@
                 <h5>Último Movimiento</h5>
                 {% if ultimo_movimiento %}
                 <p>{{ ultimo_movimiento.fecha|date:"d/m/Y" }} - {{ ultimo_movimiento.motivo }}</p>
-                <small class="text-muted">{{ ultimo_movimiento.nombre_producto }}</small>
+                <small class="text-muted" style="font-size: x-small;">{{ ultimo_movimiento.nombre_producto }}</small>
                 {% else %}
                 <p class="text-muted">Sin movimientos registrados</p>
                 {% endif %}
@@ -153,10 +154,11 @@
 
   <!-- Módulos -->
   <div class="modules">
-    <div class="module-card">
-      <h4>Movimientos</h4>
-      <p>Movimientos hechos por {{ user.username }}</p>
-      <div class="btns">
+    <div class="module-card" style="display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      <div class="stat-item-seller">
+        <h4>Movimientos</h4>
+        <p><strong>Historial de movimientos hechos por {{ user.username }}</strong></p>
         <button class="btn-view-mov" onclick="window.location.href='{% url 'user_mov' %}'"><svg
             class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
             width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -165,28 +167,40 @@
             <path stroke="currentColor" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
           </svg>
         </button>
-        <button class="btn-manage-mov"><svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
-          </svg>
-        </button>
       </div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor"
+        class="bi bi-file-earmark-person" viewBox="0 0 16 16" style="margin: 4vh auto; padding-left: 10vh">
+        <path d="M11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+        <path
+          d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2v9.255S12 12 8 12s-5 1.755-5 1.755V2a1 1 0 0 1 1-1h5.5z" />
+      </svg>
+
     </div>
 
-    <div class="module-card">
-      <h4>Brands</h4>
-      <p>You can add and manage brands</p>
-      <div class="btns">
-        <button class="btn-add">+ Add</button>
-        <button class="btn-manage">Manage</button>
+
+    <div class="module-card" style="display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      <div class="stat-item-seller">
+        <h4>Producto más vendido por {{ user.first_name }}</h4>
+        {% if mas_vendido %}
+        <p><strong>{{ mas_vendido.nombre_producto }}</strong></p>
+        <p class="stat-number">Ventas: {{ mas_vendido.total_vendido }}</p>
+        {% else %}
+        <p>No hay ventas registradas.</p>
+        {% endif %}
       </div>
+      <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" class="bi bi-bar-chart-line"
+        viewBox="0 0 16 16" style="margin: 4vh auto; padding-left: 10vh">
+        <path
+          d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1zm1 12h2V2h-2zm-3 0V7H7v7zm-5 0v-3H2v3z" />
+      </svg>
     </div>
 
     <div class="module-card">
       <h4>Products</h4>
       <p>You can add and manage products</p>
       <div class="btns">
+
         <button class="btn-add">+ Add</button>
         <button class="btn-manage">Manage</button>
       </div>

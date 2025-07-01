@@ -53,8 +53,10 @@
         <td>
           <div class="btn-group" role="group">
             <a href="{% url 'supplier_update' supplier.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+            {% if user.is_staff %}
             <a href="{% url 'supplier_delete' supplier.pk %}" class="btn btn-sm btn-danger" 
                onclick="return confirm('¿Estás seguro de que quieres eliminar este proveedor?')">X</a>
+               {% endif %}
           </div>
         </td>
       </tr>

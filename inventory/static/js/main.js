@@ -423,16 +423,29 @@ function enablePassword() {
 function copyPassword() {
     const passwordField = document.getElementById('id_password');
     if (passwordField.value) {
-        passwordField.select();
-        document.execCommand('copy');
-
-        // Mostrar toast flotante
-        const toast = document.querySelector('.registro-toast.copy');
-        if (toast) {
-            toast.style.display = 'block';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 2000);
+        // Copiar usando Clipboard API si está disponible
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(passwordField.value).then(function() {
+                // Mostrar toast flotante
+                const toast = document.querySelector('.registro-toast.copy');
+                if (toast) {
+                    toast.style.display = 'block';
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 2000);
+                }
+            });
+        } else {
+            // Fallback para navegadores antiguos
+            passwordField.select();
+            document.execCommand('copy');
+            const toast = document.querySelector('.registro-toast.copy');
+            if (toast) {
+                toast.style.display = 'block';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 2000);
+            }
         }
     }
 }

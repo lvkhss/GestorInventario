@@ -96,7 +96,7 @@
                id="new_password2" 
                name="new_password2" 
                class="form-control" 
-               placeholder="Repita la nueva contraseña" required>
+               placeholder="Repita la nueva contraseña">
         <small class="text-muted">Repita la nueva contraseña para confirmar</small>
         <span id="password2-error" class="text-danger" style="display:none;"></span>
         {% if form.new_password2.errors %}
@@ -155,9 +155,15 @@
 
     <div class="add-product-group">
       <div class="add-product-btn-wrap">
-        <button type="button" class="add-product-btn" onclick="window.location.href='{% url 'profile' %}'">
-          Cancelar
-        </button>
+        {% if user_obj.pk == user.pk %}
+          <button type="button" class="add-product-btn" onclick="window.location.href='{% url 'profile' %}'">
+            Cancelar
+          </button>
+        {% else %}
+          <button type="button" class="add-product-btn" onclick="window.location.href='{% url 'users_view' %}'">
+            Cancelar
+          </button>
+        {% endif %}
         <button type="submit" class="add-product-btn">
           Actualizar Usuario
         </button>
@@ -165,6 +171,7 @@
     </div>
   </form>
 </div>
+
 <script>
   // Función para mostrar el toast de error
   function showErrorToast(message) {
@@ -175,6 +182,21 @@
       toast.style.display = 'none';
     }, 3000);
   }
+
+  // Hacer que el campo "Repetir nueva contraseña" sea requerido solo si se escribe una nueva contraseña
+  document.addEventListener('DOMContentLoaded', function() {
+    var newPassword = document.getElementById('new_password');
+    var newPassword2 = document.getElementById('new_password2');
+    function toggleRequired() {
+      if (newPassword.value.length > 0) {
+        newPassword2.setAttribute('required', 'required');
+      } else {
+        newPassword2.removeAttribute('required');
+      }
+    }
+    newPassword.addEventListener('input', toggleRequired);
+    toggleRequired(); // Inicial
+  });
 
   // Ejemplo de uso: mostrar el toast en caso de error de email o contraseña
   {% if messages %}

@@ -26,8 +26,10 @@
           <!-- <a href="{% url 'producto_detail' producto.pk %}?next=inventario" class="btn btn-sm btn-info">
             Ver
           </a> -->
+          {% if user.is_staff %}
           <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-sm btn-danger"
            onclick="return confirm('¿Está seguro que desea eliminar este producto?')">X</a>
+           {% endif %}
         </td>
       </tr>
       {% empty %}

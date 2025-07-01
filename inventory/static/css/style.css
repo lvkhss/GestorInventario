@@ -403,15 +403,12 @@ form+p {
 
 .btn-view-mov {
   border: none;
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 1vh;
+  padding: 1vh 1.5vh ;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 
@@ -636,14 +633,13 @@ padding: 15vh;
   }
 }
 
- Basic Container */
+
 .registro-container {
   max-width: 500px;
   margin: 0 auto;
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Form Group */
@@ -669,46 +665,38 @@ padding: 15vh;
   box-sizing: border-box;
 }
 
-/* Input Group (for password field with buttons) */
 .registro-input-group {
-  position: relative;
+   display: flex;
+  align-items: center;
+  
+  
 }
 
-.registro-input-group input {
-  padding-right: 35px;
+.registro-input-group-icons {
+  border-radius: 1vh;
+  padding: 10px;
+  border: 1px solid #ced4da;
 }
 
-.registro-input-btn, .registro-input-btn2{
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-}
 
-.registro-input-btn {
-  right: 5px;
-}
-
-.registro-input-btn2 {
-  right: 35px;
-}
 
 .registro-btn {
-  width: 100%;
+margin-left: 25%;
+  width: 50%;
   padding: 12px;
-  background-color: #007BFF;
+  background-color: #354e66;
   color: white;
   font-size: 16px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   margin-top: 10px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .registro-btn:hover {
-  background-color: #0056b3;
+  background-color: #223146;
 }
 
 /* Toast messages */
