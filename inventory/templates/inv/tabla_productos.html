@@ -1,65 +1,55 @@
+{% load number_filters %}
 <div class="table-responsive">
-  <table class="table table-hover fixed-table">
+  <table class="table table-striped">
     <thead>
       <tr>
-        <th>Codigo de Barras</th>
+        <th>Código de Barras</th>
         <th>Nombre</th>
+        <th>Tipo</th>
         <th>Precio</th>
         <th>Stock</th>
-        <th></th>
+        <th>Fecha</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      {% for entry in items %}
+      {% for producto in productos %}
       <tr>
-        <td>{{ entry.item.codigo_barras }}</td>
-        <td>{{ entry.item.name }}</td>
-        <td>$ {{ entry.item.price }}</td>
-        <td>{{ entry.item.stock }}</td>
+        <td>{{ producto.codigo_barras|default:"-" }}</td>
+        <td>{{ producto.name }}</td>
+        <td>{{ producto.product_type.name }}</td>
+        <td>${{ producto.price|comma_miles }}</td>
+        <td>{{ producto.stock }}</td>
+        <td>{{ producto.date_added|date:"d/m/Y H:i" }}</td>
         <td>
-          {% if entry.category == "Sellantes" %}
-          <a href="{% url 'edit_sellante' entry.item.pk %}" class="btn btn-warning btn-sm" role="button"
-            aria-pressed="true">Editar</a>
-          <a href="{% url 'delete_sellante' entry.item.pk %}" class="btn btn-danger btn-sm delete-product-btn"
-            role="button" aria-pressed="true">x</a>
-          {% elif entry.category == "Herramientas" %}
-          <a href="{% url 'edit_herramienta' entry.item.pk %}" class="btn btn-warning btn-sm" role="button"
-            aria-pressed="true">Editar</a>
-          <a href="{% url 'delete_herramienta' entry.item.pk %}" class="btn btn-danger btn-sm delete-product-btn"
-            role="button" aria-pressed="true">x</a>
-          {% elif entry.category == "Pinturas" %}
-          <a href="{% url 'edit_pintura' entry.item.pk %}" class="btn btn-warning btn-sm" role="button"
-            aria-pressed="true">Editar</a>
-          <a href="{% url 'delete_pintura' entry.item.pk %}" class="btn btn-danger btn-sm delete-product-btn"
-            role="button" aria-pressed="true">x</a>
-          {% endif %}
+          <a href="{% url 'producto_update' producto.pk %}" class="btn btn-sm btn-warning">Editar</a>
+          <!-- <a href="{% url 'producto_detail' producto.pk %}?next=inventario" class="btn btn-sm btn-info">
+            Ver
+          </a> -->
+          {% if user.is_staff %}
+          <a href="{% url 'producto_delete' producto.pk %}" class="btn btn-sm btn-danger"
+           onclick="return confirm('¿Está seguro que desea eliminar este producto?')">X</a>
+           {% endif %}
         </td>
       </tr>
       {% empty %}
       <tr>
-        <td colspan="5">No hay productos que mostrar</td>
+        <td colspan="7" class="text-center">No hay productos disponibles</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 
+<!-- Pagination controls (same as historial) -->
 <div class="pagination">
-  {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">Anterior</a>
+  {% if productos.has_previous %}
+  <a
+    href="?page={{ productos.previous_page_number }}{% if current_query %}&q={{ current_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}">Anterior</a>
   {% endif %}
-  <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-  {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">Siguiente</a>
+  <span>Página {{ productos.number }} de {{ productos.paginator.num_pages }}</span>
+  {% if productos.has_next %}
+  <a
+    href="?page={{ productos.next_page_number }}{% if current_query %}&q={{ current_query }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}">Siguiente</a>
   {% endif %}
 </div>
-
-<script>
-  document.addEventListener('click', function(event) {
-    if (event.target.matches('.delete-product-btn')) {
-      if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-        event.preventDefault();
-      }
-    }
-  }, false);
-</script>

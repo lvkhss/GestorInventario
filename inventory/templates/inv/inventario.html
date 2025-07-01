@@ -1,4 +1,5 @@
 {% extends 'inv/base.html' %}
+{% load static %}
 
 {% block body %}
 <h2>Inventario</h2>
@@ -6,63 +7,34 @@
   <div class="add_buttons">
     <div class="inventory-left">
       <div class="button-group">
-        <input type="text" id="searchInput" placeholder="Buscar por nombre..."
-          class="form-control d-inline-block w-auto" />
+        <input type="text" id="searchInput" placeholder="Buscar..." class="form-control d-inline-block w-auto" />
       </div>
-      <div class="button-group">
 
+      <div class="button-group">
         <select id="filterType" class="form-select d-inline-block w-auto">
           <option value="">Todos</option>
-          <option value="Sellantes">Sellantes</option>
-          <option value="Herramientas">Herramientas</option>
-          <option value="Pinturas">Pinturas</option>
+          {% for product_type in product_types %}
+          <option value="{{ product_type.name }}">{{ product_type.name }}</option>
+          {% endfor %}
         </select>
+        <button type="submit" class="dynamic-table-button">Entrar</button>
+
       </div>
     </div>
     <div class="inventory-right">
       <div class="button-group">
         <div class="button-group-fused">
-          <a href="{% url 'agregar_producto' %}" class=" agregar-producto">Agregar producto</a>
+          <a href="{% url 'producto_create' %}" class=" agregar-producto">Agregar producto</a>
           <a href="{% url 'upload_products_excel' %}" class=" agregar-excel">Subir Excel</a>
+          </dican ypiv>
         </div>
       </div>
     </div>
   </div>
 
+  <div id="tablaProductos">
+    {% include 'inv/tabla_productos.html' %}
+  </div>
 
-
-</div>
-<div id="tablaProductos">
-  {% include 'inv/tabla_productos.html' %}
-</div>
-
-<script>
-  function updateTable() {
-    const query = document.getElementById("searchInput").value;
-    const type = document.getElementById("filterType").value;
-
-    let url = `{% url 'inventario' %}?`;
-    if (query) url += `q=${encodeURIComponent(query)}&`;
-    if (type) url += `type=${encodeURIComponent(type)}`;
-
-    fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        const parser = new DOMParser();
-        const htmlDoc = parser.parseFromString(data, "text/html");
-        const newContent = htmlDoc.querySelector("#tablaProductos").innerHTML;
-        document.getElementById("tablaProductos").innerHTML = newContent;
-      });
-  }
-
-  document.getElementById("searchInput").addEventListener("input", updateTable);
-  document.getElementById("filterType").addEventListener("change", updateTable);
-</script>
-{% endblock %}
-{% block extra_scripts %}
-<script>
-  sellantes = Sellantes.objects.all().order_by('-date_added')
-  herramientas = Herramientas.objects.all().order_by('-date_added')
-  pinturas = Pinturas.objects.all().order_by('-date_added')
-</script>
-{% endblock %}
+  <script src="{% static 'js/main.js' %}"></script>
+  {% endblock %}

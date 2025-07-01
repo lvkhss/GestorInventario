@@ -1,82 +1,170 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db import OperationalError
-from .models import Sellantes, Herramientas, Pinturas, HistorialMovimiento
+from .models import HistorialMovimiento, Suppliers 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-
-from django.db.models import Q
+from django.db.models import Q, Count, Sum, ExpressionWrapper, IntegerField
 from datetime import datetime, timedelta
 from .forms import *
+from .forms import UserRegistrationForm, ProductTypeForm
 import pandas as pd
-from .models import ProductoReal, Sellantes, Herramientas, Pinturas
 from .forms import ExcelUploadForm
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from .models import HistorialMovimiento
 from django.contrib.auth import logout
+from django.core.validators import RegexValidator, EmailValidator
+from django.core.exceptions import ValidationError
+from django.contrib import messages
+from .decorators import staff_required
+from django.contrib.auth.password_validation import validate_password, ValidationError as PasswordValidationError
+
+from django.contrib import messages
+from .models import ProductType
+
+def generar_boleta_codigo():
+    """Genera un código de boleta chileno secuencial con prefijo BOL-."""
+    ultimo = HistorialMovimiento.objects.filter(boleta_codigo__startswith='BOL-').order_by('-id').first()
+    if ultimo and ultimo.boleta_codigo:
+        try:
+            num = int(ultimo.boleta_codigo.replace('BOL-', ''))
+        except Exception:
+            num = 0
+    else:
+        num = 0
+    return f"BOL-{num+1:08d}"
+def crear_historial_venta(**kwargs):
+    """Crea un HistorialMovimiento para una venta, generando boleta_codigo único."""
+    if kwargs.get('motivo', '').strip().lower() == 'venta':
+        kwargs['boleta_codigo'] = generar_boleta_codigo()
+    return HistorialMovimiento.objects.create(**kwargs)
 
 
+@staff_required
+def delete_product_type(request, pk):
+    if request.method != 'POST':
+        messages.error(request, "La eliminación de tipos de producto solo se permite por POST.")
+        return redirect('settings_view')
+    # Extra: puedes pedir confirmación aquí si quieres
+    ProductType.objects.filter(pk=pk).delete()
+    messages.success(request, "Tipo de producto eliminado.")
+    return redirect('settings_view')
+
+
+@staff_required
+def settings_view(request):
+    if request.method == 'POST':
+        form = ProductTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Tipo de producto creado exitosamente.")
+            return redirect('settings_view')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error[0])
+    else:
+        form = ProductTypeForm()
+    
+    product_types = ProductType.objects.all()
+    return render(request, 'inv/settings.html', {
+        'product_types': product_types,
+        'form': form
+    })
 def logout_custom(request):
     logout(request)
     return redirect('login') 
 
 @login_required
 def suppliers_list(request):
-    suppliers = Suppliers.objects.all()
+    suppliers = Suppliers.objects.all()  
     return render(request, 'inv/suppliers_list.html', {'suppliers': suppliers})
+
 @login_required
 def supplier_create(request):
     if request.method == 'POST':
-        form = suplierForm(request.POST)
+        form = SupplierForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('suppliers_list')
+            try:
+                supplier = form.save()
+                messages.success(request, f'Proveedor "{supplier.empresa}" creado exitosamente.')
+                return redirect('suppliers_list')
+            except ValidationError as e:
+                messages.error(request, f'Error al crear proveedor: {e}')
+        else:
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
     else:
-        form = suplierForm()
-    return render(request, 'inv/suppliers_form.html', {'form': form})
+        form = SupplierForm()
+    
+    return render(request, 'inv/suppliers_form.html', {  # Change this line
+        'form': form,
+        'title': 'Crear Proveedor'
+    })
+
 @login_required
 def supplier_update(request, pk):
     supplier = get_object_or_404(Suppliers, pk=pk)
     if request.method == 'POST':
-        form = suplierForm(request.POST, instance=supplier)
+        form = SupplierForm(request.POST, instance=supplier)
         if form.is_valid():
-            form.save()
-            return redirect('suppliers_list')
+            try:
+                supplier = form.save()
+                messages.success(request, f'Proveedor "{supplier.empresa}" actualizado exitosamente.')
+                return redirect('suppliers_list')
+            except ValidationError as e:
+                messages.error(request, f'Error al actualizar proveedor: {e}')
+        else:
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
     else:
-        form = suplierForm(instance=supplier)
-    return render(request, 'inv/supplier_form.html', {'form': form})
-@login_required
-def supplier_delete(request, pk):
-    supplier = get_object_or_404(Suppliers, pk=pk)
-    if request.method == 'POST':
-        supplier.delete()
-        return redirect('suppliers_list')
-    return render(request, 'inv/supplier_confirm_delete.html', {'supplier': supplier})
+        form = SupplierForm(instance=supplier)
+    
+    return render(request, 'inv/suppliers_form.html', {  # Change this line
+        'form': form,
+        'title': 'Editar Proveedor',
+        'supplier': supplier
+    })
 
 @login_required
+def supplier_delete(request, pk):
+    try:
+        supplier = Suppliers.objects.get(pk=pk)
+        supplier.delete()
+        messages.success(request, 'Proveedor eliminado exitosamente')
+    except Suppliers.DoesNotExist:
+        messages.error(request, 'El proveedor no existe o ya fue eliminado')
+    
+    return redirect('suppliers_list')
+
+@staff_required
 def users_view(request):
     users = User.objects.all()
     return render(request, 'inv/users.html', {'users': users})
 
+@staff_required
 def register_view(request):
-    error = None
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        if password1 != password2:
-            error = "Las contraseñas no coinciden."
-        elif User.objects.filter(username=username).exists():
-            error = "El usuario ya existe."
-        elif User.objects.filter(email=email).exists():
-            error = "El email ya está registrado."
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            try:
+                user = User.objects.create_user(
+                    username=form.cleaned_data['username'],
+                    password=form.cleaned_data['password1'],
+                    email=form.cleaned_data['email'],
+                    first_name=request.POST.get('first_name', ''),
+                    last_name=request.POST.get('last_name', '')
+                )
+                # Asignar roles según los checkboxes
+                user.is_staff = 'is_staff' in request.POST
+                user.is_superuser = 'is_superuser' in request.POST
+                user.save()
+                messages.success(request, f"Usuario '{user.username}' creado exitosamente")
+                return redirect('users_view')
+            except Exception as e:
+                messages.error(request, f"Error al crear usuario: {e}")
         else:
-            user = User.objects.create_user(username=username, password=password1, email=email)
-            login(request, user)
-            return redirect('index')
-    return render(request, 'inv/register.html', {'error': error})
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'inv/register.html', {'form': form})
 
 def login_view(request):
     error = None
@@ -92,148 +180,335 @@ def login_view(request):
     return render(request, 'inv/login.html', {'error': error})
 
 
-
 @login_required
 def historial(request):
     query = request.GET.get('q', '')
-    tipo = request.GET.get('type', '')
-    start = request.GET.get('start', '')
-    end = request.GET.get('end', '')
-
-    movimientos_list = HistorialMovimiento.objects.all().order_by('-fecha')
-
+    product_type_filter = request.GET.get('type', '')
+    user_filter = request.GET.get('user', '')
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+    
+    movimientos = HistorialMovimiento.objects.select_related('usuario').all().order_by('-fecha')
+    
+    # Apply filters
     if query:
-        movimientos_list = movimientos_list.filter(nombre_producto__icontains=query)
+        movimientos = movimientos.filter(
+            Q(nombre_producto__icontains=query) | 
+            Q(codigo_barras__icontains=query)
+        )
+    
+    if product_type_filter:
+        movimientos = movimientos.filter(tipo_producto=product_type_filter)
+    
+    if user_filter:
+        movimientos = movimientos.filter(usuario__username=user_filter)
+    
+    if start_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            movimientos = movimientos.filter(fecha__date__gte=start_date)
+        except ValueError:
+            pass
+    
+    if end_date:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            movimientos = movimientos.filter(fecha__date__lte=end_date)
+        except ValueError:
+            pass
+    
 
-    if tipo:
-        movimientos_list = movimientos_list.filter(tipo_producto=tipo)
-
-    try:
-        if start:
-            start_date = datetime.strptime(start, "%Y-%m-%d")
-        else:
-            start_date = None
-
-        if end:
-            # le sumamos 1 día para incluir todos los registros del día seleccionado
-            end_date = datetime.strptime(end, "%Y-%m-%d") + timedelta(days=1)
-        else:
-            end_date = None
-
-        # validamos coherencia
-        if start_date and end_date:
-            if start_date > end_date:
-                movimientos_list = movimientos_list.none()
-            else:
-                movimientos_list = movimientos_list.filter(fecha__gte=start_date, fecha__lt=end_date)
-        elif start_date:
-            movimientos_list = movimientos_list.filter(fecha__gte=start_date)
-        elif end_date:
-            movimientos_list = movimientos_list.filter(fecha__lt=end_date)
-
-    except ValueError:
-        pass  # Si alguna fecha es inválida, simplemente no filtra por fecha
-
-    paginator = Paginator(movimientos_list, 10)
+    for mov in movimientos:
+        mov.stock_inicial = mov.stock_final - mov.cambio_stock
+    
+    # Pagination
+    paginator = Paginator(movimientos, 20)
     page_number = request.GET.get('page')
     movimientos = paginator.get_page(page_number)
+    
 
-    return render(request, 'inv/historial.html', {'movimientos': movimientos})
+    product_types = HistorialMovimiento.objects.values_list('tipo_producto', flat=True).distinct().order_by('tipo_producto')
+    # Obtener usuarios que han hecho movimientos
+    user_ids = HistorialMovimiento.objects.exclude(usuario__isnull=True).values_list('usuario_id', flat=True).distinct()
+    users = User.objects.filter(id__in=user_ids).order_by('username')
+    
+    context = {
+        'movimientos': movimientos,
+        'product_types': product_types,
+        'users': users,
+        'current_query': query,
+        'current_type': product_type_filter,
+        'current_user': user_filter,
+        'current_start': request.GET.get('start', ''),
+        'current_end': request.GET.get('end', ''),
+    }
+    
+    return render(request, 'inv/historial.html', context)
+
 @login_required
-# views.py
-def index(request):
-    try:
-        sellantes = Sellantes.objects.all()
-    except OperationalError:
-        sellantes = []
+def profile(request):
+    user = request.user
 
-    try:
-        herramientas = Herramientas.objects.all()
-    except OperationalError:
-        herramientas = []
+    productos_creados = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo='Producto creado'
+    ).count()
 
-    try:
-        pinturas = Pinturas.objects.all()
-    except OperationalError:
-        pinturas = []
+    productos_editados = HistorialMovimiento.objects.filter(
+        usuario=user,
+    ).filter(
+        Q(motivo='Producto editado') |
+        Q(motivo='Edición manual') |
+        Q(motivo='Corrección precio') |
+        Q(motivo='Corrección nombre') |
+        Q(motivo__icontains='ajuste de inventario') |
+        Q(motivo__icontains='uso interno') |
+        Q(motivo__icontains='otro')
+    ).count()
 
-    all_items = [
-        {"item": sellante, "category": "Sellantes"} for sellante in sellantes
-    ] + [
-        {"item": herramienta, "category": "Herramientas"} for herramienta in herramientas
-    ] + [
-        {"item": pintura, "category": "Pinturas"} for pintura in pinturas
-    ]
+    productos_eliminados = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo='Producto eliminado'
+    ).count()
 
-    # Last 10 added products (by id descending)
-    latest_items = sorted(
-        all_items,
-        key=lambda x: getattr(x["item"], "id", None) or 0,
-        reverse=True
-    )[:10]
+    from django.db.models import F, ExpressionWrapper, IntegerField, Sum
+    from django.utils import timezone
 
-    # 10 products with the least stock (ascending)
-    least_stock_items = sorted(
-        all_items,
-        key=lambda x: getattr(x["item"], "stock", None) if getattr(x["item"], "stock", None) is not None else float('inf')
-    )[:10]
+    now = timezone.now()
+    week_start = now - timezone.timedelta(days=now.weekday())
+    month_start = now.replace(day=1)
+    year_start = now.replace(month=1, day=1)
+
+    # Total ventas (cantidad de productos vendidos)
+    total_ventas = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        cambio_stock__lt=0
+    ).aggregate(total=Sum(-F('cambio_stock')))['total'] or 0
+
+    # Total dinero recaudado por ventas (precio * cantidad)
+    total_recaudado = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        cambio_stock__lt=0
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
+    recaudado_semana = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        cambio_stock__lt=0,
+        fecha__gte=week_start
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
+    recaudado_mes = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        cambio_stock__lt=0,
+        fecha__gte=month_start
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
+    recaudado_anio = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        cambio_stock__lt=0,
+        fecha__gte=year_start
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
+    # Movimientos totales del usuario
+    total_movimientos = HistorialMovimiento.objects.filter(
+        usuario=user
+    ).count()
+
+    # Último movimiento del usuario
+    ultimo_movimiento = HistorialMovimiento.objects.filter(
+        usuario=user
+    ).order_by('-fecha').first()
+
+    # Producto más vendido por el usuario (por cantidad, no por eventos)
+    mas_vendido = (
+        HistorialMovimiento.objects
+        .filter(usuario=user, motivo__iexact='venta')
+        .values('nombre_producto')
+        .annotate(total_vendido=Sum(-F('cambio_stock')))
+        .order_by('-total_vendido', 'nombre_producto')
+        .first()
+    )
+
+    # GLOBAL: Dinero ganado esta semana (todos los usuarios)
+    recaudado_semana_global = HistorialMovimiento.objects.filter(
+        motivo__iexact='venta',
+        cambio_stock__lt=0,
+        fecha__gte=week_start
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
 
     context = {
-        'latest_items': latest_items,
-        'least_stock_items': least_stock_items,
+        'user': user,
+        'productos_creados': productos_creados,
+        'productos_editados': productos_editados,
+        'productos_eliminados': productos_eliminados,
+        'total_ventas': total_ventas,
+        'total_movimientos': total_movimientos,
+        'ultimo_movimiento': ultimo_movimiento,
+        'mas_vendido': mas_vendido,
+        'total_recaudado': total_recaudado,
+        'recaudado_semana': recaudado_semana,
+        'recaudado_mes': recaudado_mes,
+        'recaudado_anio': recaudado_anio,
+        'recaudado_semana_global': recaudado_semana_global,
     }
+    return render(request, 'inv/profile.html', context)
+
+@login_required
+def user_mov(request):
+    """Vista para mostrar los movimientos del usuario logueado"""
+    query = request.GET.get('q', '')
+    product_type_filter = request.GET.get('type', '')
+    start_date = request.GET.get('start')
+    end_date = request.GET.get('end')
+    
+    # Filtrar movimientos por el usuario logueado
+    movimientos = HistorialMovimiento.objects.filter(usuario=request.user).order_by('-fecha')
+    
+    # Apply filters (same as historial view)
+    if query:
+        movimientos = movimientos.filter(
+            Q(nombre_producto__icontains=query) | 
+            Q(codigo_barras__icontains=query)
+        )
+    
+    if product_type_filter:
+        movimientos = movimientos.filter(tipo_producto=product_type_filter)
+    
+    if start_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            movimientos = movimientos.filter(fecha__date__gte=start_date)
+        except ValueError:
+            pass
+    
+    if end_date:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            movimientos = movimientos.filter(fecha__date__lte=end_date)
+        except ValueError:
+            pass
+    
+    # Calculate stock inicial for each movement
+    for mov in movimientos:
+        mov.stock_inicial = mov.stock_final - mov.cambio_stock
+    
+    # Pagination
+    paginator = Paginator(movimientos, 20)
+    page_number = request.GET.get('page')
+    movimientos = paginator.get_page(page_number)
+    
+    # Get product types from user's movements only
+    product_types = HistorialMovimiento.objects.filter(usuario=request.user).values_list('tipo_producto', flat=True).distinct().order_by('tipo_producto')
+    
+    context = {
+        'movimientos': movimientos,
+        'product_types': product_types,  
+        'current_query': query,
+        'current_type': product_type_filter,
+        'current_start': request.GET.get('start', ''),
+        'current_end': request.GET.get('end', ''),
+        'user': request.user
+    }
+    
+    return render(request, 'inv/user_mov.html', context)
+
+@login_required
+def index(request):
+    
+
+    # Productos más vendidos (por cantidad total vendida, no solo eventos)
+    from django.db.models import F
+    from django.db.models.functions import Abs
+    ventas = (
+        HistorialMovimiento.objects
+        .filter(motivo__iexact='venta')
+        .values('producto_id', 'nombre_producto', 'tipo_producto')
+        .annotate(
+            ventas=Sum(Abs(F('cambio_stock'))),
+            recaudado=Sum(F('precio') * Abs(F('cambio_stock')))
+        )
+        .order_by('-ventas', 'nombre_producto')[:10]
+    )
+
+    # Obtener info de producto para stock y precio actual
+    productos_ids = [v['producto_id'] for v in ventas]
+    productos_map = {p.id: p for p in Producto.objects.filter(id__in=productos_ids)}
+    productos_ids_existentes = set(Producto.objects.values_list('id', flat=True))
+    productos_mas_vendidos = []
+    for v in ventas:
+        if v['producto_id'] in productos_ids_existentes:
+            prod = productos_map.get(v['producto_id'])
+            productos_mas_vendidos.append({
+                'name': v['nombre_producto'],
+                'tipo': v['tipo_producto'],
+                'ventas': v['ventas'],
+                'stock': prod.stock if prod else '-',
+            })
+
+    least_stock_items = Producto.objects.all().order_by('stock', 'date_added')[:10]
+    
+    context = {
+        'productos_mas_vendidos': productos_mas_vendidos,
+        'least_stock_items': least_stock_items
+    }
+    
     return render(request, 'inv/index.html', context)
+
 
 @login_required
 def inventario(request):
-    q = request.GET.get('q', '')
-    tipo = request.GET.get('type', '')
+    query = request.GET.get('q', '')
+    product_type_filter = request.GET.get('type', '')
 
-    # Always order by -date_added
-    sellantes = Sellantes.objects.all().order_by('-date_added')
-    herramientas = Herramientas.objects.all().order_by('-date_added')
-    pinturas = Pinturas.objects.all().order_by('-date_added')
+    # Ordenar por código de barras (de mayor a menor) si hay productos con código
+    productos = Producto.objects.all()
+    if query:
+        productos = productos.filter(
+            Q(name__icontains=query) |
+            Q(codigo_barras__icontains=query)
+        )
+    if product_type_filter:
+        productos = productos.filter(product_type__name=product_type_filter)
 
-    if q:
-        sellantes = sellantes.filter(name__icontains=q)
-        herramientas = herramientas.filter(name__icontains=q)
-        pinturas = pinturas.filter(name__icontains=q)
-
-    if tipo:
-        if tipo == "Sellantes":
-            herramientas = Herramientas.objects.none()
-            pinturas = Pinturas.objects.none()
-        elif tipo == "Herramientas":
-            sellantes = Sellantes.objects.none()
-            pinturas = Pinturas.objects.none()
-        elif tipo == "Pinturas":
-            sellantes = Sellantes.objects.none()
-            herramientas = Herramientas.objects.none()
-
-    # Combine all items into a single list
-    items = (
-        [{"item": s, "category": "Sellantes"} for s in sellantes] +
-        [{"item": h, "category": "Herramientas"} for h in herramientas] +
-        [{"item": p, "category": "Pinturas"} for p in pinturas]
+    # Ordenar: primero por código de barras descendente (nulls last), luego por id descendente
+    from django.db.models import F
+    productos = productos.annotate(
+        codigo_barras_int=F('codigo_barras')
+    ).order_by(
+        F('codigo_barras').desc(nulls_last=True),
+        '-id'
     )
 
-    # Sort the combined list by date_added DESCENDING
-    items = sorted(
-        items,
-        key=lambda x: getattr(x["item"], "date_added", None) or datetime.min,
-        reverse=True
-    )
+    product_types = ProductType.objects.filter(is_active=True).order_by('name')
 
-    # PAGINATE: 20 items per page (or 5 if you want)
-    paginator = Paginator(items, 20)
+    paginator = Paginator(productos, 20)
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    productos = paginator.get_page(page_number)
 
     context = {
-        'page_obj': page_obj,
-        'items': page_obj,  # So your template keeps working
+        'productos': productos,
+        'product_types': product_types,
+        'current_query': query,
+        'current_type': product_type_filter
     }
+
     return render(request, 'inv/inventario.html', context)
+
 
 @login_required
 def add_item(request, cls):
@@ -245,128 +520,344 @@ def add_item(request, cls):
     else:
         form = cls()
     return render(request, 'inv/add_new.html', {'form': form})
-@login_required
-def add_herramienta(request):
-    return add_item(request, HerramientaForm)
-@login_required
-def add_sellante(request):
-    return add_item(request, SellanteForm)
-@login_required
-def add_pintura(request):
-    return add_item(request, PinturaForm)
-@login_required
-def edit_item(request, pk, model, cls):
-    item = get_object_or_404(model, pk=pk)
-    stock_field = 'stock'
-    stock_anterior = getattr(item, stock_field, None)
 
-    if request.method == "POST":
-        form = cls(request.POST, instance=item)
-        motivo = request.POST.get('motivo', 'Edición manual')
-        if form.is_valid():
-            updated_item = form.save(commit=False)
-            stock_nuevo = getattr(updated_item, stock_field, None)
-            cambio_stock = 0
-            stock_final = stock_anterior
-            if stock_anterior is not None and stock_nuevo is not None and stock_anterior != stock_nuevo:
-                cambio_stock = stock_nuevo - stock_anterior
-                stock_final = stock_nuevo
-            # Always create historial entry
-            HistorialMovimiento.objects.create(
-                producto_id=item.id,
-                nombre_producto=getattr(updated_item, 'name', ''),
-                tipo_producto=getattr(updated_item, 'type', ''),
-                codigo_barras=getattr(updated_item, 'codigo_barras', ''),
-                cambio_stock=cambio_stock,
-                stock_final=stock_final,
-                motivo=motivo,
-                usuario=request.user
-            )
-            updated_item.save()
-            return redirect('inventario')
-    else:
-        form = cls(instance=item)
-    return render(request, 'inv/edit_item.html', {'form': form})
-@login_required
-def edit_herramienta(request, pk):
-    return edit_item(request, pk, Herramientas, HerramientaForm)
-@login_required
-def edit_sellante(request, pk):
-    return edit_item(request, pk, Sellantes, SellanteForm)
-@login_required
-def edit_pintura(request, pk):
-    return edit_item(request, pk, Pinturas, PinturaForm)
-@login_required
-def delete_herramienta(request, pk):
-    Herramientas.objects.filter(id=pk).delete()
-    return redirect('inventario')
-@login_required
-def delete_sellante(request, pk):
-    Sellantes.objects.filter(id=pk).delete()
-    return redirect('inventario') 
-@login_required
-def delete_pintura(request, pk):
-    Pinturas.objects.filter(id=pk).delete()
-    return redirect('inventario')
-@login_required
-def agregar_producto(request):
-    if request.method == 'POST':
-        form = ProductoForm(request.POST)
-        if form.is_valid():
-            tipo = form.cleaned_data['type']
-            name = form.cleaned_data['name']
-            price = form.cleaned_data['price']
-            codigo_barras = form.cleaned_data.get('codigo_barras', '')
-
-            if tipo == 'Sellantes':
-                Sellantes.objects.create(name=name, codigo_barras=codigo_barras, price =price, type=tipo)
-            elif tipo == 'Herramientas':
-                Herramientas.objects.create(name=name, codigo_barras=codigo_barras, price =price, type=tipo)
-            elif tipo == 'Pinturas':
-                Pinturas.objects.create(name=name, codigo_barras=codigo_barras, price =price, type=tipo)
-
-            return redirect('inventario')
-    else:
-        form = ProductoForm()
-
-    return render(request, 'inv/add_new.html', {'form': form, 'header': 'Agregar Producto'})
-
-MODEL_MAP = {
-    'ProductoReal': ProductoReal,
-    'Sellantes': Sellantes,
-    'Herramientas': Herramientas,
-    'Pinturas': Pinturas,
-}
 @login_required
 def upload_products_excel(request):
-    msg = ""
-    if request.method == "POST":
+    success_message = None
+    if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
-            excel_file = request.FILES['file']
-            df = pd.read_excel(excel_file)
-            for _, row in df.iterrows():
-                print(row)
-                model_name = row['type']
-                model = MODEL_MAP.get(model_name)
-                if not model:
-                    print(f"Tipo '{model_name}' no reconocido. Fila omitida.")
-                    continue
-                obj, created = model.objects.update_or_create(
-                    name=row['name'],
-                    defaults={
-                        'price': row['price'],
-                        'stock': row.get('stock', 0),
-                        'type': row['type'],
-                        'codigo_barras': row.get('codigo_barras', ''),
-                    }
-                )
-            msg = "Productos cargados o actualizados exitosamente."
+            excel_file = form.cleaned_data['file']
+            try:
+                import pandas as pd
+                df = pd.read_excel(excel_file)
+                existing_types = ProductType.objects.filter(is_active=True)
+                type_mapping = {pt.name.lower(): pt for pt in existing_types}
+                success_count = 0
+                error_count = 0
+                errors_list = []
+                for index, row in df.iterrows():
+                    try:
+                        product_data = {
+                            'name': str(row.get('nombre', '')).strip(),
+                            'product_type': None,
+                            'price': float(row.get('precio', 0)),
+                            'stock': int(row.get('stock', 0)),
+                            'codigo_barras': str(row.get('codigo de barras', '')).strip() or None
+                        }
+                        tipo_input = str(row.get('tipo', '')).strip().lower()
+                        if tipo_input in type_mapping:
+                            product_data['product_type'] = type_mapping[tipo_input].id
+                        product_form = ProductoForm(product_data)
+                        if product_form.is_valid():
+                            producto = product_form.save()
+                            # Registrar movimiento de creación
+                            HistorialMovimiento.objects.create(
+                                producto_id=producto.id,
+                                nombre_producto=producto.name,
+                                tipo_producto=producto.product_type.name,
+                                codigo_barras=producto.codigo_barras or '',
+                                cambio_stock=producto.stock,
+                                stock_final=producto.stock,
+                                motivo='Producto creado',
+                                usuario=request.user if request.user.is_authenticated else None,
+                                precio=producto.price
+                            )
+                            success_count += 1
+                        else:
+                            error_count += 1
+                            errors_list.append(f"Fila {index+1}: {'; '.join([f'{field}: {error[0]}' for field, error in product_form.errors.items()])}")
+                    except Exception as e:
+                        error_count += 1
+                        errors_list.append(f"Fila {index+1}: Error - {str(e)}")
+                if success_count > 0:
+                    success_message = f"Productos subidos exitosamente: {success_count}"
+                if error_count > 0:
+                    messages.warning(request, f"Productos con errores: {error_count}")
+                    for error in errors_list[:5]:
+                        messages.error(request, error)
+            except Exception as e:
+                messages.error(request, f"Error procesando archivo: {str(e)}")
+        else:
+            messages.error(request, 'Por favor corrija los errores en el archivo.')
     else:
         form = ExcelUploadForm()
-    return render(request, 'inv/upload_products_excel.html', {'form': form, 'msg': msg})
+    return render(request, 'inv/upload_excel.html', {'form': form, 'success_message': success_message})
 
 def detalle_historial(request, pk):
     movimiento = get_object_or_404(HistorialMovimiento, pk=pk)
-    return render(request, 'inv/detalle_historial.html', {'movimiento': movimiento})
+    stock_inicial = movimiento.stock_final - movimiento.cambio_stock
+    return render(request, 'inv/detalle_historial.html', {
+        'movimiento': movimiento,
+        'stock_inicial': stock_inicial,
+    })
+
+@login_required
+def detalle_user_mov(request, pk):
+    # Verificar que el movimiento pertenece al usuario logueado
+    movimiento = get_object_or_404(HistorialMovimiento, pk=pk, usuario=request.user)
+    stock_inicial = movimiento.stock_final - movimiento.cambio_stock
+    return render(request, 'inv/detalle_user_mov.html', {
+        'movimiento': movimiento,
+        'stock_inicial': stock_inicial,
+    })
+
+@login_required
+def producto_create(request):
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():  # Todas las validaciones se ejecutan automáticamente aquí
+            producto = form.save()
+            
+            HistorialMovimiento.objects.create(
+                producto_id=producto.id,
+                nombre_producto=producto.name,
+                tipo_producto=producto.product_type.name,
+                codigo_barras=producto.codigo_barras or '',
+                cambio_stock=producto.stock,
+                stock_final=producto.stock,
+                motivo='Producto creado',
+                usuario=request.user,
+                precio=producto.price
+            )
+            messages.success(request, f'Producto "{producto.name}" creado exitosamente.')
+            return redirect('inventario')
+        else:
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
+    else:
+        form = ProductoForm()
+    return render(request, 'inv/add_new.html', {'form': form})
+
+@login_required
+def producto_list(request):
+    query = request.GET.get('q', '')
+    product_type = request.GET.get('product_type', '')
+    
+    productos = Producto.objects.all().order_by('-date_added')
+    
+    if query:
+        productos = productos.filter(
+            Q(name__icontains=query) | 
+            Q(codigo_barras__icontains=query)
+        )
+    
+    if product_type:
+        productos = productos.filter(product_type__id=product_type)
+    
+
+    product_types = ProductType.objects.filter(is_active=True)
+    
+    paginator = Paginator(productos, 20)
+    page_number = request.GET.get('page')
+    productos = paginator.get_page(page_number)
+    
+    return render(request, 'inv/producto_list.html', {
+        'productos': productos, 
+        'product_types': product_types,
+        'current_query': query,
+        'current_type': product_type
+    })
+
+@login_required
+def producto_detail(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+
+    movimientos = HistorialMovimiento.objects.filter(producto_id=pk).order_by('-fecha')[:10]
+    
+
+    referer = request.GET.get('next') or request.META.get('HTTP_REFERER', '')
+    back_url = 'inventario'  
+    back_text = 'Inventario'  
+    
+
+    if 'historial' in referer:
+        back_url = 'historial'
+        back_text = 'Historial'
+    elif 'inventario' in referer:
+        back_url = 'inventario'
+        back_text = 'Inventario'
+    
+    return render(request, 'inv/producto_detail.html', {
+        'producto': producto,
+        'movimientos': movimientos,
+        'back_url': back_url,
+        'back_text': back_text
+    })
+
+@login_required
+def producto_update(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    stock_anterior = producto.stock
+
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, instance=producto)
+        motivo = request.POST.get('motivo', 'Producto editado')
+        if form.is_valid():
+            updated_producto = form.save(commit=False)
+            stock_nuevo = updated_producto.stock
+            cambio_stock = stock_nuevo - stock_anterior
+
+            # Si motivo es Venta, solo permitir disminuir stock (incluyendo dejarlo en 0)
+            if motivo.strip().lower() == 'venta':
+                if stock_nuevo >= stock_anterior:
+                    messages.error(request, 'En una venta solo puedes disminuir el stock (incluyendo dejarlo en 0).')
+                    return render(request, 'inv/edit_item.html', {'form': form, 'producto': producto})
+                updated_producto.save()
+                crear_historial_venta(
+                    producto_id=updated_producto.id,
+                    nombre_producto=updated_producto.name,
+                    tipo_producto=updated_producto.product_type.name,
+                    codigo_barras=updated_producto.codigo_barras or '',
+                    cambio_stock=cambio_stock,
+                    stock_final=updated_producto.stock,
+                    motivo=motivo,
+                    usuario=request.user,
+                    precio=updated_producto.price
+                )
+            else:
+                updated_producto.save()
+                HistorialMovimiento.objects.create(
+                    producto_id=updated_producto.id,
+                    nombre_producto=updated_producto.name,
+                    tipo_producto=updated_producto.product_type.name,
+                    codigo_barras=updated_producto.codigo_barras or '',
+                    cambio_stock=cambio_stock,
+                    stock_final=updated_producto.stock,
+                    motivo=motivo,
+                    usuario=request.user,
+                    precio=updated_producto.price
+                )
+            messages.success(request, f'Producto "{updated_producto.name}" actualizado exitosamente.')
+            return redirect('inventario')
+        else:
+            messages.error(request, 'Por favor corrija los errores en el formulario.')
+    else:
+        form = ProductoForm(instance=producto)
+    return render(request, 'inv/edit_item.html', {  
+        'form': form, 
+        'producto': producto
+    })
+
+
+@login_required
+def producto_delete(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    
+    HistorialMovimiento.objects.create(
+        producto_id=producto.id,
+        nombre_producto=producto.name,
+        tipo_producto=producto.product_type.name,
+        codigo_barras=producto.codigo_barras or '',
+        cambio_stock=-producto.stock,
+        stock_final=0,
+        motivo='Producto eliminado',
+        usuario=request.user,
+        precio=producto.price  # Add this line
+    )
+    producto.delete()
+    return redirect('inventario')
+
+def permission_denied_view(request, exception=None):
+    return render(request, 'inv/403.html', status=403)
+
+@login_required
+def user_edit(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    
+    if request.method == 'POST':
+        # Datos básicos del usuario
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        new_password = request.POST.get('new_password', '').strip()
+        new_password2 = request.POST.get('new_password2', '').strip()
+        is_staff = request.POST.get('is_staff') == 'on'
+        is_superuser = request.POST.get('is_superuser') == 'on'
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+
+        # Password validation: only if user filled either field
+        if new_password or new_password2:
+            if new_password != new_password2:
+                messages.error(request, 'Las contraseñas no coinciden.')
+                return render(request, 'inv/user_edit.html', {'user_obj': user})
+            # Password strength validation
+            try:
+                validate_password(new_password, user)
+            except PasswordValidationError as e:
+                messages.error(request, e.messages[0])
+                return render(request, 'inv/user_edit.html', {'user_obj': user})
+
+        # Validaciones básicas
+        if User.objects.exclude(pk=pk).filter(username=username).exists():
+            messages.error(request, 'Ya existe un usuario con ese nombre.')
+        elif User.objects.exclude(pk=pk).filter(email=email).exists():
+            messages.error(request, 'Ya existe un usuario con ese email.')
+        else:
+            # Actualizar usuario
+            user.username = username
+            user.email = email.lower()
+            user.first_name = first_name
+            user.last_name = last_name
+            user.is_staff = is_staff
+            user.is_superuser = is_superuser
+            # Cambiar contraseña solo si el campo está lleno y es válido
+            if new_password:
+                user.set_password(new_password)
+            user.save()
+            messages.success(request, f'Usuario "{username}" actualizado exitosamente.')
+            return redirect('users_view')
+    return render(request, 'inv/user_edit.html', {'user_obj': user})
+
+@staff_required
+def user_delete(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    
+    # No permitir que se elimine a sí mismo
+    if user == request.user:
+        messages.error(request, 'No puedes eliminar tu propia cuenta.')
+        return redirect('users_view')
+    
+    # No permitir eliminar al último superusuario
+    if user.is_superuser and User.objects.filter(is_superuser=True).count() <= 1:
+        messages.error(request, 'No se puede eliminar al último superusuario del sistema.')
+        return redirect('users_view')
+    
+    username = user.username
+    user.delete()
+    messages.success(request, f'Usuario "{username}" eliminado exitosamente.')
+    return redirect('users_view')
+
+def recaudado_semana_global(request):
+    today = timezone.now().date()
+    start_week = today - timedelta(days=today.weekday())
+    end_week = start_week + timedelta(days=7)
+
+    # Global sales (all users)
+    ventas_global = HistorialMovimiento.objects.filter(
+        fecha__gte=start_week,
+        fecha__lt=end_week,
+        motivo='Venta',
+        cambio_stock__lt=0
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
+    # User sales
+    ventas_usuario = HistorialMovimiento.objects.filter(
+        fecha__gte=start_week,
+        fecha__lt=end_week,
+        motivo='Venta',
+        cambio_stock__lt=0,
+        usuario=request.user
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
+    context = {
+        # ...other context...
+        'recaudado_semana_global': ventas_global,
+        'recaudado_semana': ventas_usuario,
+    }
+
+    return render(request, 'inv/some_template.html', context)  # Cambia 'inv/some_template.html' por tu plantilla real
 

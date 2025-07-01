@@ -1,85 +1,338 @@
 from django import forms
-from .models import *
-from .models import Suppliers
+from .models import Suppliers, Producto, ProductType
+from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
+import re
 
-TIPOS_PRODUCTO = (
-    ('Sellantes', 'Sellante'),
-    ('Herramientas', 'Herramienta'),
-    ('Pinturas', 'Pintura'),
-)
 
-class ProductoForm(forms.Form):
-    name = forms.CharField(label="Nombre", max_length=200)
-    codigo_barras =forms.CharField(label="Codigo Barras")
-    price = forms.IntegerField(label="Precio")
-    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO)
-    date_added = forms.DateTimeField(label='Fecha de ingreso', initial=now, required=False, disabled=True,)
-
-class SellanteForm(forms.ModelForm):
-    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO) 
+class ProductoForm(forms.ModelForm):
+    """Dynamic form for the new unified Producto model"""
     class Meta:
-        model = Sellantes
-        fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
+        model = Producto
+        fields = ['name', 'product_type', 'price', 'stock', 'codigo_barras']
         labels = {
             'name': 'Nombre',
-            'type': 'Tipo',
+            'product_type': 'Tipo',
             'price': 'Precio',
             'stock': 'Stock',
-            'codigo_barras':'Codigo Barras'
+            'codigo_barras': 'Código de Barras'
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['date_added'] = forms.DateTimeField(
-            initial=self.instance.date_added, disabled=True, required=False, label='Fecha de ingreso' 
-        )
+        # CRITICAL: Only show existing active product types - NO creation allowed
+        self.fields['product_type'].queryset = ProductType.objects.filter(is_active=True)
+        self.fields['product_type'].empty_label = "-- Seleccione un tipo --"
         
+        # Make sure the field cannot create new objects
+        self.fields['product_type'].widget.can_add_related = False
+        self.fields['product_type'].widget.can_change_related = False
+        self.fields['product_type'].widget.can_delete_related = False
 
-class HerramientaForm(forms.ModelForm):
-    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO)  # <-- Add this line
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name:
+            name = name.strip().title()  # Capitalizar automáticamente
+            if len(name) < 2:
+                raise ValidationError('El nombre debe tener al menos 2 caracteres.')
+            
+            # Verificar duplicados
+            if self.instance.pk:
+                if Producto.objects.exclude(pk=self.instance.pk).filter(name__iexact=name).exists():
+                    raise ValidationError('Ya existe un producto con este nombre.')
+            else:
+                if Producto.objects.filter(name__iexact=name).exists():
+                    raise ValidationError('Ya existe un producto con este nombre.')
+        return name
+
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if price is not None and price <= 0:
+            raise ValidationError('El precio debe ser mayor a 0.')
+        return price
+
+    def clean_stock(self):
+        stock = self.cleaned_data.get('stock')
+        if stock is not None and stock < 0:
+            raise ValidationError('El stock no puede ser negativo.')
+        return stock
+
+    def clean_codigo_barras(self):
+        codigo = self.cleaned_data.get('codigo_barras')
+        if codigo:
+            codigo = codigo.strip()
+            
+            # Verificar duplicados
+            if self.instance.pk:
+                if Producto.objects.exclude(pk=self.instance.pk).filter(codigo_barras=codigo).exists():
+                    raise ValidationError('Ya existe un producto con este código de barras.')
+            else:
+                if Producto.objects.filter(codigo_barras=codigo).exists():
+                    raise ValidationError('Ya existe un producto con este código de barras.')
+        return codigo
+
+    def clean_product_type(self):
+        product_type = self.cleaned_data.get('product_type')
+        if not product_type:
+            raise ValidationError('Debe seleccionar un tipo de producto válido.')
+        
+        # Ensure the product type exists and is active
+        if not ProductType.objects.filter(id=product_type.id, is_active=True).exists():
+            raise ValidationError('El tipo de producto seleccionado no es válido.')
+        
+        return product_type
+
+class ProductTypeForm(forms.ModelForm):
+    """Form for managing product types"""
     class Meta:
-        model = Herramientas
-        fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
+        model = ProductType
+        fields = ['name', 'description', 'is_active']
         labels = {
-            'name': 'Nombre',
-            'type': 'Tipo',
-            'price': 'Precio',
-            'stock': 'Stock',
-            'codigo_barras':'Codigo Barras'
+            'name': 'Nombre del Tipo',
+            'description': 'Descripción',
+            'is_active': 'Activo'
         }
+    
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name:
+            name = name.strip().title()
+            if len(name) < 2:
+                raise ValidationError('El nombre del tipo debe tener al menos 2 caracteres.')
+            
+            # Verificar duplicados
+            if self.instance.pk:
+                if ProductType.objects.exclude(pk=self.instance.pk).filter(name__iexact=name).exists():
+                    raise ValidationError('Ya existe un tipo de producto con este nombre.')
+            else:
+                if ProductType.objects.filter(name__iexact=name).exists():
+                    raise ValidationError('Ya existe un tipo de producto con este nombre.')
+        return name
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['date_added'] = forms.DateTimeField(
-            initial=self.instance.date_added, disabled=True, required=False, label='Fecha de ingreso'
-        )
-
-class PinturaForm(forms.ModelForm):
-    type = forms.ChoiceField(label="Tipo", choices=TIPOS_PRODUCTO)  # <-- Add this line
-    class Meta:
-        model = Pinturas
-        fields = ['name', 'price', 'type', 'stock', 'codigo_barras']
-        labels = {
-            'name': 'Nombre',
-            'type': 'Tipo',
-            'price': 'Precio',
-            'stock': 'Stock',
-            'codigo_barras':'Codigo Barras'
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['date_added'] = forms.DateTimeField(
-            initial=self.instance.date_added, disabled=True, required=False, label='Fecha de ingreso'
-        )
-
-
-class suplierForm(forms.ModelForm):
+class SupplierForm(forms.ModelForm):
     class Meta:
         model = Suppliers
-        fields = ['empresa', 'encargado', 'email', 'numero', 'direccion']
+        fields = ['empresa', 'encargado', 'email', 'numero', 'direccion','rut']
+        labels = {
+            'empresa': 'Empresa',
+            'encargado': 'Encargado',
+            'email': 'Email',
+            'numero': 'Teléfono',
+            'direccion': 'Dirección',
+            'rut': 'RUT'
+        }
+        widgets = {
+            'empresa': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre de la empresa'
+            }),
+            'encargado': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre del encargado'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'correo@ejemplo.com'
+            }),
+            'numero': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '9 8765 4321'  # No +56
+            }),
+            'direccion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Dirección completa del proveedor'
+            }),
+            'rut': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '99999999-9'  
+            }),
+        }
 
+    def clean_empresa(self):
+        empresa = self.cleaned_data.get('empresa')
+        if empresa:
+            empresa = empresa.strip()
+            if len(empresa) < 3:
+                raise ValidationError('El nombre de la empresa debe tener al menos 3 caracteres.')
+            if not re.match(r'^[a-zA-ZÀ-ÿ\s\.\-]+$', empresa):
+                raise ValidationError('El nombre de la empresa solo puede contener letras, espacios, puntos y guiones.')
+        return empresa
 
+    def clean_encargado(self):
+        encargado = self.cleaned_data.get('encargado')
+        if encargado:
+            encargado = encargado.strip()
+            if len(encargado) < 2:
+                raise ValidationError('El nombre del encargado debe tener al menos 2 caracteres.')
+            if not re.match(r'^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s\-]+$', encargado):
+                raise ValidationError('El nombre solo puede contener letras, espacios, guiones y acentos.')
+        return encargado
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            email = email.lower().strip()
+
+            if self.instance.pk:
+                if Suppliers.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
+                    raise ValidationError('Ya existe un proveedor con este email.')
+            else:
+                if Suppliers.objects.filter(email=email).exists():
+                    raise ValidationError('Ya existe un proveedor con este email.')
+        return email
+
+    def clean_numero(self):
+        numero = self.cleaned_data.get('numero')
+        if numero:
+     
+            numero = re.sub(r'[\s\-\(\)]', '', numero)
+            
+          
+            if not numero.startswith('+56'):
+                numero = '+56' + numero
+            
+            # Validate final format
+            if not re.match(r'^\+56\d{9}$', numero):
+                raise ValidationError('Formato de teléfono inválido. Ingrese 9 dígitos (ej: 987654321)')
+        return numero
+
+    def clean_direccion(self):
+        direccion = self.cleaned_data.get('direccion')
+        if direccion:
+            direccion = direccion.strip()
+            if len(direccion) < 10:
+                raise ValidationError('La dirección debe tener al menos 10 caracteres.')
+            if len(direccion) > 500:
+                raise ValidationError('La dirección no puede exceder 500 caracteres.')
+        return direccion
+
+    def clean_rut(self):
+        rut = self.cleaned_data.get('rut')
+        if rut:
+            # Convert to string and clean
+            rut_original = str(rut).strip().upper()
+            
+            # Remove dots and hyphens for validation
+            rut_limpio = re.sub(r'[.\-]', '', rut_original)
+            
+            # Verificar longitud mínima
+            if len(rut_limpio) < 2:
+                raise ValidationError('El RUT debe tener al menos 2 caracteres.')
+            
+            # Separar cuerpo y dígito verificador
+            cuerpo = rut_limpio[:-1]
+            dv = rut_limpio[-1]
+            
+            # Validar que el cuerpo sean solo dígitos
+            if not re.match(r'^\d+$', cuerpo):
+                raise ValidationError('El cuerpo del RUT solo puede contener números.')
+            
+            # Validar longitud del cuerpo (7-8 dígitos)
+            if len(cuerpo) < 7 or len(cuerpo) > 6:
+                raise ValidationError('El RUT debe tener entre 7 y 8 dígitos.')
+            
+            # Validar que no empiece con 0
+            if cuerpo.startswith('0'):
+                raise ValidationError('El RUT no puede empezar con 0.')
+            
+            # Calcular dígito verificador esperado (Módulo 11)
+            reverso = cuerpo[::-1]  # Invertir string
+            multiplicador = 2
+            suma = 0
+            
+            for digito in reverso:
+                suma += int(digito) * multiplicador
+                multiplicador += 1
+                if multiplicador == 8:
+                    multiplicador = 2
+            
+            dv_calculado = 11 - (suma % 11)
+            
+            if dv_calculado == 11:
+                dv_esperado = '0'
+            elif dv_calculado == 10:
+                dv_esperado = 'K'
+            else:
+                dv_esperado = str(dv_calculado)
+            
+            # Comparar dígito verificador
+            if dv != dv_esperado:
+                raise ValidationError(f'Rut no válido.')
+            
+            # Formatear RUT con guión para guardar
+            rut_formateado = f"{cuerpo}-{dv}"
+            
+            # Validar unicidad
+            if self.instance.pk:
+                if Suppliers.objects.exclude(pk=self.instance.pk).filter(rut=rut_formateado).exists():
+                    raise ValidationError('Ya existe un proveedor con este RUT.')
+            else:
+                if Suppliers.objects.filter(rut=rut_formateado).exists():
+                    raise ValidationError('Ya existe un proveedor con este RUT.')
+        
+        return rut_formateado
 
 class ExcelUploadForm(forms.Form):
-    file = forms.FileField(label="Archivo Excel")
+    file = forms.FileField(
+        label="Archivo Excel",
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.xlsx,.xls'})
+    )
+    
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            # Validar extensión
+            if not file.name.endswith(('.xlsx', '.xls')):
+                raise ValidationError('Solo se permiten archivos Excel (.xlsx, .xls)')
+            
+            # Validar tamaño (máximo 5MB)
+            if file.size > 5 * 1024 * 1024:
+                raise ValidationError('El archivo no puede exceder 5MB.')
+            
+            # Validar que no esté vacío
+            if file.size == 0:
+                raise ValidationError('El archivo está vacío.')
+                
+        return file
+
+class UserRegistrationForm(forms.Form):
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username:
+            username = username.strip()
+            if User.objects.filter(username=username).exists():
+                raise ValidationError('El usuario ya existe.')
+        return username
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            email = email.lower().strip()
+            if User.objects.filter(email=email).exists():
+                raise ValidationError('El email ya está registrado.')
+        return email
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
+        # Solo validar coincidencia, no longitud ni fortaleza aquí
+        if password1 and password2 and password1 != password2:
+            raise ValidationError('Las contraseñas no coinciden.')
+        return cleaned_data
+

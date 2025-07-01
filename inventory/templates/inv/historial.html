@@ -1,25 +1,34 @@
 {% extends 'inv/base.html' %}
+{% load static %}
 
 {% block body %}
 <h2>Historial de movimientos</h2>
-
 <div class="container-set-inventory">
   <div class="add_buttons">
     <div class="inventory-left">
       <div class="button-group">
-        <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="form-control" />
+        <input type="text" id="searchInput" placeholder="Buscar..." class="form-control" />
       </div>
 
       <div class="button-group">
         <select id="filterType" class="form-select">
           <option value="">Todos</option>
-          <option value="Sellantes">Sellantes</option>
-          <option value="Herramientas">Herramientas</option>
-          <option value="Pinturas">Pinturas</option>
+          {% for product_type in product_types %}
+          <option value="{{ product_type }}" {% if product_type == current_type %}selected{% endif %}>{{ product_type }}</option>
+          {% endfor %}
         </select>
+        {% if user.is_staff %}
+        <select id="filterUser" class="form-select">
+          <option value="">Usuarios</option>
+          {% for usuario in users %}
+          <option value="{{ usuario.username }}" {% if usuario.username == current_user %}selected{% endif %}>{{ usuario.username }}</option>
+          {% endfor %}
+        </select>
+        {% endif %}
+        <button type="submit" class="dynamic-table-button"></button>
       </div>
     </div>
-    <div class="button-group">
+    <div class="button-group-2">
       <label for="startDate">Desde:</label>
       <input type="date" id="startDate" class="form-control">
       <label for="endDate">Hasta:</label>
@@ -32,56 +41,5 @@
 <div id="tablaHistorial">
   {% include 'inv/tabla_historial.html' %}
 </div>
-
-<script>
-  function updateTable() {
-  const query = document.getElementById("searchInput").value;
-  const type = document.getElementById("filterType").value;
-  const startDateInput = document.getElementById("startDate");
-  const endDateInput = document.getElementById("endDate");
-  const startDate = startDateInput.value;
-  const endDate = endDateInput.value;
-
-  // Validar si las fechas están bien puestas
-  if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-    alert("La fecha de inicio no puede ser posterior a la fecha de fin.");
-
-    endDateInput.value = "";
-
-    fetch(`{% url 'historial' %}`)
-      .then(response => response.text())
-      .then(data => {
-        const parser = new DOMParser();
-        const htmlDoc = parser.parseFromString(data, "text/html");
-        const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
-        document.getElementById("tablaHistorial").innerHTML = newContent;
-      });
-
-    return; 
-  }
-
-  let url = `{% url 'historial' %}?`;
-
-  if (query) url += `q=${encodeURIComponent(query)}&`;
-  if (type) url += `type=${encodeURIComponent(type)}&`;
-  if (startDate) url += `start=${encodeURIComponent(startDate)}&`;
-  if (endDate) url += `end=${encodeURIComponent(endDate)}`;
-
-  fetch(url)
-    .then(response => response.text())
-    .then(data => {
-      const parser = new DOMParser();
-      const htmlDoc = parser.parseFromString(data, "text/html");
-      const newContent = htmlDoc.querySelector("#tablaHistorial").innerHTML;
-      document.getElementById("tablaHistorial").innerHTML = newContent;
-    });
-}
-
-document.getElementById("searchInput").addEventListener("input", updateTable);
-document.getElementById("filterType").addEventListener("change", updateTable);
-document.getElementById("startDate").addEventListener("change", updateTable);
-document.getElementById("endDate").addEventListener("change", updateTable);
-
-
-</script>
+<script src="{% static 'js/main.js' %}"></script>
 {% endblock %}

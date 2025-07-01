@@ -1,29 +1,117 @@
 {% extends 'inv/base.html' %}
-
+{% load static %}
 {% block body %}
 
 <div class="add-product-container">
   <form method="POST" class="add-product-form">
     {% csrf_token %}
 
-    <h4>Agregar nuevo proveedor</h4>
+    <h4>{{ title|default:"Agregar nuevo proveedor" }}</h4>
 
-    {% for field in form %}
+
+    <!-- Empresa rut -->
     <div class="add-product-group">
-      <label for="id_{{ field.name }}" class="add-product-label">{{ field.label }}</label>
+      <label for="id_rut" class="add-product-label">{{ form.rut.label }}</label>
       <div class="add-product-field">
-        {{ field }}
+        {{ form.rut }}
+        {% if form.rut.errors %}
+          <div class="text-danger">
+            {% for error in form.rut.errors %}
+              <small>{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
     </div>
-    {% endfor %}
+
+
+    <!-- Empresa -->
+    <div class="add-product-group">
+      <label for="id_empresa" class="add-product-label">{{ form.empresa.label }}</label>
+      <div class="add-product-field">
+        {{ form.empresa }}
+        {% if form.empresa.errors %}
+          <div class="text-danger">
+            {% for error in form.empresa.errors %}
+              <small>{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Encargado  -->
+    <div class="add-product-group">
+      <label for="id_encargado" class="add-product-label">{{ form.encargado.label }}</label>
+      <div class="add-product-field">
+        {{ form.encargado }}
+        {% if form.encargado.errors %}
+          <div class="text-danger">
+            {% for error in form.encargado.errors %}
+              <small>{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Email  -->
+    <div class="add-product-group">
+      <label for="id_email" class="add-product-label">{{ form.email.label }}</label>
+      <div class="add-product-field">
+        {{ form.email }}
+        {% if form.email.errors %}
+          <div class="text-danger">
+            {% for error in form.email.errors %}
+              <small>{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Numero -->
+    <div class="add-product-group">
+      <label for="id_numero" class="add-product-label">{{ form.numero.label }}</label>
+      <div class="add-product-field">
+        <div class="phone-input-wrapper">
+          <span class="phone-prefix">+56</span>
+          {{ form.numero }}
+        </div>
+        {% if form.numero.errors %}
+          <div class="text-danger">
+            {% for error in form.numero.errors %}
+              <small>{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Direccion -->
+    <div class="add-product-group">
+      <label for="id_direccion" class="add-product-label">{{ form.direccion.label }}</label>
+      <div class="add-product-field">
+        {{ form.direccion }}
+        {% if form.direccion.errors %}
+          <div class="text-danger">
+            {% for error in form.direccion.errors %}
+              <small>{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
 
     <div class="add-product-group">
       <div class="add-product-btn-wrap">
         <button type="button" class="add-product-btn" onclick="window.location.href='{% url 'suppliers_list' %}'">Volver</button>
-        <button type="submit" class="add-product-btn">Agregar Proveedor</button>
+        <button type="submit" class="add-product-btn">
+          {% if supplier %}Actualizar{% else %}Agregar{% endif %} Proveedor
+        </button>
       </div>
     </div>
   </form>
 </div>
-
+<script src="{% static 'js/main.js' %}"></script>
 {% endblock %}

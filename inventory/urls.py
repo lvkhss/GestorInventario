@@ -4,30 +4,32 @@ from . import views
 
 
 urlpatterns = [
-    re_path(r'^agregar$', agregar_producto, name='agregar_producto'),
+    path('index', index, name='index'),
+    path('historial<int:pk>', detalle_historial, name='detalle_historial'),
+    path('settings/', views.settings_view, name='settings_view'),
+    path('product_types/<int:pk>/delete/', views.delete_product_type, name='delete_product_type'),
 
-    re_path(r'index$', index, name='index'),
+    path('inventario', inventario, name='inventario'),
+    path('', login_view, name='login'),
+    path('register', register_view, name='register'),
+    path('usuarios', users_view, name='users_view'),
+    path('usuarios/<int:pk>/edit/', views.user_edit, name='user_edit'),
+    path('usuarios/<int:pk>/delete/', views.user_delete, name='user_delete'),
+    path('historial', historial, name='historial'),
+    path('profile/', profile, name='profile'),
+    path('user-mov/', user_mov, name='user_mov'),
 
-    re_path(r'historial(?P<pk>\d+)$', detalle_historial, name='detalle_historial'),
+    path('suppliers/', views.suppliers_list, name='suppliers_list'),
+    path('suppliers/create/', views.supplier_create, name='supplier_create'),
+    path('suppliers/<int:pk>/edit/', views.supplier_update, name='supplier_update'),
+    path('suppliers/<int:pk>/delete/', views.supplier_delete, name='supplier_delete'),
 
+    path('productos/', views.producto_list, name='producto_list'),
+    path('productos/create/', views.producto_create, name='producto_create'),
+    path('productos/<int:pk>/', views.producto_detail, name='producto_detail'),
+    path('productos/<int:pk>/edit/', views.producto_update, name='producto_update'),
+    path('productos/<int:pk>/delete/', views.producto_delete, name='producto_delete'),
+    path('productos/upload_excel/', views.upload_products_excel, name='upload_products_excel'),
 
-    re_path(r'^sellantes/edit_item/(?P<pk>\d+)$', edit_sellante, name="edit_sellante"),
-    re_path(r'^herramientas/edit_item/(?P<pk>\d+)$', edit_herramienta, name="edit_herramienta"),
-    re_path(r'^pinturas/edit_item/(?P<pk>\d+)$', edit_pintura, name="edit_pintura"),
-
-    re_path(r'^sellantes/delete/(?P<pk>\d+)$', delete_sellante, name="delete_sellante"),
-    re_path(r'^herramientas/delete/(?P<pk>\d+)$', delete_herramienta, name="delete_herramienta"),
-    re_path(r'^pinturas/delete/(?P<pk>\d+)$', delete_pintura, name="delete_pintura"),
-
-    re_path(r'^inventario$', inventario, name='inventario'),
-    re_path(r'^$', login_view, name='login'),
-    re_path(r'^register$', register_view, name='register'),
-    re_path(r'^usuarios$', users_view, name='users'),
-    re_path(r'^historial$', historial, name='historial'),
-    re_path(r'^suppliers/?$', views.suppliers_list, name='suppliers_list'),
-    re_path(r'^suppliers/create/?$', views.supplier_create, name='supplier_create'),
-    re_path(r'^suppliers/(?P<pk>\d+)/edit/?$', views.supplier_update, name='supplier_update'),
-    re_path(r'^suppliers/(?P<pk>\d+)/delete/?$', views.supplier_delete, name='supplier_delete'),
-    re_path(r'^productos/upload_excel/?$', views.upload_products_excel, name='upload_products_excel'),
-    re_path(r'^logout/$', logout_custom, name='logout_custom'),
+    path('logout/', logout_custom, name='logout_custom'),
 ]
