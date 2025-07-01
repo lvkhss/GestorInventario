@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import HistorialMovimiento, Suppliers 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Count, Sum
-from datetime import datetime
+from django.db.models import Q, Count, Sum, ExpressionWrapper, IntegerField
+from datetime import datetime, timedelta
 from .forms import *
 from .forms import UserRegistrationForm, ProductTypeForm
 import pandas as pd
@@ -248,90 +248,108 @@ def historial(request):
 @login_required
 def profile(request):
     user = request.user
-    
 
     productos_creados = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo='Producto creado'
     ).count()
-    
-    # Productos editados por el usuario (todos los motivos que representan edición)
+
     productos_editados = HistorialMovimiento.objects.filter(
-        usuario=user
+        usuario=user,
     ).filter(
         Q(motivo='Producto editado') |
         Q(motivo='Edición manual') |
-        Q(motivo='Corrección precio') |          
-        Q(motivo='Corrección nombre') |          
+        Q(motivo='Corrección precio') |
+        Q(motivo='Corrección nombre') |
         Q(motivo__icontains='ajuste de inventario') |
         Q(motivo__icontains='uso interno') |
         Q(motivo__icontains='otro')
     ).count()
-    
-    # Productos eliminados por el usuario
+
     productos_eliminados = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo='Producto eliminado'
     ).count()
-    
 
-    from django.db.models import F
-    from django.db.models.functions import Abs
+    from django.db.models import F, ExpressionWrapper, IntegerField, Sum
     from django.utils import timezone
-    # Total de ventas (cantidad de productos vendidos, no solo eventos)
-    total_ventas = HistorialMovimiento.objects.filter(
-        usuario=user,
-        motivo__iexact='venta'
-    ).aggregate(total=Sum(Abs(F('cambio_stock'))))['total'] or 0
-
-    # Total dinero recaudado por ventas (precio * cantidad)
-    total_recaudado = HistorialMovimiento.objects.filter(
-        usuario=user,
-        motivo__iexact='venta'
-    ).aggregate(total=Sum(F('precio') * Abs(F('cambio_stock'))))['total'] or 0
 
     now = timezone.now()
     week_start = now - timezone.timedelta(days=now.weekday())
     month_start = now.replace(day=1)
     year_start = now.replace(month=1, day=1)
 
+    # Total ventas (cantidad de productos vendidos)
+    total_ventas = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        cambio_stock__lt=0
+    ).aggregate(total=Sum(-F('cambio_stock')))['total'] or 0
+
+    # Total dinero recaudado por ventas (precio * cantidad)
+    total_recaudado = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        cambio_stock__lt=0
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
     recaudado_semana = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo__iexact='venta',
+        cambio_stock__lt=0,
         fecha__gte=week_start
-    ).aggregate(total=Sum(F('precio') * Abs(F('cambio_stock'))))['total'] or 0
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
 
     recaudado_mes = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo__iexact='venta',
+        cambio_stock__lt=0,
         fecha__gte=month_start
-    ).aggregate(total=Sum(F('precio') * Abs(F('cambio_stock'))))['total'] or 0
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
 
     recaudado_anio = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo__iexact='venta',
+        cambio_stock__lt=0,
         fecha__gte=year_start
-    ).aggregate(total=Sum(F('precio') * Abs(F('cambio_stock'))))['total'] or 0
-    
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
     # Movimientos totales del usuario
     total_movimientos = HistorialMovimiento.objects.filter(
         usuario=user
     ).count()
-    
+
     # Último movimiento del usuario
     ultimo_movimiento = HistorialMovimiento.objects.filter(
         usuario=user
     ).order_by('-fecha').first()
-    
+
     # Producto más vendido por el usuario (por cantidad, no por eventos)
     mas_vendido = (
         HistorialMovimiento.objects
         .filter(usuario=user, motivo__iexact='venta')
         .values('nombre_producto')
-        .annotate(total_vendido=Sum(Abs(F('cambio_stock'))))
+        .annotate(total_vendido=Sum(-F('cambio_stock')))
         .order_by('-total_vendido', 'nombre_producto')
         .first()
     )
+
+    # GLOBAL: Dinero ganado esta semana (todos los usuarios)
+    recaudado_semana_global = HistorialMovimiento.objects.filter(
+        motivo__iexact='venta',
+        cambio_stock__lt=0,
+        fecha__gte=week_start
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
 
     context = {
         'user': user,
@@ -346,8 +364,8 @@ def profile(request):
         'recaudado_semana': recaudado_semana,
         'recaudado_mes': recaudado_mes,
         'recaudado_anio': recaudado_anio,
+        'recaudado_semana_global': recaudado_semana_global,
     }
-    
     return render(request, 'inv/profile.html', context)
 
 @login_required
@@ -808,4 +826,38 @@ def user_delete(request, pk):
     user.delete()
     messages.success(request, f'Usuario "{username}" eliminado exitosamente.')
     return redirect('users_view')
+
+def recaudado_semana_global(request):
+    today = timezone.now().date()
+    start_week = today - timedelta(days=today.weekday())
+    end_week = start_week + timedelta(days=7)
+
+    # Global sales (all users)
+    ventas_global = HistorialMovimiento.objects.filter(
+        fecha__gte=start_week,
+        fecha__lt=end_week,
+        motivo='Venta',
+        cambio_stock__lt=0
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
+    # User sales
+    ventas_usuario = HistorialMovimiento.objects.filter(
+        fecha__gte=start_week,
+        fecha__lt=end_week,
+        motivo='Venta',
+        cambio_stock__lt=0,
+        usuario=request.user
+    ).annotate(
+        total_venta=ExpressionWrapper(F('precio') * -F('cambio_stock'), output_field=IntegerField())
+    ).aggregate(total=Sum('total_venta'))['total'] or 0
+
+    context = {
+        # ...other context...
+        'recaudado_semana_global': ventas_global,
+        'recaudado_semana': ventas_usuario,
+    }
+
+    return render(request, 'inv/some_template.html', context)  # Cambia 'inv/some_template.html' por tu plantilla real
 

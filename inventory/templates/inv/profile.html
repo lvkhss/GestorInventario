@@ -200,7 +200,10 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
       <div class="stat-item-seller">
         <div class="money-earned" style="margin-top: 1em;">
-        <span style="font-weight: bold;">Dinero ganado esta semana:</span>
+        <span style="font-weight: bold;">Dinero ganado esta semana :</span>
+        <span style="color: #198754; font-weight: bold;">${{ recaudado_semana_global|comma_miles }}</span>
+        <br>
+        <span style="font-weight: bold;">Dinero ganado por ti:</span>
         <span style="color: #198754; font-weight: bold;">${{ recaudado_semana|comma_miles }}</span>
       </div>
       </div>
@@ -212,19 +215,7 @@
 </svg>
     </div>
 
-    <!-- <div class="module-card">
-      <h4>Products</h4>
-      <p>You can add and manage products</p>
-      <div class="btns">
-        <button class="btn-add">+ Add</button>
-        <button class="btn-manage">Manage</button>
-      </div>
-      <div class="money-earned" style="margin-top: 1em;">
-        <span style="font-weight: bold;">Dinero ganado esta semana:</span>
-        <span style="color: #198754; font-weight: bold;">${{ recaudado_semana|comma_miles }}</span>
-      </div>
-    </div>
-  </div> -->
+    
 
 </body>
 
