@@ -66,6 +66,7 @@ class HistorialMovimiento(models.Model):
     motivo = models.CharField(max_length=255, blank=True)
     usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     precio = models.IntegerField()  # Assuming you want to track the price in the history
+    boleta_codigo = models.CharField(max_length=32, blank=True, null=True, help_text="Código de boleta chileno (opcional)")
 
     def __str__(self):
         return f"{self.nombre_producto} ({self.tipo_producto}) - {self.cambio_stock} unidades"

@@ -4,6 +4,13 @@
 {% block body %}
   <div class="center-content">
     <ul class="list-group detalle-boleta" >
+      {% if movimiento.motivo|lower == 'venta' %}
+      <li class="list-group-item">
+        <span class="label">N° Boleta :</span>
+        <span class="dots"></span>
+        <span class="value">{{ movimiento.boleta_codigo|default:"-" }}</span>
+      </li>
+      {% endif %}
       <li class="list-group-item">
         <span class="label">Producto :</span>
         <span class="dots"></span>

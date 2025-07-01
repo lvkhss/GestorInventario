@@ -239,7 +239,6 @@ align-items: center;
 
 /* tablas staticas*/
 .table {
-    table-layout: fixed;
     width: 100%;
     border-collapse: collapse;
 }

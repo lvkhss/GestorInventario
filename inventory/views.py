@@ -1,3 +1,19 @@
+def generar_boleta_codigo():
+    """Genera un código de boleta chileno secuencial con prefijo BOL-."""
+    ultimo = HistorialMovimiento.objects.filter(boleta_codigo__startswith='BOL-').order_by('-id').first()
+    if ultimo and ultimo.boleta_codigo:
+        try:
+            num = int(ultimo.boleta_codigo.replace('BOL-', ''))
+        except Exception:
+            num = 0
+    else:
+        num = 0
+    return f"BOL-{num+1:08d}"
+def crear_historial_venta(**kwargs):
+    """Crea un HistorialMovimiento para una venta, generando boleta_codigo único."""
+    if kwargs.get('motivo', '').strip().lower() == 'venta':
+        kwargs['boleta_codigo'] = generar_boleta_codigo()
+    return HistorialMovimiento.objects.create(**kwargs)
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import HistorialMovimiento, Suppliers 
 from django.contrib.auth import authenticate, login
@@ -256,6 +272,37 @@ def profile(request):
         usuario=user,
         motivo__iexact='venta'
     ).count()
+
+    # Total dinero recaudado por ventas (todas las ventas de este usuario)
+    total_recaudado = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta'
+    ).aggregate(total=Sum('precio'))['total'] or 0
+
+    # Dinero recaudado por semana, mes y año (para este usuario)
+    from django.utils import timezone
+    now = timezone.now()
+    week_start = now - timezone.timedelta(days=now.weekday())
+    month_start = now.replace(day=1)
+    year_start = now.replace(month=1, day=1)
+
+    recaudado_semana = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        fecha__gte=week_start
+    ).aggregate(total=Sum('precio'))['total'] or 0
+
+    recaudado_mes = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        fecha__gte=month_start
+    ).aggregate(total=Sum('precio'))['total'] or 0
+
+    recaudado_anio = HistorialMovimiento.objects.filter(
+        usuario=user,
+        motivo__iexact='venta',
+        fecha__gte=year_start
+    ).aggregate(total=Sum('precio'))['total'] or 0
     
     # Movimientos totales del usuario
     total_movimientos = HistorialMovimiento.objects.filter(
@@ -286,6 +333,10 @@ def profile(request):
         'total_movimientos': total_movimientos,
         'ultimo_movimiento': ultimo_movimiento,
         'mas_vendido': mas_vendido,
+        'total_recaudado': total_recaudado,
+        'recaudado_semana': recaudado_semana,
+        'recaudado_mes': recaudado_mes,
+        'recaudado_anio': recaudado_anio,
     }
     
     return render(request, 'inv/profile.html', context)
@@ -396,35 +447,39 @@ def index(request):
 def inventario(request):
     query = request.GET.get('q', '')
     product_type_filter = request.GET.get('type', '')
-    
- 
-    productos = Producto.objects.all().order_by('-date_added')
-    
-   
+
+    # Ordenar por código de barras (de mayor a menor) si hay productos con código
+    productos = Producto.objects.all()
     if query:
         productos = productos.filter(
-            Q(name__icontains=query) | 
+            Q(name__icontains=query) |
             Q(codigo_barras__icontains=query)
         )
-    
     if product_type_filter:
         productos = productos.filter(product_type__name=product_type_filter)
-    
-  
-    product_types = ProductType.objects.filter(is_active=True).order_by('name')
-    
 
-    paginator = Paginator(productos, 20)  
+    # Ordenar: primero por código de barras descendente (nulls last), luego por id descendente
+    from django.db.models import F
+    productos = productos.annotate(
+        codigo_barras_int=F('codigo_barras')
+    ).order_by(
+        F('codigo_barras').desc(nulls_last=True),
+        '-id'
+    )
+
+    product_types = ProductType.objects.filter(is_active=True).order_by('name')
+
+    paginator = Paginator(productos, 20)
     page_number = request.GET.get('page')
     productos = paginator.get_page(page_number)
-    
+
     context = {
         'productos': productos,
         'product_types': product_types,
         'current_query': query,
         'current_type': product_type_filter
     }
-    
+
     return render(request, 'inv/inventario.html', context)
 
 
@@ -441,23 +496,21 @@ def add_item(request, cls):
 
 @login_required
 def upload_products_excel(request):
+    success_message = None
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
-        if form.is_valid():  # Validaciones de archivo se ejecutan automáticamente
-            excel_file = request.FILES['file']
-            
+        if form.is_valid():
+            excel_file = form.cleaned_data['file']
             try:
+                import pandas as pd
                 df = pd.read_excel(excel_file)
                 existing_types = ProductType.objects.filter(is_active=True)
                 type_mapping = {pt.name.lower(): pt for pt in existing_types}
-                
                 success_count = 0
                 error_count = 0
                 errors_list = []
-                
                 for index, row in df.iterrows():
                     try:
-                        # Crear form para cada producto para usar validaciones automáticas
                         product_data = {
                             'name': str(row.get('nombre', '')).strip(),
                             'product_type': None,
@@ -465,43 +518,44 @@ def upload_products_excel(request):
                             'stock': int(row.get('stock', 0)),
                             'codigo_barras': str(row.get('codigo de barras', '')).strip() or None
                         }
-                        
-                        # Buscar tipo de producto
                         tipo_input = str(row.get('tipo', '')).strip().lower()
                         if tipo_input in type_mapping:
                             product_data['product_type'] = type_mapping[tipo_input].id
-                        
-                        # Usar ProductoForm para validaciones automáticas
                         product_form = ProductoForm(product_data)
                         if product_form.is_valid():
-                            product_form.save()
+                            producto = product_form.save()
+                            # Registrar movimiento de creación
+                            HistorialMovimiento.objects.create(
+                                producto_id=producto.id,
+                                nombre_producto=producto.name,
+                                tipo_producto=producto.product_type.name,
+                                codigo_barras=producto.codigo_barras or '',
+                                cambio_stock=producto.stock,
+                                stock_final=producto.stock,
+                                motivo='Producto creado',
+                                usuario=request.user if request.user.is_authenticated else None,
+                                precio=producto.price
+                            )
                             success_count += 1
                         else:
                             error_count += 1
                             errors_list.append(f"Fila {index+1}: {'; '.join([f'{field}: {error[0]}' for field, error in product_form.errors.items()])}")
-                        
                     except Exception as e:
                         error_count += 1
                         errors_list.append(f"Fila {index+1}: Error - {str(e)}")
-                
-                # Mostrar resultados
                 if success_count > 0:
-                    messages.success(request, f"Productos subidos exitosamente: {success_count}")
-                
+                    success_message = f"Productos subidos exitosamente: {success_count}"
                 if error_count > 0:
                     messages.warning(request, f"Productos con errores: {error_count}")
-                    for error in errors_list[:5]:  # Mostrar solo los primeros 5 errores
+                    for error in errors_list[:5]:
                         messages.error(request, error)
-                
             except Exception as e:
                 messages.error(request, f"Error procesando archivo: {str(e)}")
         else:
             messages.error(request, 'Por favor corrija los errores en el archivo.')
-                
     else:
         form = ExcelUploadForm()
-    
-    return render(request, 'inv/upload_excel.html', {'form': form})
+    return render(request, 'inv/upload_excel.html', {'form': form, 'success_message': success_message})
 
 def detalle_historial(request, pk):
     movimiento = get_object_or_404(HistorialMovimiento, pk=pk)
@@ -616,17 +670,30 @@ def producto_update(request, pk):
             stock_nuevo = updated_producto.stock
             cambio_stock = stock_nuevo - stock_anterior
 
-            HistorialMovimiento.objects.create(
-                producto_id=updated_producto.id,
-                nombre_producto=updated_producto.name,
-                tipo_producto=updated_producto.product_type.name,
-                codigo_barras=updated_producto.codigo_barras or '',
-                cambio_stock=cambio_stock,
-                stock_final=stock_nuevo,
-                motivo=motivo,
-                usuario=request.user,
-                precio=updated_producto.price
-            )
+            if motivo.strip().lower() == 'venta':
+                crear_historial_venta(
+                    producto_id=updated_producto.id,
+                    nombre_producto=updated_producto.name,
+                    tipo_producto=updated_producto.product_type.name,
+                    codigo_barras=updated_producto.codigo_barras or '',
+                    cambio_stock=cambio_stock,
+                    stock_final=stock_nuevo,
+                    motivo=motivo,
+                    usuario=request.user,
+                    precio=updated_producto.price
+                )
+            else:
+                HistorialMovimiento.objects.create(
+                    producto_id=updated_producto.id,
+                    nombre_producto=updated_producto.name,
+                    tipo_producto=updated_producto.product_type.name,
+                    codigo_barras=updated_producto.codigo_barras or '',
+                    cambio_stock=cambio_stock,
+                    stock_final=stock_nuevo,
+                    motivo=motivo,
+                    usuario=request.user,
+                    precio=updated_producto.price
+                )
             messages.success(request, f'Producto "{updated_producto.name}" actualizado exitosamente.')
             return redirect('inventario')
         else:
