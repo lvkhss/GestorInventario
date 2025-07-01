@@ -200,10 +200,10 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
       <div class="stat-item-seller">
         <div class="money-earned" style="margin-top: 1em;">
-        <span style="font-weight: bold;">Dinero ganado esta semana :</span>
+        <span style="font-weight: bold;">Dinero recaudado semana:</span>
         <span style="color: #198754; font-weight: bold;">${{ recaudado_semana_global|comma_miles }}</span>
         <br>
-        <span style="font-weight: bold;">Dinero ganado por ti:</span>
+        <span style="font-weight: bold;">Dinero ganado por {{ user.first_name }}:</span>
         <span style="color: #198754; font-weight: bold;">${{ recaudado_semana|comma_miles }}</span>
       </div>
       </div>
