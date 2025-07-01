@@ -18,13 +18,6 @@
           {% endwith %}
         {% elif field.name == 'price' or field.name == 'motivo' %}
           {{ field }}
-        {% elif field.name in 'name product_type codigo_barras' %}
-          {% if not user.is_staff and not user.is_superuser %}
-            <input type="text" id="id_{{ field.name }}" class="form-control-plaintext" value="{% if field.name == 'product_type' %}{{ form.instance.product_type }}{% else %}{{ field.value }}{% endif %}" readonly tabindex="-1" disabled>
-            <input type="hidden" name="{{ field.name }}" value="{% if field.name == 'product_type' %}{{ form.instance.product_type.pk }}{% else %}{{ field.value }}{% endif %}">
-          {% else %}
-            {{ field }}
-          {% endif %}
         {% else %}
           <input type="text" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-plaintext" value="{{ field.value }}" readonly tabindex="-1">
         {% endif %}
@@ -49,8 +42,8 @@
           <option value="Venta">Venta</option>
           {% if user.is_staff %}
           <option value="Corrección nombre">Corrección nombre</option>
-          {% endif %}
           <option value="Corrección precio">Corrección precio</option>
+          {% endif %}
           <option value="Ajuste de inventario">Ajuste de inventario</option>
           <option value="Uso interno">Uso interno</option>
           <option value="Otro">Otro</option>

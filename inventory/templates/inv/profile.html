@@ -200,11 +200,8 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
       <div class="stat-item-seller">
         <div class="money-earned" style="margin-top: 1em;">
-        <span style="font-weight: bold;">Dinero recaudado semana:</span>
-        <span style="color: #198754; font-weight: bold;">${{ recaudado_semana_global|comma_miles }}</span>
-        <br>
-        <span style="font-weight: bold;">Dinero ganado por {{ user.first_name }}:</span>
-        <span style="color: #198754; font-weight: bold;">${{ recaudado_semana|comma_miles }}</span>
+        <span style="font-weight: bold;">Dinero ganado esta semana:</span>
+        <span style="font-size: 4vh; color: #198754; font-weight: bold;">${{ recaudado_semana|comma_miles }}</span>
       </div>
       </div>
       <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" class="bi bi-cash-coin" viewBox="0 0 16 16" style="margin: 4vh auto; padding-left: 10vh">
@@ -215,7 +212,19 @@
 </svg>
     </div>
 
-    
+    <!-- <div class="module-card">
+      <h4>Products</h4>
+      <p>You can add and manage products</p>
+      <div class="btns">
+        <button class="btn-add">+ Add</button>
+        <button class="btn-manage">Manage</button>
+      </div>
+      <div class="money-earned" style="margin-top: 1em;">
+        <span style="font-weight: bold;">Dinero ganado esta semana:</span>
+        <span style="color: #198754; font-weight: bold;">${{ recaudado_semana|comma_miles }}</span>
+      </div>
+    </div>
+  </div> -->
 
 </body>
 

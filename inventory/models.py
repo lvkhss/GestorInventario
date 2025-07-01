@@ -1,7 +1,7 @@
 from django.db import models, connection
 from django.utils.timezone import now, timedelta
 from django.contrib.auth.models import User
-from django.db.models import Sum, F, ExpressionWrapper, IntegerField
+from django.db.models import Sum
 from django.utils import timezone
 
 
@@ -73,3 +73,32 @@ class HistorialMovimiento(models.Model):
 
     def __str__(self):
         return f"{self.nombre_producto} ({self.tipo_producto}) - {self.cambio_stock} unidades"
+
+def profile_view(request):
+    # ...other context...
+
+    today = timezone.now().date()
+    start_week = today - timedelta(days=today.weekday())
+    end_week = start_week + timedelta(days=7)
+
+    # Sum for ALL users, not just the current user
+    recaudado_semana_global = Movimiento.objects.filter(
+        fecha__gte=start_week,
+        fecha__lt=end_week,
+        motivo='Venta'  # adjust if needed
+    ).aggregate(total=Sum('total'))['total'] or 0
+
+    # Sum for the current user
+    recaudado_semana = Movimiento.objects.filter(
+        fecha__gte=start_week,
+        fecha__lt=end_week,
+        motivo='Venta',
+        usuario=request.user  # adjust field name if needed
+    ).aggregate(total=Sum('total'))['total'] or 0
+
+    context = {
+        # ...other context...
+        'recaudado_semana_global': recaudado_semana_global,
+        'recaudado_semana': recaudado_semana,
+    }
+    return render(request, 'inv/profile.html', context)
