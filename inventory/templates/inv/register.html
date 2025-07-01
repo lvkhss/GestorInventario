@@ -58,8 +58,35 @@
 <div>
   <label for="id_confirm_password" class="registro-form-label">Confirmar Contraseña</label>
   <input type="password" class="registro-form-control" id="id_confirm_password" name="password2" required>
-
 </div>
+{% if user.is_staff %}
+  <div class="add-product-group">
+    <label class="add-product-label">Permisos</label>
+    <div class="add-product-field">
+      <div class="form-check">
+        <label for="is_staff" class="form-check-label">
+          Staff 
+        </label> 
+        <input type="checkbox" 
+               id="is_staff" 
+               name="is_staff" 
+               class="form-check-input"
+               {% if request.POST.is_staff %}checked{% elif user_obj.is_staff %}checked{% endif %}>
+      </div>
+      
+      <div class="form-check mt-2">
+        <label for="is_superuser" class="form-check-label">
+          Superusuario 
+        </label>
+        <input type="checkbox" 
+               id="is_superuser" 
+               name="is_superuser" 
+               class="form-check-input"
+               {% if request.POST.is_superuser %}checked{% elif user_obj.is_superuser %}checked{% endif %}>
+      </div>
+    </div>
+  </div>
+{% endif %}
 <button type="button" class="registro-btn" onclick="enablePassword()">Generar Contraseña</button>
 <button type="submit" class="registro-btn">Registrar</button>
 <button type="button" class="registro-btn" onclick="window.location.href='{% url 'users_view' %}'">Volver</button>

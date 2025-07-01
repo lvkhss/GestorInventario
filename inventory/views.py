@@ -1,19 +1,3 @@
-def generar_boleta_codigo():
-    """Genera un código de boleta chileno secuencial con prefijo BOL-."""
-    ultimo = HistorialMovimiento.objects.filter(boleta_codigo__startswith='BOL-').order_by('-id').first()
-    if ultimo and ultimo.boleta_codigo:
-        try:
-            num = int(ultimo.boleta_codigo.replace('BOL-', ''))
-        except Exception:
-            num = 0
-    else:
-        num = 0
-    return f"BOL-{num+1:08d}"
-def crear_historial_venta(**kwargs):
-    """Crea un HistorialMovimiento para una venta, generando boleta_codigo único."""
-    if kwargs.get('motivo', '').strip().lower() == 'venta':
-        kwargs['boleta_codigo'] = generar_boleta_codigo()
-    return HistorialMovimiento.objects.create(**kwargs)
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import HistorialMovimiento, Suppliers 
 from django.contrib.auth import authenticate, login
@@ -37,6 +21,25 @@ from django.contrib.auth.password_validation import validate_password, Validatio
 
 from django.contrib import messages
 from .models import ProductType
+
+def generar_boleta_codigo():
+    """Genera un código de boleta chileno secuencial con prefijo BOL-."""
+    ultimo = HistorialMovimiento.objects.filter(boleta_codigo__startswith='BOL-').order_by('-id').first()
+    if ultimo and ultimo.boleta_codigo:
+        try:
+            num = int(ultimo.boleta_codigo.replace('BOL-', ''))
+        except Exception:
+            num = 0
+    else:
+        num = 0
+    return f"BOL-{num+1:08d}"
+def crear_historial_venta(**kwargs):
+    """Crea un HistorialMovimiento para una venta, generando boleta_codigo único."""
+    if kwargs.get('motivo', '').strip().lower() == 'venta':
+        kwargs['boleta_codigo'] = generar_boleta_codigo()
+    return HistorialMovimiento.objects.create(**kwargs)
+
+
 @staff_required
 def delete_product_type(request, pk):
     if request.method != 'POST':
@@ -149,6 +152,10 @@ def register_view(request):
                     first_name=request.POST.get('first_name', ''),
                     last_name=request.POST.get('last_name', '')
                 )
+                # Asignar roles según los checkboxes
+                user.is_staff = 'is_staff' in request.POST
+                user.is_superuser = 'is_superuser' in request.POST
+                user.save()
                 messages.success(request, f"Usuario '{user.username}' creado exitosamente")
                 return redirect('users_view')
             except Exception as e:
@@ -267,20 +274,22 @@ def profile(request):
         motivo='Producto eliminado'
     ).count()
     
-    # Total de ventas (motivo: venta)
+
+    from django.db.models import F
+    from django.db.models.functions import Abs
+    from django.utils import timezone
+    # Total de ventas (cantidad de productos vendidos, no solo eventos)
     total_ventas = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo__iexact='venta'
-    ).count()
+    ).aggregate(total=Sum(Abs(F('cambio_stock'))))['total'] or 0
 
-    # Total dinero recaudado por ventas (todas las ventas de este usuario)
+    # Total dinero recaudado por ventas (precio * cantidad)
     total_recaudado = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo__iexact='venta'
-    ).aggregate(total=Sum('precio'))['total'] or 0
+    ).aggregate(total=Sum(F('precio') * Abs(F('cambio_stock'))))['total'] or 0
 
-    # Dinero recaudado por semana, mes y año (para este usuario)
-    from django.utils import timezone
     now = timezone.now()
     week_start = now - timezone.timedelta(days=now.weekday())
     month_start = now.replace(day=1)
@@ -290,19 +299,19 @@ def profile(request):
         usuario=user,
         motivo__iexact='venta',
         fecha__gte=week_start
-    ).aggregate(total=Sum('precio'))['total'] or 0
+    ).aggregate(total=Sum(F('precio') * Abs(F('cambio_stock'))))['total'] or 0
 
     recaudado_mes = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo__iexact='venta',
         fecha__gte=month_start
-    ).aggregate(total=Sum('precio'))['total'] or 0
+    ).aggregate(total=Sum(F('precio') * Abs(F('cambio_stock'))))['total'] or 0
 
     recaudado_anio = HistorialMovimiento.objects.filter(
         usuario=user,
         motivo__iexact='venta',
         fecha__gte=year_start
-    ).aggregate(total=Sum('precio'))['total'] or 0
+    ).aggregate(total=Sum(F('precio') * Abs(F('cambio_stock'))))['total'] or 0
     
     # Movimientos totales del usuario
     total_movimientos = HistorialMovimiento.objects.filter(
@@ -314,12 +323,12 @@ def profile(request):
         usuario=user
     ).order_by('-fecha').first()
     
-    # Producto más vendido por el usuario
+    # Producto más vendido por el usuario (por cantidad, no por eventos)
     mas_vendido = (
         HistorialMovimiento.objects
         .filter(usuario=user, motivo__iexact='venta')
         .values('nombre_producto')
-        .annotate(total_vendido=Count('id'))
+        .annotate(total_vendido=Sum(Abs(F('cambio_stock'))))
         .order_by('-total_vendido', 'nombre_producto')
         .first()
     )
@@ -403,14 +412,17 @@ def user_mov(request):
 @login_required
 def index(request):
     
-    # Productos más vendidos (por cantidad de ventas en historial)
+
+    # Productos más vendidos (por cantidad total vendida, no solo eventos)
+    from django.db.models import F
+    from django.db.models.functions import Abs
     ventas = (
         HistorialMovimiento.objects
         .filter(motivo__iexact='venta')
         .values('producto_id', 'nombre_producto', 'tipo_producto')
         .annotate(
-            ventas=Count('id'),
-            recaudado=Sum('precio')
+            ventas=Sum(Abs(F('cambio_stock'))),
+            recaudado=Sum(F('precio') * Abs(F('cambio_stock')))
         )
         .order_by('-ventas', 'nombre_producto')[:10]
     )
@@ -418,20 +430,17 @@ def index(request):
     # Obtener info de producto para stock y precio actual
     productos_ids = [v['producto_id'] for v in ventas]
     productos_map = {p.id: p for p in Producto.objects.filter(id__in=productos_ids)}
+    productos_ids_existentes = set(Producto.objects.values_list('id', flat=True))
     productos_mas_vendidos = []
     for v in ventas:
-        # Solo productos que existen actualmente
-        productos_ids_existentes = set(Producto.objects.values_list('id', flat=True))
-        productos_mas_vendidos = []
-        for v in ventas:
-            if v['producto_id'] in productos_ids_existentes:
-                prod = productos_map.get(v['producto_id'])
-                productos_mas_vendidos.append({
-                    'name': v['nombre_producto'],
-                    'tipo': v['tipo_producto'],
-                    'ventas': v['ventas'],
-                    'stock': prod.stock if prod else '-',
-                })
+        if v['producto_id'] in productos_ids_existentes:
+            prod = productos_map.get(v['producto_id'])
+            productos_mas_vendidos.append({
+                'name': v['nombre_producto'],
+                'tipo': v['tipo_producto'],
+                'ventas': v['ventas'],
+                'stock': prod.stock if prod else '-',
+            })
 
     least_stock_items = Producto.objects.all().order_by('stock', 'date_added')[:10]
     
@@ -665,31 +674,37 @@ def producto_update(request, pk):
     if request.method == 'POST':
         form = ProductoForm(request.POST, instance=producto)
         motivo = request.POST.get('motivo', 'Producto editado')
-        if form.is_valid():  # Todas las validaciones se ejecutan automáticamente aquí
-            updated_producto = form.save()
+        if form.is_valid():
+            updated_producto = form.save(commit=False)
             stock_nuevo = updated_producto.stock
             cambio_stock = stock_nuevo - stock_anterior
 
+            # Si motivo es Venta, solo permitir disminuir stock (incluyendo dejarlo en 0)
             if motivo.strip().lower() == 'venta':
+                if stock_nuevo >= stock_anterior:
+                    messages.error(request, 'En una venta solo puedes disminuir el stock (incluyendo dejarlo en 0).')
+                    return render(request, 'inv/edit_item.html', {'form': form, 'producto': producto})
+                updated_producto.save()
                 crear_historial_venta(
                     producto_id=updated_producto.id,
                     nombre_producto=updated_producto.name,
                     tipo_producto=updated_producto.product_type.name,
                     codigo_barras=updated_producto.codigo_barras or '',
                     cambio_stock=cambio_stock,
-                    stock_final=stock_nuevo,
+                    stock_final=updated_producto.stock,
                     motivo=motivo,
                     usuario=request.user,
                     precio=updated_producto.price
                 )
             else:
+                updated_producto.save()
                 HistorialMovimiento.objects.create(
                     producto_id=updated_producto.id,
                     nombre_producto=updated_producto.name,
                     tipo_producto=updated_producto.product_type.name,
                     codigo_barras=updated_producto.codigo_barras or '',
                     cambio_stock=cambio_stock,
-                    stock_final=stock_nuevo,
+                    stock_final=updated_producto.stock,
                     motivo=motivo,
                     usuario=request.user,
                     precio=updated_producto.price

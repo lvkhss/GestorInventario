@@ -12,7 +12,26 @@
     <div class="add-product-group">
       <label for="id_{{ field.name }}" class="add-product-label">{{ field.label }}</label>
       <div class="add-product-field">
-        {{ field }}
+        {# If this is the stock field, add data-original-stock attribute #}
+        {% if field.name == 'stock' %}
+          {% with orig_stock=form.instance.stock %}
+            <input type="number" name="stock" id="id_stock" class="form-control" value="{{ field.value }}" data-original-stock="{{ orig_stock }}" {% if field.field.required %}required{% endif %}>
+          {% endwith %}
+        {% elif field.name == 'name' or field.name == 'type' or field.name == 'codigo_barras' %}
+          {% if user.is_staff or user.is_superuser %}
+            {{ field }}
+          {% else %}
+            {% if field.name == 'type' %}
+              <div class="form-control-plaintext" style="background:transparent;padding-left:0;">
+                {% for option in field.field.choices %}{% if option.0 == field.value %}{{ option.1 }}{% endif %}{% endfor %}
+              </div>
+            {% else %}
+              <input type="text" class="form-control" value="{{ field.value }}" readonly tabindex="-1" style="background:#f8f9fa;pointer-events:none;">
+            {% endif %}
+          {% endif %}
+        {% else %}
+          {{ field }}
+        {% endif %}
         {% if field.errors %}
           <div class="text-danger">
             {% for error in field.errors %}
@@ -32,13 +51,20 @@
         <select name="motivo" id="id_motivo" class="form-control" required>
           <option value="" disabled selected>Seleccione un motivo</option>
           <option value="Venta">Venta</option>
+          {% if user.is_staff %}
           <option value="Corrección nombre">Corrección nombre</option>
           <option value="Corrección precio">Corrección precio</option>
+          {% endif %}
           <option value="Ajuste de inventario">Ajuste de inventario</option>
           <option value="Uso interno">Uso interno</option>
           <option value="Otro">Otro</option>
         </select>
         <input type="text" id="motivo_extra" class="form-control" placeholder="Especifique el motivo" style="margin-top:8px; display:none;" disabled>
+        <!-- Toast for Venta motivo -->
+        <div id="ventaToast"
+          style="position: fixed; top: 20px; right: 20px; z-index: 1050; background-color: #dc3545; color: white; padding: 10px 15px; border-radius: 5px; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width:240px; font-weight:bold;">
+          <span id="ventaToastMsg">No puede agregar stock ni dejar sin cambios cuando el motivo es "Venta".</span>
+        </div>
       </div>
     </div>
     <input type="hidden" name="motivo" id="motivo_hidden">
@@ -55,7 +81,36 @@
   </form>
 </div>
 <script src="{% static 'js/main.js' %}"></script>
-{% if form.instance.pk %}
+<script>
+// Mostrar toast si motivo es Venta y se intenta agregar stock o dejar sin cambios
+document.addEventListener('DOMContentLoaded', function () {
+  const motivoSelect = document.getElementById('id_motivo');
+  const ventaToast = document.getElementById('ventaToast');
+  // Detectar el campo de stock (puede ser number o text, depende del form)
+  const stockInput = document.getElementById('id_stock');
+  const form = document.querySelector('form.add-product-form');
+  if (!motivoSelect || !stockInput || !form) return;
 
-{% endif %}
+  form.addEventListener('submit', function(e) {
+    if (motivoSelect.value === 'Venta') {
+      // Detectar si el valor de stock es mayor o igual al valor original (no se permite agregar stock ni dejar igual)
+      const originalStock = stockInput.getAttribute('data-original-stock');
+      const currentStock = parseInt(stockInput.value, 10);
+      const original = originalStock !== null ? parseInt(originalStock, 10) : null;
+      if (original !== null && currentStock >= original) {
+        e.preventDefault();
+        if (ventaToast) {
+          ventaToast.style.display = 'block';
+          setTimeout(() => { ventaToast.style.display = 'none'; }, 3000);
+        } else {
+          alert('No puede agregar stock ni dejar sin cambios cuando el motivo es "Venta".');
+        }
+        stockInput.focus();
+        return false;
+      }
+    }
+  });
+});
+</script>
+
 {% endblock %}
