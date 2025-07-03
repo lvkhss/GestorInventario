@@ -12,14 +12,29 @@
     <div class="add-product-group">
       <label for="id_{{ field.name }}" class="add-product-label">{{ field.label }}</label>
       <div class="add-product-field">
-        {% if field.name == 'stock' %}
-          {% with orig_stock=form.instance.stock %}
-            <input type="number" name="stock" id="id_stock" class="form-control" value="{{ field.value }}" data-original-stock="{{ orig_stock }}" {% if field.field.required %}required{% endif %}>
-          {% endwith %}
-        {% elif field.name == 'price' or field.name == 'motivo' %}
-          {{ field }}
+        {% if user.is_staff %}
+          {# Staff: all fields editable as before #}
+          {% if field.name == 'stock' %}
+            {% with orig_stock=form.instance.stock %}
+              <input type="number" name="stock" id="id_stock" class="form-control" value="{{ field.value }}" data-original-stock="{{ orig_stock }}" {% if field.field.required %}required{% endif %}>
+            {% endwith %}
+          {% else %}
+            {{ field }}
+          {% endif %}
         {% else %}
-          <input type="text" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-plaintext" value="{{ field.value }}" readonly tabindex="-1">
+          {# Non-staff: price and stock editable, type as name (readonly), rest readonly #}
+          {% if field.name == 'price' %}
+            <input type="number" name="price" id="id_price" class="form-control" value="{{ field.value }}" {% if field.field.required %}required{% endif %}>
+          {% elif field.name == 'stock' %}
+            {% with orig_stock=form.instance.stock %}
+              <input type="number" name="stock" id="id_stock" class="form-control" value="{{ field.value }}" data-original-stock="{{ orig_stock }}" {% if field.field.required %}required{% endif %}>
+            {% endwith %}
+          {% elif field.name == 'product_type' %}
+            <input type="hidden" name="product_type" id="id_product_type" value="{{ form.instance.product_type.id }}">
+            <input type="text" class="form-control-plaintext" value="{{ form.instance.product_type.name }}" readonly tabindex="-1">
+          {% else %}
+            <input type="text" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-plaintext" value="{{ field.value }}" readonly tabindex="-1">
+          {% endif %}
         {% endif %}
         {% if field.errors %}
           <div class="text-danger">
