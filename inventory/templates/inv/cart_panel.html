@@ -5,14 +5,18 @@
 </svg>
 </button>
 
-<div id="slideout-panel" style="position:fixed;top:0;right:0;width:400px;height:100vh;background:#f8fafc;box-shadow:-2px 0 12px rgba(0,0,0,0.12);z-index:2100;transform:translateX(100%);transition:transform 0.4s cubic-bezier(.77,0,.18,1), visibility 0s linear 0.4s; padding:32px 24px 24px 24px;overflow-y:auto;visibility:hidden;">
-  <button id="close-slideout" style="position:absolute;top:18px;right:18px;background:none;border:none;font-size:2rem;color:#354e66;cursor:pointer;">&times;</button>
-  <h3 style="color:#354e66;margin-bottom:1.5em;">Carrito de Compras</h3>
-  <p>Aquí puedes mostrar los productos agregados al carrito, totales, y botones de acción.</p>
-  <!-- Agrega aquí el contenido del carrito -->
+
+<div id="slideout-panel" style="position:fixed;top:0;right:0;width:370px;max-width:95vw;height:100vh;background:#fff;border-left:4px solid #354e66;box-shadow:-4px 0 24px rgba(53,78,102,0.13);z-index:2100;transform:translateX(100%);transition:transform 0.4s cubic-bezier(.77,0,.18,1), visibility 0s linear 0.4s;padding:28px 18px 18px 18px;overflow-y:auto;visibility:hidden;">
+  <button id="close-slideout" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:2.1rem;color:#354e66;cursor:pointer;line-height:1;">&times;</button>
+  <h3 style="color:#354e66;font-weight:700;margin-bottom:1.1em;font-size:1.35em;letter-spacing:0.5px;">🛒 Carrito de Compras</h3>
+  <div id="cart_items_table" style="margin-top:0.5em;background:#f4f7fa;border-radius:10px;padding:14px 10px 10px 10px;box-shadow:0 2px 8px rgba(53,78,102,0.06);min-height:120px;">
+    <ul id="cart_items_list" style="list-style:none;padding:0;margin:0;"></ul>
+    <div id="cart_total_amount" style="margin-top:1.2em;font-weight:700;color:#2a3a4d;text-align:right;font-size:1.13em;"></div>
+  </div>
 </div>
 
 <script>
+  // Cart panel open/close logic
   const btn = document.getElementById('slideout-btn');
   const panel = document.getElementById('slideout-panel');
   const closeBtn = document.getElementById('close-slideout');
@@ -33,5 +37,62 @@
     if (panel.style.transform === 'translateX(0)' && !panel.contains(e.target) && e.target !== btn) {
       hidePanel();
     }
+  });
+
+  // Cart logic
+  document.addEventListener('DOMContentLoaded', function() {
+    const cartList = document.getElementById('cart_items_list');
+    const totalDiv = document.getElementById('cart_total_amount');
+    if (!panel || !cartList) return;
+    // Cart data: { name: { price: number, quantity: number, stock: number|string } }
+    const cart = {};
+    function renderCart() {
+      cartList.innerHTML = '';
+      let total = 0;
+      for (const [name, data] of Object.entries(cart)) {
+        const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.alignItems = 'center';
+        li.style.justifyContent = 'space-between';
+        li.style.padding = '7px 0 7px 0';
+        li.style.borderBottom = '1px solid #e3e8ee';
+        li.style.flexWrap = 'nowrap';
+        li.style.overflow = 'hidden';
+        li.style.textOverflow = 'ellipsis';
+        let stockText = (data.stock !== undefined && data.stock !== null && data.stock !== '' && data.stock !== 'null') ? `<span style='color:#7a8ca3;font-size:0.97em;margin-left:7px;white-space:nowrap;'>(Stock: ${data.stock})</span>` : '';
+        li.innerHTML = `<span style="font-weight:500;color:#2a3a4d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%;display:inline-block;">${name}</span>${stockText}<span style="color:#354e66;font-weight:600;white-space:nowrap;margin-left:auto;">$${parseFloat(data.price).toLocaleString()} x${data.quantity}</span>`;
+        cartList.appendChild(li);
+        // Calculate total
+        const priceNum = parseFloat(data.price);
+        if (!isNaN(priceNum)) {
+          total += priceNum * data.quantity;
+        }
+      }
+      if (totalDiv) {
+        totalDiv.innerHTML = `Total: <span style='color:#354e66;'>$${total.toLocaleString()}</span>`;
+      }
+    }
+    // Delegate click events for cart-inv-btn (works even if buttons are loaded dynamically)
+    document.body.addEventListener('click', function(e) {
+      const btn = e.target.closest('.cart-inv-btn');
+      if (btn && btn.hasAttribute('data-product-name')) {
+        e.preventDefault();
+        const name = btn.getAttribute('data-product-name');
+        const price = btn.getAttribute('data-product-price');
+        const stock = btn.getAttribute('data-product-stock');
+        if (name && price) {
+          const stockNum = stock !== undefined && stock !== null && stock !== '' ? parseInt(stock, 10) : null;
+          if (cart[name]) {
+            // Only increase if quantity < stock (if stock is defined)
+            if (stockNum === null || cart[name].quantity < stockNum) {
+              cart[name].quantity += 1;
+            }
+          } else {
+            cart[name] = { price: price, quantity: 1, stock: stock };
+          }
+          renderCart();
+        }
+      }
+    });
   });
 </script>
