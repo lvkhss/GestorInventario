@@ -667,6 +667,7 @@ function getCSRFToken() {
 
 
 // Cart panel open/close logic and cart logic
+// Cart slide panel open/close and item display only
 document.addEventListener('DOMContentLoaded', function() {
   const btn = document.getElementById('slideout-btn');
   const panel = document.getElementById('slideout-panel');
@@ -677,6 +678,7 @@ document.addEventListener('DOMContentLoaded', function() {
     panel.style.transform = 'translateX(0)';
     panel.style.visibility = 'visible';
     panel.style.transition = 'transform 0.4s cubic-bezier(.77,0,.18,1), visibility 0s';
+    renderCart();
   });
   function hidePanel() {
     panel.style.transform = 'translateX(100%)';
@@ -692,18 +694,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Cart logic
+  // Only display items in the cart (no add/remove/qty/checkout logic)
   const cartList = document.getElementById('cart_items_list');
-  const totalDiv = document.getElementById('cart_total_amount');
   if (!panel || !cartList) return;
-  // Cart data is stored in localStorage for persistence across pages
   function getCart() {
     try {
       return JSON.parse(localStorage.getItem('cart_items') || '{}');
     } catch { return {}; }
-  }
-  function setCart(cart) {
-    localStorage.setItem('cart_items', JSON.stringify(cart));
   }
   function renderCart() {
     const cart = getCart();
@@ -719,6 +716,21 @@ document.addEventListener('DOMContentLoaded', function() {
       li.style.flexWrap = 'nowrap';
       li.style.overflow = 'hidden';
       li.style.textOverflow = 'ellipsis';
+      // Remove button (left side)
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'cart-remove-btn';
+      removeBtn.setAttribute('data-remove-id', id);
+      removeBtn.title = 'Quitar del carrito';
+      removeBtn.style.background = 'none';
+      removeBtn.style.border = 'none';
+      removeBtn.style.color = '#c0392b';
+      removeBtn.style.fontSize = '1.1em';
+      removeBtn.style.marginRight = '7px';
+      removeBtn.style.cursor = 'pointer';
+      removeBtn.style.lineHeight = '1';
+      removeBtn.style.padding = '0 4px';
+      removeBtn.textContent = '×';
+
       // Quantity controls
       const minusBtn = document.createElement('button');
       minusBtn.textContent = '-';
@@ -752,20 +764,6 @@ document.addEventListener('DOMContentLoaded', function() {
       plusBtn.style.margin = '0 0 0 4px';
       plusBtn.style.cursor = 'pointer';
 
-      // Remove button (left side)
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'cart-remove-btn';
-      removeBtn.setAttribute('data-remove-id', id);
-      removeBtn.title = 'Quitar del carrito';
-      removeBtn.style.background = 'none';
-      removeBtn.style.border = 'none';
-      removeBtn.style.color = '#c0392b';
-      removeBtn.style.fontSize = '1.1em';
-      removeBtn.style.marginRight = '7px';
-      removeBtn.style.cursor = 'pointer';
-      removeBtn.style.lineHeight = '1';
-      removeBtn.style.padding = '0 4px';
-      removeBtn.textContent = '×';
       // Name
       const nameSpan = document.createElement('span');
       nameSpan.style.fontWeight = '500';
@@ -776,14 +774,13 @@ document.addEventListener('DOMContentLoaded', function() {
       nameSpan.style.maxWidth = '60%';
       nameSpan.style.display = 'inline-block';
       nameSpan.textContent = data.name;
-
       // Price/qty
       const priceSpan = document.createElement('span');
       priceSpan.style.color = '#354e66';
       priceSpan.style.fontWeight = '600';
       priceSpan.style.whiteSpace = 'nowrap';
       priceSpan.style.marginLeft = 'auto';
-      priceSpan.innerHTML = `$${parseFloat(data.price).toLocaleString()} `;
+      priceSpan.innerHTML = `$${parseFloat(data.price).toLocaleString()}`;
 
       // Quantity controls wrapper
       const qtyWrap = document.createElement('span');
@@ -810,20 +807,22 @@ document.addEventListener('DOMContentLoaded', function() {
         total += priceNum * data.quantity;
       }
     }
+    // Update total
+    const totalDiv = document.getElementById('cart_total_amount');
     if (totalDiv) {
       totalDiv.innerHTML = `Total: <span style='color:#354e66;'>$${total.toLocaleString()}</span>`;
     }
   }
-  // Delegate click events for cart-inv-btn (add to cart), cart-qty-btn (+/-), and cart-remove-btn (remove)
+
+  // Add back quantity controls and remove event
   document.body.addEventListener('click', function(e) {
-    // Quantity controls
     const qtyBtn = e.target.closest('.cart-qty-btn');
     if (qtyBtn && qtyBtn.hasAttribute('data-qty-action') && qtyBtn.hasAttribute('data-qty-id')) {
       const action = qtyBtn.getAttribute('data-qty-action');
       const id = qtyBtn.getAttribute('data-qty-id');
       let cart = getCart();
+      let stockNum = cart[id] && cart[id].stock !== undefined && cart[id].stock !== null && cart[id].stock !== '' && cart[id].stock !== 'null' ? parseInt(cart[id].stock, 10) : null;
       if (cart[id]) {
-        let stockNum = cart[id].stock !== undefined && cart[id].stock !== null && cart[id].stock !== '' && cart[id].stock !== 'null' ? parseInt(cart[id].stock, 10) : null;
         if (action === 'increase') {
           if (stockNum === null || cart[id].quantity < stockNum) {
             cart[id].quantity += 1;
@@ -833,7 +832,7 @@ document.addEventListener('DOMContentLoaded', function() {
             cart[id].quantity -= 1;
           }
         }
-        setCart(cart);
+        localStorage.setItem('cart_items', JSON.stringify(cart));
         renderCart();
       }
       return;
@@ -845,12 +844,12 @@ document.addEventListener('DOMContentLoaded', function() {
       let cart = getCart();
       if (cart[id]) {
         delete cart[id];
-        setCart(cart);
+        localStorage.setItem('cart_items', JSON.stringify(cart));
         renderCart();
       }
       return;
     }
-    // Add to cart
+    // Add to cart from product button
     const btn = e.target.closest('.cart-inv-btn');
     if (btn && btn.hasAttribute('data-product-id')) {
       e.preventDefault();
@@ -862,14 +861,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const stockNum = stock !== undefined && stock !== null && stock !== '' ? parseInt(stock, 10) : null;
         let cart = getCart();
         if (cart[id]) {
-          // Only increase if quantity < stock (if stock is defined)
           if (stockNum === null || cart[id].quantity < stockNum) {
             cart[id].quantity += 1;
           }
         } else {
           cart[id] = { id: id, name: name, price: price, quantity: 1, stock: stock };
         }
-        setCart(cart);
+        localStorage.setItem('cart_items', JSON.stringify(cart));
         renderCart();
       } else if (!id) {
         alert('Error: el producto no tiene ID. Contacte al administrador.');
@@ -878,53 +876,63 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   // Render cart on load (from localStorage)
   renderCart();
-  // Also update cart when the panel is opened (in case another tab/page changed it)
-  const slideoutBtn = document.getElementById('slideout-btn');
-  if (slideoutBtn) {
-    slideoutBtn.addEventListener('click', renderCart);
-  }
-  // Listen for storage events (other tabs)
-  window.addEventListener('storage', function(e) {
-    if (e.key === 'cart_items') renderCart();
-  });
+});
+
+// Checkout: send cart to backend (must be inside DOMContentLoaded for cart panel)
+document.addEventListener('DOMContentLoaded', function() {
   const checkoutBtn = document.getElementById('cart-checkout-btn');
+  const cartCodeInput = document.getElementById('cart-code-input');
   if (checkoutBtn) {
-    checkoutBtn.addEventListener('click', function() {
-      const cartObj = getCart();
-      // Convert cart object to array of items for backend
-      const cart = Object.entries(cartObj).map(([id, data]) => ({
-        id: id,
-        name: data.name,
-        price: data.price,
-        quantity: data.quantity
-      }));
-      if (cart.length === 0) {
+    checkoutBtn.addEventListener('click', async function() {
+      let getCart = window.getCart;
+      let renderCart = window.renderCart;
+      if (!getCart) {
+        getCart = function() {
+          try {
+            return JSON.parse(localStorage.getItem('cart_items') || '{}');
+          } catch { return {}; }
+        };
+      }
+      if (!renderCart) {
+        renderCart = function() { window.location.reload(); };
+      }
+      const cart = getCart();
+      const items = Object.values(cart);
+      if (!items.length) {
         alert('El carrito está vacío.');
         return;
       }
-      // Debug: show cart in console
-      console.log('Enviando carrito:', cart);
-      fetch('/cart_checkout/', {
+      const cartCode = cartCodeInput ? cartCodeInput.value.trim() : '';
+      if (!cartCode) {
+        alert('Debe ingresar el código de la boleta, factura o documento.');
+        if (cartCodeInput) cartCodeInput.focus();
+        return;
+      }
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = 'Procesando...';
+      try {
+        const resp = await fetch('/cart_checkout/', {
           method: 'POST',
-          headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken()},
-          body: JSON.stringify({cart: cart})
-      })
-      .then(response => {
-        if (!response.ok) throw new Error('Error HTTP: ' + response.status);
-        return response.json();
-      })
-      .then(data => {
-          if (data.success) {
-              localStorage.removeItem('cart_items');
-              window.location.href = '/historial';
-          } else {
-              alert(data.error || 'Error al procesar la venta');
-          }
-      })
-      .catch(err => {
-        alert('Error de red o servidor: ' + err);
-        console.error('Error en checkout:', err);
-      });
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+          },
+          body: JSON.stringify({cart: items, cart_code: cartCode})
+        });
+        const data = await resp.json();
+        if (resp.ok && data.success) {
+          localStorage.removeItem('cart_items');
+          if (cartCodeInput) cartCodeInput.value = '';
+          renderCart();
+          alert('¡Movimiento registrado con éxito!');
+        } else {
+          alert(data.error || 'Error al finalizar la operación.');
+        }
+      } catch (err) {
+        alert('Error de red al finalizar la operación.');
+      }
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = 'Finalizar compra';
     });
   }
 });

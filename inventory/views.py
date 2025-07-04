@@ -876,11 +876,11 @@ def cart_checkout(request):
     data = json.loads(request.body)
     cart_items = data.get('cart', [])
     user = request.user
-    cart_code = str(uuid.uuid4())
+    cart_code = data.get('cart_code')
+    if not cart_code or not str(cart_code).strip():
+        return JsonResponse({'error': 'Debe ingresar el código de la boleta, factura o documento de la transacción.'}, status=400)
 
     cart_sale = CartSale.objects.create(user=user, cart_code=cart_code)
-    movimientos = []
-
     for item in cart_items:
         producto_id = item['id']
         quantity = int(item['quantity'])
@@ -895,16 +895,19 @@ def cart_checkout(request):
             quantity=quantity,
             price_at_sale=producto.price
         )
-        # Create Movimiento for historial
-        movimientos.append(Movimiento(
-            producto=producto,
-            user=user,
+        # Crear historial de movimiento de venta
+        from .models import HistorialMovimiento
+        HistorialMovimiento.objects.create(
+            producto_id=producto.id,
+            nombre_producto=producto.name,
+            tipo_producto=producto.product_type.name if producto.product_type else '',
+            codigo_barras=producto.codigo_barras or '',
+            cambio_stock=-quantity,
+            stock_final=producto.stock,
             motivo='Venta',
-            cantidad=-quantity,
-            stock_antes=producto.stock + quantity,
-            stock_despues=producto.stock,
-            cart_code=cart_code  # Add this field to Movimiento if you want to group ventas
-        ))
-    Movimiento.objects.bulk_create(movimientos)
+            usuario=user,
+            precio=producto.price,
+            boleta_codigo=cart_code
+        )
     return JsonResponse({'success': True, 'cart_code': cart_code})
 
