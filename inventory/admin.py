@@ -1,6 +1,18 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
-from .models import Suppliers, ProductType, Producto, HistorialMovimiento
+from .models import Suppliers, ProductType, Producto, HistorialMovimiento, CartSale, CartSaleItem
+# Admin for CartSale and CartSaleItem
+@admin.register(CartSale)
+class CartSaleAdmin(admin.ModelAdmin):
+    list_display = ('cart_code', 'user', 'created_at')
+    search_fields = ('cart_code', 'user__username')
+    list_filter = ('user', 'created_at')
+
+@admin.register(CartSaleItem)
+class CartSaleItemAdmin(admin.ModelAdmin):
+    list_display = ('cart_sale', 'producto', 'quantity', 'price_at_sale')
+    search_fields = ('cart_sale__cart_code', 'producto__name')
+    list_filter = ('cart_sale', 'producto')
 
 # Registrar todos los modelos del inventario
 admin.site.register(Suppliers)

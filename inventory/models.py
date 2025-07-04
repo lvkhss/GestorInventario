@@ -102,3 +102,14 @@ def profile_view(request):
         'recaudado_semana': recaudado_semana,
     }
     return render(request, 'inv/profile.html', context)
+
+class CartSale(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cart_code = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class CartSaleItem(models.Model):
+    cart_sale = models.ForeignKey(CartSale, on_delete=models.CASCADE, related_name='items')
+    producto = models.ForeignKey('Producto', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    price_at_sale = models.IntegerField()

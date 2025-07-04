@@ -1,4 +1,5 @@
-from django.urls import path, re_path
+from django.urls import path, include
+
 from .views import *
 from . import views 
 
@@ -6,6 +7,7 @@ from . import views
 urlpatterns = [
     path('index', index, name='index'),
     path('historial<int:pk>', detalle_historial, name='detalle_historial'),
+    path('cart_checkout/', views.cart_checkout, name='cart_checkout'),
     path('settings/', views.settings_view, name='settings_view'),
     path('product_types/<int:pk>/delete/', views.delete_product_type, name='delete_product_type'),
 
@@ -32,4 +34,5 @@ urlpatterns = [
     path('productos/upload_excel/', views.upload_products_excel, name='upload_products_excel'),
 
     path('logout/', logout_custom, name='logout_custom'),
+
 ]

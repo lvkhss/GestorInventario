@@ -62,6 +62,9 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('user-mov/', views.user_mov, name='user_mov'),
     path('user-mov/<int:pk>/', views.detalle_user_mov, name='detalle_user_mov'),
+
+    # Cart checkout endpoint
+    path('cart_checkout/', views.cart_checkout, name='cart_checkout'),
 ]
 
 # Servir archivos estáticos en modo DEBUG=False para desarrollo

@@ -1,3 +1,5 @@
+from .models import CartSale, CartSaleItem, Producto, HistorialMovimiento
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import HistorialMovimiento, Suppliers 
 from django.contrib.auth import authenticate, login
@@ -18,6 +20,10 @@ from django.core.exceptions import ValidationError
 from django.contrib import messages
 from .decorators import staff_required
 from django.contrib.auth.password_validation import validate_password, ValidationError as PasswordValidationError
+import uuid
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib import messages
 from .models import ProductType
@@ -33,6 +39,7 @@ def generar_boleta_codigo():
     else:
         num = 0
     return f"BOL-{num+1:08d}"
+
 def crear_historial_venta(**kwargs):
     """Crea un HistorialMovimiento para una venta, generando boleta_codigo único."""
     if kwargs.get('motivo', '').strip().lower() == 'venta':
@@ -860,4 +867,44 @@ def recaudado_semana_global(request):
     }
 
     return render(request, 'inv/some_template.html', context)  # Cambia 'inv/some_template.html' por tu plantilla real
+
+@login_required
+@require_POST
+@csrf_exempt
+def cart_checkout(request):
+    import json
+    data = json.loads(request.body)
+    cart_items = data.get('cart', [])
+    user = request.user
+    cart_code = str(uuid.uuid4())
+
+    cart_sale = CartSale.objects.create(user=user, cart_code=cart_code)
+    movimientos = []
+
+    for item in cart_items:
+        producto_id = item['id']
+        quantity = int(item['quantity'])
+        producto = Producto.objects.get(pk=producto_id)
+        if producto.stock < quantity:
+            return JsonResponse({'error': f'Stock insuficiente para {producto.name}'}, status=400)
+        producto.stock -= quantity
+        producto.save()
+        CartSaleItem.objects.create(
+            cart_sale=cart_sale,
+            producto=producto,
+            quantity=quantity,
+            price_at_sale=producto.price
+        )
+        # Create Movimiento for historial
+        movimientos.append(Movimiento(
+            producto=producto,
+            user=user,
+            motivo='Venta',
+            cantidad=-quantity,
+            stock_antes=producto.stock + quantity,
+            stock_despues=producto.stock,
+            cart_code=cart_code  # Add this field to Movimiento if you want to group ventas
+        ))
+    Movimiento.objects.bulk_create(movimientos)
+    return JsonResponse({'success': True, 'cart_code': cart_code})
 
