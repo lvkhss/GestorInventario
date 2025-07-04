@@ -108,6 +108,14 @@ class CartSale(models.Model):
     cart_code = models.CharField(max_length=64, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def total(self):
+        return sum(item.quantity * item.price_at_sale for item in self.items.all())
+
+    @property
+    def total_units(self):
+        return sum(item.quantity for item in self.items.all())
+
 class CartSaleItem(models.Model):
     cart_sale = models.ForeignKey(CartSale, on_delete=models.CASCADE, related_name='items')
     producto = models.ForeignKey('Producto', on_delete=models.CASCADE)

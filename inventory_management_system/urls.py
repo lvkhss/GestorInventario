@@ -65,6 +65,13 @@ urlpatterns = [
 
     # Cart checkout endpoint
     path('cart_checkout/', views.cart_checkout, name='cart_checkout'),
+
+    # Nuevas rutas sugeridas
+    path('tabla_cart_sales/', views.tabla_cart_sales, name='tabla_cart_sales'),
+    path('tabla_historial/', views.tabla_historial, name='tabla_historial'),
+
+    # Detalle de venta en el carrito
+    path('cart_sale/<int:pk>/', views.detalle_cart_sale, name='detalle_cart_sale'),
 ]
 
 # Servir archivos estáticos en modo DEBUG=False para desarrollo

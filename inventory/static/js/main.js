@@ -936,3 +936,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+  const motivoSelect = document.getElementById('id_motivo');
+  const boletaInput = document.getElementById('id_boleta_codigo');
+  if (motivoSelect && boletaInput) {
+    function toggleBoletaInput() {
+      if (motivoSelect.value === 'Venta') {
+        boletaInput.style.display = '';
+        boletaInput.required = true;
+      } else {
+        boletaInput.style.display = 'none';
+        boletaInput.required = false;
+        boletaInput.value = '';
+      }
+    }
+    motivoSelect.addEventListener('change', toggleBoletaInput);
+    toggleBoletaInput(); // Inicial
+  }
+});
+

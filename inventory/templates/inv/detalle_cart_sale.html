@@ -1,0 +1,35 @@
+{% load static %}
+{% load number_filters %}
+
+<h3>Detalle de Venta #{{ sale.id }}</h3>
+<p>Usuario: {{ sale.user.username }}</p>
+<p>Código documento: {{ sale.cart_code }}</p>
+<p>Fecha: {{ sale.created_at|date:"d-m-Y H:i" }}</p>
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Producto</th>
+      <th>Cantidad</th>
+      <th>Precio unitario</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ item.producto.id }}</td>
+      <td>{{ item.producto.name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>${{ item.price_at_sale }}</td>
+      <td>${{ item.quantity|mul:item.price_at_sale }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th colspan="4" class="text-end">Total general:</th>
+      <th>${{ sale.total|comma_miles }}</th>
+    </tr>
+  </tfoot>
+</table>

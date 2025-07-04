@@ -35,4 +35,8 @@ urlpatterns = [
 
     path('logout/', logout_custom, name='logout_custom'),
 
+    path('tabla_cart_sales/', views.tabla_cart_sales, name='tabla_cart_sales'),
+    path('tabla_historial/', views.tabla_historial, name='tabla_historial'),
+    path('cart_sale/<int:pk>/', views.detalle_cart_sale, name='detalle_cart_sale'),
+
 ]

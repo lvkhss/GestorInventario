@@ -1,0 +1,32 @@
+{% load static %}
+{% load number_filters %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Código Documento</th>
+            <th>Usuario</th>
+            <th>Cantidad unidades</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Detalle</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sale in cart_sales %}
+        <tr>
+            <td>{{ sale.cart_code }}</td>
+            <td>{{ sale.user.username }}</td>
+            <td>{{ sale.total_units }}</td>
+            <td>{{ sale.created_at|date:"d-m-Y H:i" }}</td>
+             <td>${{ sale.total|comma_miles }}</td>
+            <td>
+                <a href="{% url 'detalle_cart_sale' sale.id %}" class="btn-detalles">Ver Detalle</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">No hay ventas registradas.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

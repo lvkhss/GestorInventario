@@ -22,7 +22,7 @@ from .decorators import staff_required
 from django.contrib.auth.password_validation import validate_password, ValidationError as PasswordValidationError
 import uuid
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib import messages
@@ -41,9 +41,8 @@ def generar_boleta_codigo():
     return f"BOL-{num+1:08d}"
 
 def crear_historial_venta(**kwargs):
-    """Crea un HistorialMovimiento para una venta, generando boleta_codigo único."""
-    if kwargs.get('motivo', '').strip().lower() == 'venta':
-        kwargs['boleta_codigo'] = generar_boleta_codigo()
+    """Crea un HistorialMovimiento para una venta, usando boleta_codigo solo si se provee explícitamente."""
+    # Ya no se genera automáticamente el código de boleta
     return HistorialMovimiento.objects.create(**kwargs)
 
 
@@ -910,4 +909,21 @@ def cart_checkout(request):
             boleta_codigo=cart_code
         )
     return JsonResponse({'success': True, 'cart_code': cart_code})
+
+def tabla_cart_sales(request):
+    cart_sales = CartSale.objects.select_related('user').all().order_by('-created_at')
+    return render(request, 'inv/tabla_cart_sales.html', {'cart_sales': cart_sales})
+
+def tabla_historial(request):
+    movimientos = HistorialMovimiento.objects.all().order_by('-fecha')
+    return render(request, 'inv/tabla_historial.html', {'movimientos': movimientos})
+
+@login_required
+def detalle_cart_sale(request, pk):
+    sale = get_object_or_404(CartSale, pk=pk)
+    items = sale.items.select_related('producto').all()
+    return render(request, 'inv/detalle_cart_sale.html', {
+        'sale': sale,
+        'items': items,
+    })
 

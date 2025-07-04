@@ -7,7 +7,7 @@
 
 .button-group-2 {
   display: inline-block;
-  margin-right: 10px;
+  margin-right: 10px;s
   vertical-align: middle;
 }
 
@@ -23,6 +23,12 @@ button.dynamic-table-button {
   transition: border-color 0.2s;
 
 }
+
+button.dynamic-table-button:hover {
+  border-color: rgb(0, 0, 0);
+  background-color: rgb(233, 233, 233);
+}
+
 
 /* Filtro */
 .form-select {

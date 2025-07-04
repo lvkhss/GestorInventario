@@ -48,7 +48,7 @@
     {% endfor %}
 
     {% if form.instance.pk %}
-    <!-- Only show motivo field when editing -->
+    <!-- Only show motivo and boleta_codigo fields when editing -->
     <div class="add-product-group">
       <label for="id_motivo" class="add-product-label">Motivo</label>
       <div class="add-product-field">
@@ -64,6 +64,8 @@
           <option value="Otro">Otro</option>
         </select>
         <input type="text" id="motivo_extra" class="form-control" placeholder="Especifique el motivo" style="margin-top:8px; display:none;" disabled>
+        <!-- Código de boleta input, solo visible si motivo es Venta -->
+        <input type="text" name="boleta_codigo" id="id_boleta_codigo" class="form-control" placeholder="Código de boleta, factura o documento" style="margin-top:8px; display:none;">
         <!-- Toast for Venta motivo -->
         <div id="ventaToast"
           style="position: fixed; top: 20px; right: 20px; z-index: 1050; background-color: #dc3545; color: white; padding: 10px 15px; border-radius: 5px; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width:240px; font-weight:bold;">
