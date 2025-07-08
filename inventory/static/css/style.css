@@ -7,7 +7,7 @@
 
 .button-group-2 {
   display: inline-block;
-  margin-right: 10px;s
+  margin-right: 10px;
   vertical-align: middle;
 }
 
@@ -27,6 +27,17 @@ button.dynamic-table-button {
 button.dynamic-table-button:hover {
   border-color: rgb(0, 0, 0);
   background-color: rgb(233, 233, 233);
+}
+
+button.dynamic-table-button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+button.dynamic-table-button.active:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
 }
 
 

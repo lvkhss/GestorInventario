@@ -956,3 +956,67 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 
+// ===================================
+// HISTORIAL - Toggle between historial and cart sales
+// ===================================
+let showingCartSales = false;
+
+function toggleCartSalesView() {
+    const tablaContainer = document.getElementById("tablaHistorial");
+    const showCartSalesBtn = document.getElementById("showCartSalesBtn");
+    
+    if (!showingCartSales) {
+        // Switch to cart sales view
+        fetch('/tabla_cart_sales/')
+            .then(response => response.text())
+            .then(data => {
+                tablaContainer.innerHTML = data;
+                showingCartSales = true;
+                
+                // Update button appearance
+                showCartSalesBtn.classList.add('active');
+                showCartSalesBtn.title = "Mostrar Historial";
+                
+                // RE-INICIALIZAR el botón toggle
+                initializeToggleButton();
+            })
+            .catch(error => {
+                console.error('Error loading cart sales:', error);
+            });
+    } else {
+        // Switch back to historial view
+        fetch('/tabla_historial/')
+            .then(response => response.text())
+            .then(data => {
+                tablaContainer.innerHTML = data;
+                showingCartSales = false;
+                
+                // Update button appearance
+                showCartSalesBtn.classList.remove('active');
+                showCartSalesBtn.title = "Mostrar Ventas del Carrito";
+                
+                // RE-INICIALIZAR el botón toggle
+                initializeToggleButton();
+            })
+            .catch(error => {
+                console.error('Error loading historial:', error);
+            });
+    }
+}
+
+// Initialize cart sales button when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Only add functionality on historial page
+    if (window.location.pathname.includes('/historial')) {
+        const showCartSalesBtn = document.getElementById("showCartSalesBtn");
+        if (showCartSalesBtn) {
+            showCartSalesBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleCartSalesView();
+            });
+            
+            // Set initial title
+            showCartSalesBtn.title = "Mostrar Ventas del Carrito";
+        }
+    }
+});
