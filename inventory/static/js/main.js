@@ -110,6 +110,9 @@ function updateHistorialTable() {
     let url = '/historial/?';
     if (query) url += `q=${encodeURIComponent(query)}&`;
     if (type) url += `type=${encodeURIComponent(type)}&`;
+    const motivoElement = document.getElementById("filterMotivo");
+    const motivo = motivoElement ? motivoElement.value : "";
+    if (motivo) url += `motivo=${encodeURIComponent(motivo)}&`;
     if (user) url += `user=${encodeURIComponent(user)}&`;
     if (startDate) url += `start=${encodeURIComponent(startDate)}&`;
     if (endDate) url += `end=${encodeURIComponent(endDate)}`;

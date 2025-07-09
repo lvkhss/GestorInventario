@@ -89,20 +89,31 @@
 <script src="{% static 'js/main.js' %}"></script>
 <script>
 // Mostrar toast si motivo es Venta y se intenta agregar stock o dejar sin cambios
+// Y validar motivos según cambios reales
+
 document.addEventListener('DOMContentLoaded', function () {
   const motivoSelect = document.getElementById('id_motivo');
   const ventaToast = document.getElementById('ventaToast');
-  // Detectar el campo de stock (puede ser number o text, depende del form)
   const stockInput = document.getElementById('id_stock');
+  const nameInput = document.getElementById('id_name');
+  const priceInput = document.getElementById('id_price');
   const form = document.querySelector('form.add-product-form');
   if (!motivoSelect || !stockInput || !form) return;
 
+  // Guardar valores originales
+  const originalStock = stockInput.getAttribute('data-original-stock');
+  const originalName = nameInput ? nameInput.defaultValue : null;
+  const originalPrice = priceInput ? priceInput.defaultValue : null;
+
   form.addEventListener('submit', function(e) {
-    if (motivoSelect.value === 'Venta') {
-      // Detectar si el valor de stock es mayor o igual al valor original (no se permite agregar stock ni dejar igual)
-      const originalStock = stockInput.getAttribute('data-original-stock');
-      const currentStock = parseInt(stockInput.value, 10);
-      const original = originalStock !== null ? parseInt(originalStock, 10) : null;
+    const currentStock = parseInt(stockInput.value, 10);
+    const original = originalStock !== null ? parseInt(originalStock, 10) : null;
+    const currentName = nameInput ? nameInput.value : null;
+    const currentPrice = priceInput ? priceInput.value : null;
+    const motivo = motivoSelect.value;
+
+    // Venta: no puede agregar stock ni dejar igual
+    if (motivo === 'Venta') {
       if (original !== null && currentStock >= original) {
         e.preventDefault();
         if (ventaToast) {
@@ -111,6 +122,33 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
           alert('No puede agregar stock ni dejar sin cambios cuando el motivo es "Venta".');
         }
+        stockInput.focus();
+        return false;
+      }
+    }
+    // Corrección nombre: solo si cambió el nombre
+    if (motivo === 'Corrección nombre') {
+      if (!nameInput || currentName === originalName) {
+        e.preventDefault();
+        alert('No puede seleccionar "Corrección nombre" si no cambió el nombre.');
+        if (nameInput) nameInput.focus();
+        return false;
+      }
+    }
+    // Corrección precio: solo si cambió el precio
+    if (motivo === 'Corrección precio') {
+      if (!priceInput || currentPrice === originalPrice) {
+        e.preventDefault();
+        alert('No puede seleccionar "Corrección precio" si no cambió el precio.');
+        if (priceInput) priceInput.focus();
+        return false;
+      }
+    }
+    // Ajuste de inventario/Uso interno: solo si cambió el stock
+    if ((motivo === 'Ajuste de inventario' || motivo === 'Uso interno') && original !== null) {
+      if (currentStock === original) {
+        e.preventDefault();
+        alert('No puede seleccionar este motivo si no cambió el stock.');
         stockInput.focus();
         return false;
       }

@@ -1,48 +1,35 @@
-{% extends 'inv/base.html' %}
 {% load static %}
 {% load number_filters %}
 
-{% block body %}
-<div class="receipt-container" style="max-width:370px;margin:40px auto 0 auto;border:2px dashed #bdbdbd;padding:28px 18px 18px 18px;border-radius:12px;background:#fafafa;box-shadow:0 4px 18px #e0e0e0;">
-  <h2 style="text-align:center;margin-bottom:10px;font-family:monospace;letter-spacing:1px;color:#333;font-size:1.4em;">RECIBO DE VENTA</h2>
-  <div style="margin-bottom:18px;border-bottom:1px dashed #bdbdbd;padding-bottom:10px;">
-    <div style="display:flex;justify-content:space-between;font-size:1em;">
-      <span><strong>N° Venta:</strong></span> <span>{{ sale.id }}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:1em;">
-      <span><strong>Usuario:</strong></span> <span>{{ sale.user.username }}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:1em;">
-      <span><strong>Documento:</strong></span> <span>{{ sale.cart_code }}</span>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:1em;">
-      <span><strong>Fecha:</strong></span> <span>{{ sale.created_at|date:"d-m-Y H:i" }}</span>
-    </div>
-  </div>
-  <div style="margin-bottom:0;">
-    <div style="display:flex;font-weight:bold;border-bottom:1px dashed #bdbdbd;padding-bottom:4px;font-size:0.98em;">
-      <div style="flex:2;">Producto</div>
-      <div style="flex:1;text-align:center;">Cant.</div>
-      <div style="flex:1;text-align:right;">P. Unit.</div>
-      <div style="flex:1;text-align:right;">Total</div>
-    </div>
+<h3>Detalle de Venta #{{ sale.id }}</h3>
+<p>Usuario: {{ sale.user.username }}</p>
+<p>Código documento: {{ sale.cart_code }}</p>
+<p>Fecha: {{ sale.created_at|date:"d-m-Y H:i" }}</p>
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Producto</th>
+      <th>Cantidad</th>
+      <th>Precio unitario</th>
+      <th>Total</th>
+    </tr>
+  </thead>
+  <tbody>
     {% for item in items %}
-    <div style="display:flex;border-bottom:1px dotted #e0e0e0;padding:2px 0;font-size:0.97em;align-items:center;">
-      <div style="flex:2;">{{ item.producto.name }}</div>
-      <div style="flex:1;text-align:center;">{{ item.quantity }}</div>
-      <div style="flex:1;text-align:right;">${{ item.price_at_sale }}</div>
-      <div style="flex:1;text-align:right;">${{ item.quantity|mul:item.price_at_sale }}</div>
-    </div>
+    <tr>
+      <td>{{ item.producto.id }}</td>
+      <td>{{ item.producto.name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>${{ item.price_at_sale }}</td>
+      <td>${{ item.quantity|mul:item.price_at_sale }}</td>
+    </tr>
     {% endfor %}
-    <div style="display:flex;font-weight:bold;padding-top:8px;font-size:1em;">
-      <div style="flex:2;"></div>
-      <div style="flex:1;"></div>
-      <div style="flex:1;text-align:right;">Total:</div>
-      <div style="flex:1;text-align:right;">${{ sale.total|comma_miles }}</div>
-    </div>
-  </div>
-  <div style="text-align:center;margin-top:18px;font-size:0.95em;color:#666;font-family:monospace;letter-spacing:1px;">
-    <button type="button" class="btn-login" style="margin-top:10px;" onclick="window.location.href='{% url 'historial' %}'">Volver</button>
-  </div>
-</div>
-{% endblock %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th colspan="4" class="text-end">Total general:</th>
+      <th>${{ sale.total|comma_miles }}</th>
+    </tr>
+  </tfoot>
+</table>

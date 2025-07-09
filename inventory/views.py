@@ -191,6 +191,7 @@ def historial(request):
     query = request.GET.get('q', '')
     product_type_filter = request.GET.get('type', '')
     user_filter = request.GET.get('user', '')
+    motivo_filter = request.GET.get('motivo', '')
     start_date = request.GET.get('start')
     end_date = request.GET.get('end')
     
@@ -200,8 +201,7 @@ def historial(request):
     if query:
         movimientos = movimientos.filter(
             Q(nombre_producto__icontains=query) | 
-            Q(codigo_barras__icontains=query) |
-            Q(boleta_codigo__icontains=query)
+            Q(codigo_barras__icontains=query)
         )
     
     if product_type_filter:
@@ -209,6 +209,9 @@ def historial(request):
     
     if user_filter:
         movimientos = movimientos.filter(usuario__username=user_filter)
+    
+    if motivo_filter:
+        movimientos = movimientos.filter(motivo=motivo_filter)
     
     if start_date:
         try:
@@ -224,6 +227,7 @@ def historial(request):
         except ValueError:
             pass
     
+
     for mov in movimientos:
         mov.stock_inicial = mov.stock_final - mov.cambio_stock
     
@@ -238,13 +242,16 @@ def historial(request):
     user_ids = HistorialMovimiento.objects.exclude(usuario__isnull=True).values_list('usuario_id', flat=True).distinct()
     users = User.objects.filter(id__in=user_ids).order_by('username')
     
+    motivos = HistorialMovimiento.objects.values_list('motivo', flat=True).distinct().order_by('motivo')
     context = {
         'movimientos': movimientos,
         'product_types': product_types,
         'users': users,
+        'motivos': motivos,
         'current_query': query,
         'current_type': product_type_filter,
         'current_user': user_filter,
+        'current_motivo': motivo_filter,
         'current_start': request.GET.get('start', ''),
         'current_end': request.GET.get('end', ''),
     }

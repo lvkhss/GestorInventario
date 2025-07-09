@@ -199,20 +199,29 @@ button.dynamic-table-button.active:hover {
 .add_buttons select#filterType {
   border-radius: 6px;
   border: 1px solid #ced4da;
-  padding: 10px 12px;
+  padding: 1vh;
   font-size: 1rem;
-  margin-top: 10px;
+  margin-top: 1vh;
   transition: border-color 0.2s;
 }
 
 .add_buttons select#filterUser {
   border-radius: 6px;
   border: 1px solid #ced4da;
-  padding: 10px 12px;
+  padding: 1vh;
   font-size: 1rem;
-  margin-top: 10px;
+  margin-top: 1vh;
   transition: border-color 0.2s;
 }
+
+.add_buttons select#filterMotivo {
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  padding: 1vh;
+  font-size: 1rem;
+  margin-top: 1vh;
+  transition: border-color 0.2s;
+} 
 
 .add_buttons {
   display: flex;
@@ -743,4 +752,198 @@ margin-left: 25%;
   padding: 10px;
   border-radius: 4px;
   margin-bottom: 20px;
+}
+
+/* Responsive styles for inventario.html (laptop screens) */
+@media (max-width: 1200px) {
+  .container-set-inventory {
+    padding: 0 2vw;
+  }
+  .add_buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+  .inventory-left, .inventory-right {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+  .button-group, .button-group-2 {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+  }
+  .button-group input,
+  .button-group select,
+  .button-group button {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 8px;
+  }
+  .button-group-fused {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  .agregar-producto, .agregar-excel {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 6px 0;
+    padding: 12px 0;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .container-set-inventory {
+    padding: 0 1vw;
+  }
+  .add_buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .inventory-left, .inventory-right {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+  }
+  .button-group, .button-group-2 {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  .button-group input,
+  .button-group select,
+  .button-group button {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 6px;
+  }
+  .button-group-fused {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  .agregar-producto, .agregar-excel {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 4px 0;
+    padding: 10px 0;
+    font-size: 1rem;
+  }
+  #tablaProductos {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .container-set-inventory {
+    padding: 0 0.5vw;
+  }
+  .add_buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .inventory-left, .inventory-right {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+  }
+  .button-group, .button-group-2 {
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+  .button-group input,
+  .button-group select,
+  .button-group button {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 4px;
+  }
+  .button-group-fused {
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+  .agregar-producto, .agregar-excel {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 2px 0;
+    padding: 8px 0;
+    font-size: 0.98rem;
+  }
+  #tablaProductos {
+    overflow-x: auto;
+  }
+}
+
+/* Responsive styles for index.html (inicio) */
+.table-container {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.table-wrapper {
+  flex: 1 1 420px;
+  min-width: 320px;
+  max-width: 100%;
+  margin-bottom: 32px;
+  padding: 24px 18px 18px 18px;
+}
+.table-wrapper h3 {
+  font-size: 1.2rem;
+  margin-bottom: 18px;
+  color: #354e66;
+  text-align: center;
+}
+.table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+.table-wrapper th, .table-wrapper td {
+  text-align: center;
+  padding: 8px 6px;
+  font-size: 1rem;
+}
+.table-wrapper th.col-nombre, .table-wrapper td.col-nombre {
+  text-align: left;
+}
+
+@media (max-width: 1200px) {
+  .table-container {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .table-wrapper {
+    min-width: 0;
+    width: 100%;
+    padding: 18px 6px 12px 6px;
+  }
+}
+@media (max-width: 700px) {
+  .table-wrapper {
+    padding: 10px 2px 8px 2px;
+  }
+  .table-wrapper table {
+    font-size: 0.95rem;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .table-wrapper th, .table-wrapper td {
+    padding: 6px 4px;
+  }
+  .table-wrapper h3 {
+    font-size: 1rem;
+  }
 }

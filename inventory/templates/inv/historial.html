@@ -12,14 +12,20 @@
       </div>
 
       <div class="button-group">
-        <select id="filterType" class="form-select">
+        <select id="filterType" class="form-select" name="type" onchange="updateHistorialTable()">
           <option value="">Todos</option>
           {% for product_type in product_types %}
           <option value="{{ product_type }}" {% if product_type == current_type %}selected{% endif %}>{{ product_type }}</option>
           {% endfor %}
         </select>
+        <select id="filterMotivo" class="form-select" name="motivo" onchange="updateHistorialTable()" >
+          <option value="">Motivo</option>
+          {% for motivo in motivos %}
+          <option value="{{ motivo }}" {% if motivo == current_motivo %}selected{% endif %}>{{ motivo }}</option>
+          {% endfor %}
+        </select>
         {% if user.is_staff %}
-        <select id="filterUser" class="form-select">
+        <select id="filterUser" class="form-select" name="user" onchange="updateHistorialTable()">
           <option value="">Usuarios</option>
           {% for usuario in users %}
           <option value="{{ usuario.username }}" {% if usuario.username == current_user %}selected{% endif %}>{{ usuario.username }}</option>
