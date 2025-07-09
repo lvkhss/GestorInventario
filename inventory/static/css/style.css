@@ -331,6 +331,7 @@ body {
   border: 1px solid #dee2e6;
 }
 
+
 /* Columnas alternadas - solo cuando tiene la clase 'striped-columns' */
 .table.striped-columns th:nth-child(odd),
 .table.striped-columns td:nth-child(odd) {
@@ -1138,7 +1139,7 @@ padding: 15vh;
   padding: 10px 15px;
   border-radius: 5px;
   display: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   font-weight: 600;
 }
 #successToast {
