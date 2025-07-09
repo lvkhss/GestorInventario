@@ -2,70 +2,51 @@
 {% load static %}
 {% load number_filters %}
 {% block body %}
-  <div class="center-content">
-    <ul class="list-group detalle-boleta" >
-      {% if movimiento.motivo|lower == 'venta' %}
-      <li class="list-group-item">
-        <span class="label">N° Boleta :</span>
-        <span class="dots"></span>
-        <span class="value">{{ movimiento.boleta_codigo|default:"-" }}</span>
-      </li>
-      {% endif %}
-      <li class="list-group-item">
-        <span class="label">Producto :</span>
-        <span class="dots"></span>
-        <span class="value">{{ movimiento.nombre_producto }}</span>
-      </li>
-      <li class="list-group-item">
-        <span class="label">Tipo :</span>
-        <span class="dots"></span>
-        <span class="value">{{ movimiento.tipo_producto }}</span>
-      </li>
-      <li class="list-group-item">
-        <span class="label">Código de Barras :</span>
-        <span class="dots"></span>
-        <span class="value">{{ movimiento.codigo_barras|default:"No asignado" }}</span>
-      </li>
-      <li class="list-group-item">
-        <span class="label">Precio :</span>
-        <span class="dots"></span>
-        <span class="value">${{ movimiento.precio|default:"-"|comma_miles }}</span>
-      </li>
-      <li class="list-group-item">
-        <span class="label">Stock Inicial :</span>
-        <span class="dots"></span>
-        <span class="value">{{ stock_inicial }}</span>
-      </li>
-      <li class="list-group-item">
-        <span class="label">Stock Final :</span>
-        <span class="dots"></span>
-        <span class="value">{{ movimiento.stock_final }}</span>
-      </li>
-      <li class="list-group-item">
-        <span class="label">Cambio de Stock :</span>
-        <span class="dots"></span>
-        <span
-          class="value {% if movimiento.cambio_stock > 0 %}text-success{% elif movimiento.cambio_stock < 0 %}text-danger{% else %}text-muted{% endif %}">
-          {% if movimiento.cambio_stock > 0 %}+{% endif %}{{ movimiento.cambio_stock }}
-        </span>
-      </li>
-      <li class="list-group-item">
-        <span class="label">Fecha :</span>
-        <span class="dots"></span>
-        <span class="value">{{ movimiento.fecha|date:"d/m/Y H:i" }}</span>
-      </li>
-      <li class="list-group-item">
-        <span class="label">Motivo :</span>
-        <span class="dots"></span>
-        <span class="value">{{ movimiento.motivo }}</span>
-      </li>
-      <li class="list-group-item">
-        <span class="label">Usuario :</span>
-        <span class="dots"></span>
-        <span class="value">{{ movimiento.usuario.username|default:"Desconocido" }}</span>
-      </li>
-      <button type="button" class="btn-login" onclick="window.location.href='{% url 'historial' %}'">Volver</button>
-    </ul>
+<div class="receipt-container" style="max-width:370px;margin:40px auto 0 auto;border:2px dashed #bdbdbd;padding:28px 18px 18px 18px;border-radius:12px;background:#fafafa;box-shadow:0 4px 18px #e0e0e0;">
+  <h2 style="text-align:center;margin-bottom:10px;font-family:monospace;letter-spacing:1px;color:#333;font-size:1.4em;">DETALLE DE MOVIMIENTO</h2>
+  <div style="margin-bottom:18px;border-bottom:1px dashed #bdbdbd;padding-bottom:10px;">
+    {% if movimiento.motivo|lower == 'venta' %}
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>N° Boleta:</strong></span> <span>{{ movimiento.boleta_codigo|default:"-" }}</span>
+    </div>
+    {% endif %}
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Producto:</strong></span> <span>{{ movimiento.nombre_producto }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Tipo:</strong></span> <span>{{ movimiento.tipo_producto }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Código de Barras:</strong></span> <span>{{ movimiento.codigo_barras|default:"No asignado" }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Precio:</strong></span> <span>${{ movimiento.precio|default:"-"|comma_miles }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Stock Inicial:</strong></span> <span>{{ stock_inicial }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Stock Final:</strong></span> <span>{{ movimiento.stock_final }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Cambio de Stock:</strong></span>
+      <span class="{% if movimiento.cambio_stock > 0 %}text-success{% elif movimiento.cambio_stock < 0 %}text-danger{% else %}text-muted{% endif %}">
+        {% if movimiento.cambio_stock > 0 %}+{% endif %}{{ movimiento.cambio_stock }}
+      </span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Fecha:</strong></span> <span>{{ movimiento.fecha|date:"d/m/Y H:i" }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Motivo:</strong></span> <span>{{ movimiento.motivo }}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:1em;">
+      <span><strong>Usuario:</strong></span> <span>{{ movimiento.usuario.username|default:"Desconocido" }}</span>
+    </div>
   </div>
-
- {% endblock %}
+  <div style="text-align:center;margin-top:18px;font-size:0.95em;color:#666;font-family:monospace;letter-spacing:1px;">
+    <button type="button" class="btn-login" onclick="window.location.href='{% url 'historial' %}'">Volver</button>
+  </div>
+  
+</div>
+{% endblock %}

@@ -38,6 +38,7 @@
       <td style="padding-right:30px;">
         <a href="{% url 'detalle_historial' mov.pk %}" class="btn-detalles">Detalles</a>
       </td>
+      <td style="display:none;">{{ mov.boleta_codigo }}</td>
     </tr>
     {% empty %}
     <tr>

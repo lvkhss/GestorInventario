@@ -200,7 +200,8 @@ def historial(request):
     if query:
         movimientos = movimientos.filter(
             Q(nombre_producto__icontains=query) | 
-            Q(codigo_barras__icontains=query)
+            Q(codigo_barras__icontains=query) |
+            Q(boleta_codigo__icontains=query)
         )
     
     if product_type_filter:
@@ -223,7 +224,6 @@ def historial(request):
         except ValueError:
             pass
     
-
     for mov in movimientos:
         mov.stock_inicial = mov.stock_final - mov.cambio_stock
     
