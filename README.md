@@ -63,7 +63,7 @@
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/tu-usuario/GestorInventario.git
+git clone https://github.com/lvkhss/GestorInventario.git
 cd GestorInventario
 ```
 
