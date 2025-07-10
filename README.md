@@ -138,27 +138,6 @@ python manage.py runserver
 
 ---
 
-## 📖 Estructura del Proyecto
-
-```
-GestorInventario/
-├── 📁 inventory/                    # App principal
-│   ├── 📁 static/                   # CSS, JS, imágenes
-│   ├── 📁 templates/                # Plantillas HTML
-│   ├── 📁 templatetags/             # Filtros personalizados
-│   ├── 📄 models.py                 # 6 modelos principales
-│   ├── 📄 views.py                  # 30+ vistas (937 líneas)
-│   ├── 📄 forms.py                  # 8 formularios con validaciones
-│   └── 📄 urls.py                   # 20+ endpoints
-├── 📁 inventory_management_system/  # Configuración Django
-├── 📄 db.sqlite3                   # Base de datos
-├── 📄 requirements.txt             # Dependencias
-├── 📄 productos.xlsx               # Archivo ejemplo
-└── 📄 Dockerfile                   # Configuración Docker
-```
-
----
-
 ## 🎯 Casos de Uso
 
 <table>
@@ -192,23 +171,4 @@ GestorInventario/
 </td>
 </tr>
 </table>
-
----
-
-## 🔧 Configuración Avanzada
-
-### Variables de Entorno (Producción)
-```bash
-DEBUG=False
-SECRET_KEY=tu-secret-key-aqui
-DATABASE_URL=postgresql://user:password@host:port/database
-ALLOWED_HOSTS=tudominio.com,www.tudominio.com
-```
-
-### Docker
-```bash
-docker build -t gestor-inventario .
-docker run -p 8000:8000 gestor-inventario
-```
-
 
