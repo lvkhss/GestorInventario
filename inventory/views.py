@@ -705,6 +705,7 @@ def producto_update(request, pk):
     if request.method == 'POST':
         form = ProductoForm(request.POST, instance=producto)
         motivo = request.POST.get('motivo', 'Producto editado')
+        boleta_codigo = request.POST.get('boleta_codigo', '')  # Get user-provided boleta code
         if form.is_valid():
             updated_producto = form.save(commit=False)
             stock_nuevo = updated_producto.stock
@@ -715,6 +716,12 @@ def producto_update(request, pk):
                 if stock_nuevo >= stock_anterior:
                     messages.error(request, 'En una venta solo puedes disminuir el stock (incluyendo dejarlo en 0).')
                     return render(request, 'inv/edit_item.html', {'form': form, 'producto': producto})
+                
+                # Validate boleta_codigo for sales
+                if not boleta_codigo or not boleta_codigo.strip():
+                    messages.error(request, 'Debe ingresar el código de boleta para una venta.')
+                    return render(request, 'inv/edit_item.html', {'form': form, 'producto': producto})
+                    
                 updated_producto.save()
                 crear_historial_venta(
                     producto_id=updated_producto.id,
@@ -725,7 +732,8 @@ def producto_update(request, pk):
                     stock_final=updated_producto.stock,
                     motivo=motivo,
                     usuario=request.user,
-                    precio=updated_producto.price
+                    precio=updated_producto.price,
+                    boleta_codigo=boleta_codigo.strip()  # Use user-provided code
                 )
             else:
                 updated_producto.save()

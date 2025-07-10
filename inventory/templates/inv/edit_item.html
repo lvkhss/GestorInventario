@@ -97,8 +97,23 @@ document.addEventListener('DOMContentLoaded', function () {
   const stockInput = document.getElementById('id_stock');
   const nameInput = document.getElementById('id_name');
   const priceInput = document.getElementById('id_price');
+  const boletaCodigoInput = document.getElementById('id_boleta_codigo');
   const form = document.querySelector('form.add-product-form');
   if (!motivoSelect || !stockInput || !form) return;
+
+  // Show/hide boleta_codigo field based on motivo selection
+  motivoSelect.addEventListener('change', function() {
+    if (boletaCodigoInput) {
+      if (this.value === 'Venta') {
+        boletaCodigoInput.style.display = 'block';
+        boletaCodigoInput.required = true;
+      } else {
+        boletaCodigoInput.style.display = 'none';
+        boletaCodigoInput.required = false;
+        boletaCodigoInput.value = '';
+      }
+    }
+  });
 
   // Guardar valores originales
   const originalStock = stockInput.getAttribute('data-original-stock');
@@ -123,6 +138,14 @@ document.addEventListener('DOMContentLoaded', function () {
           alert('No puede agregar stock ni dejar sin cambios cuando el motivo es "Venta".');
         }
         stockInput.focus();
+        return false;
+      }
+      
+      // Validate boleta code for sales
+      if (boletaCodigoInput && (!boletaCodigoInput.value || !boletaCodigoInput.value.trim())) {
+        e.preventDefault();
+        alert('Debe ingresar el código de boleta para una venta.');
+        boletaCodigoInput.focus();
         return false;
       }
     }

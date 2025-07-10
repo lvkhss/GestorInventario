@@ -16,7 +16,9 @@
     {% for mov in movimientos %}
     <tr>
       <td>{{ mov.codigo_barras }}</td>
-      <td>{{ mov.nombre_producto }}</td>
+      <td style="max-width: 180px; word-wrap: break-word; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ mov.nombre_producto }}">
+        {{ mov.nombre_producto|truncatechars:35 }}
+      </td>
       <!-- <td>
         {% if mov.usuario %}
         {{ mov.usuario.username }}
