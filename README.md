@@ -54,20 +54,6 @@
 
 ---
 
-## 🖼️ Capturas de Pantalla
-
-<div align="center">
-
-### Dashboard Principal
-<img src="https://via.placeholder.com/800x400/667eea/ffffff?text=Dashboard+Principal" alt="Dashboard" width="70%">
-
-### Sistema de Carrito
-<img src="https://via.placeholder.com/400x300/764ba2/ffffff?text=Carrito+Interactivo" alt="Carrito" width="35%"> <img src="https://via.placeholder.com/400x300/2f855a/ffffff?text=Recibo+de+Venta" alt="Recibo" width="35%">
-
-</div>
-
----
-
 ## 🚀 Instalación Rápida
 
 ### Prerrequisitos
