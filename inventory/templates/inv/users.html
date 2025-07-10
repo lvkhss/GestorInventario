@@ -47,7 +47,7 @@
           </td>
           <td>{{ user.username }}</td>
           <td>{{ user.email }}</td>
-          <td>{{ user.date_joined|date:"Y-m-d H:i:s" }}</td>
+          <td>{{ user.date_joined|date:"d/m/Y H:i"}}</td>
           <td>
             <a href="{% url 'user_edit' user.pk %}" class="btn btn-sm btn-warning">Editar</a>
             <a href="{% url 'user_delete' user.pk %}" class="btn btn-sm btn-danger"
