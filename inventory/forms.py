@@ -229,7 +229,7 @@ class SupplierForm(forms.ModelForm):
                 raise ValidationError('El cuerpo del RUT solo puede contener números.')
             
             # Validar longitud del cuerpo (7-8 dígitos)
-            if len(cuerpo) < 7 or len(cuerpo) > 6:
+            if len(cuerpo) < 7 or len(cuerpo) > 8:
                 raise ValidationError('El RUT debe tener entre 7 y 8 dígitos.')
             
             # Validar que no empiece con 0

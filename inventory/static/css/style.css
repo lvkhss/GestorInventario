@@ -78,7 +78,6 @@
 
 
 html, body {
-    overflow-y: scroll !important;
     overflow-x: hidden;
   font-family: 'Nunito', Arial, sans-serif;
   background-color: #ffffff;
@@ -95,7 +94,7 @@ html, body {
   flex-direction: column;
   background-color: #354e66;
   width: 200px;
-  height: 100vh; /* Cambiado de 100% a 100vh para altura fija de pantalla */
+  height: 100vh; 
   position: fixed;
   box-shadow: 6px 4px 6px rgba(0, 0, 0, 0.2);
   z-index: 1000;
@@ -116,20 +115,19 @@ html, body {
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 2vh;
   flex: 1;
 }
 
 .sidebar-nav a {
   color: white;
   text-decoration: none;
-  font-size: 16px;
-  margin-bottom: 10px;
+  font-size: 1.8vh;
+  margin-bottom: 1vh;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 1vh;
   transition: background-color 0.3s ease;
 }
 
@@ -197,6 +195,7 @@ html, body {
   max-width: 100vw;
   box-sizing: border-box;
   padding-bottom: 2em;
+  overflow-x: auto;
 }
 
 .fixed-table {
@@ -204,6 +203,9 @@ html, body {
   width: 90vw;
   min-width: 320px;
   max-width: 100%;
+  overflow-x: auto;
+  display: block;
+  white-space: nowrap;
 }
 
 .fixed-table th,
@@ -481,10 +483,54 @@ html, body {
   font-size: 0.9rem;
 }
 
-@media (max-width: 2vh) and (max-height: 2vh) {
+/* Responsive design for smaller screens */
+@media (max-width: 1366px) {
   .table-container {
     padding-left: 0.5em;
     padding-right: 0.5em;
+  }
+
+  .fixed-table {
+    width: 95vw;
+    min-width: 0;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.8em 0.5em;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 1280px) {
+  .table-container {
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+  }
+
+  .fixed-table {
+    width: 98vw;
+    min-width: 0;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.7em 0.4em;
+    font-size: 0.85rem;
+  }
+
+  /* Adjust column names for smaller screens */
+  .col-nombre {
+    min-width: 180px;
+    max-width: 300px;
+    width: 35%;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    padding-left: 0.2em;
+    padding-right: 0.2em;
   }
 
   .fixed-table {
@@ -494,8 +540,14 @@ html, body {
 
   .table th,
   .table td {
-    padding: 0.6em;
-    font-size: 0.9rem;
+    padding: 0.5em 0.3em;
+    font-size: 0.8rem;
+  }
+
+  .col-nombre {
+    min-width: 150px;
+    max-width: 250px;
+    width: 30%;
   }
 }
 /* checkbox Admin y superuser*/
@@ -1255,9 +1307,29 @@ margin-left: 25%;
 }
 
 
+@media (max-width: 1366px) {
+  .main-content, .container {
+    max-width: calc(100vw - 200px);
+    margin-left: 200px;
+    padding: 0 1rem;
+  }
+}
+
 @media (max-width: 1280px) {
   .main-content, .container {
     max-width: calc(100vw - 200px);
+    margin-left: 200px;
+    padding: 0 0.5rem;
+  }
+  
+  /* Make sidebar narrower on very small screens */
+  .sidebar {
+    width: 180px;
+  }
+  
+  .main-content, .container {
+    max-width: calc(100vw - 180px);
+    margin-left: 180px;
   }
 }
 
@@ -1317,4 +1389,237 @@ margin-left: 25%;
   display: block;
   margin: 0 auto;
   color: inherit;
+}
+
+/* Responsive adjustments for table actions ONLY */
+@media (max-width: 1280px) {
+  .table-action-group {
+    gap: 3px;
+  }
+  
+  .table-action-group .cart-inv-btn,
+  .table-action-group .btn-action-sm {
+    padding: 3px 5px;
+    min-width: 24px;
+    min-height: 24px;
+  }
+  
+  /* Only affect SVGs inside table action groups */
+  .table-action-group svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-action-group {
+    gap: 2px;
+    flex-wrap: wrap;
+  }
+  
+  .table-action-group .cart-inv-btn,
+  .table-action-group .btn-action-sm {
+    padding: 2px 4px;
+    min-width: 20px;
+    min-height: 20px;
+  }
+  
+  /* Only affect SVGs inside table action groups */
+  .table-action-group svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+}
+
+/* Ensure sidebar icons maintain proper size */
+.sidebar-nav svg,
+.sidebar-footer svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* === DETALLE CART SALE STYLES === */
+
+/* Sale detail header */
+.sale-detail-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.sale-detail-header h3 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.sale-detail-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.sale-info-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.sale-info-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sale-info-value {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Sale detail table */
+.sale-detail-table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-top: 2rem;
+}
+
+.sale-detail-table .table {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.sale-detail-table thead {
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+}
+
+.sale-detail-table thead th {
+  color: white;
+  font-weight: 600;
+  padding: 1rem;
+  border: none;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.sale-detail-table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.sale-detail-table tbody tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.sale-detail-table tbody tr:hover {
+  background-color: #edf2f7;
+  transition: background-color 0.2s ease;
+}
+
+/* Product ID column styling */
+.sale-detail-table .product-id {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #4a5568;
+  background-color: #edf2f7;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+/* Product name styling */
+.sale-detail-table .product-name {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+/* Quantity styling */
+.sale-detail-table .quantity {
+  text-align: center;
+  font-weight: 600;
+  color: #2b6cb0;
+}
+
+/* Price styling */
+.sale-detail-table .price {
+  text-align: right;
+  font-weight: 600;
+  color: #2f855a;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Total footer styling */
+.sale-detail-table tfoot {
+  background: linear-gradient(135deg, #2f855a 0%, #38a169 100%);
+}
+
+.sale-detail-table tfoot th {
+  color: white;
+  font-weight: 700;
+  padding: 1.2rem 1rem;
+  border: none;
+  font-size: 1.1rem;
+}
+
+.sale-detail-table .total-amount {
+  font-size: 1.3rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive design for sale detail */
+@media (max-width: 768px) {
+  .sale-detail-header {
+    padding: 1.5rem;
+  }
+  
+  .sale-detail-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .sale-detail-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .sale-detail-table {
+    font-size: 0.85rem;
+  }
+  
+  .sale-detail-table thead th,
+  .sale-detail-table tbody td,
+  .sale-detail-table tfoot th {
+    padding: 0.8rem 0.5rem;
+  }
+  
+  .sale-detail-table .total-amount {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .sale-detail-table {
+    font-size: 0.8rem;
+  }
+  
+  .sale-detail-table thead th,
+  .sale-detail-table tbody td,
+  .sale-detail-table tfoot th {
+    padding: 0.6rem 0.4rem;
+  }
+  
+  .product-id {
+    font-size: 0.75rem !important;
+  }
 }

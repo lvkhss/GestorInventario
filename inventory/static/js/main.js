@@ -377,6 +377,7 @@ function validateRUT(rut) {
     const cleanRUT = rut.replace(/[.-]/g, '');
 
     // Verificar formato básico (mínimo 8 caracteres, máximo 9)
+    // El cuerpo puede tener de 7 a 8 dígitos + 1 dígito verificador = 8 a 9 caracteres total
     if (cleanRUT.length < 8 || cleanRUT.length > 9) {
         return false;
     }
@@ -384,6 +385,11 @@ function validateRUT(rut) {
     // Separar cuerpo y dígito verificador
     const cuerpo = cleanRUT.slice(0, -1);
     const dv = cleanRUT.slice(-1).toLowerCase();
+
+    // Verificar que el cuerpo tenga entre 7 y 8 dígitos
+    if (cuerpo.length < 7 || cuerpo.length > 8) {
+        return false;
+    }
 
     // Verificar que el cuerpo sean solo números
     if (!/^\d+$/.test(cuerpo)) {
@@ -700,15 +706,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Only display items in the cart (no add/remove/qty/checkout logic)
   const cartList = document.getElementById('cart_items_list');
   if (!panel || !cartList) return;
-  function getCart() {
-    try {
-      return JSON.parse(localStorage.getItem('cart_items') || '{}');
-    } catch { return {}; }
-  }
+  
   function renderCart() {
     const cart = getCart();
     cartList.innerHTML = '';
     let total = 0;
+    updateCartCounter(); // Update counter when rendering cart
+    
     for (const [id, data] of Object.entries(cart)) {
       const li = document.createElement('li');
       li.style.display = 'flex';
@@ -829,6 +833,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (action === 'increase') {
           if (stockNum === null || cart[id].quantity < stockNum) {
             cart[id].quantity += 1;
+            triggerCartWiggle(); // Trigger animation on increase
           }
         } else if (action === 'decrease') {
           if (cart[id].quantity > 1) {
@@ -866,9 +871,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (cart[id]) {
           if (stockNum === null || cart[id].quantity < stockNum) {
             cart[id].quantity += 1;
+            triggerCartWiggle(); // Trigger animation when adding to existing item
           }
         } else {
           cart[id] = { id: id, name: name, price: price, quantity: 1, stock: stock };
+          triggerCartWiggle(); // Trigger animation when adding new item
         }
         localStorage.setItem('cart_items', JSON.stringify(cart));
         renderCart();
@@ -877,8 +884,9 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
-  // Render cart on load (from localStorage)
+  // Render cart on load (from localStorage) and update counter
   renderCart();
+  updateCartCounter();
 });
 
 // Checkout: send cart to backend (must be inside DOMContentLoaded for cart panel)
@@ -927,6 +935,7 @@ document.addEventListener('DOMContentLoaded', function() {
           localStorage.removeItem('cart_items');
           if (cartCodeInput) cartCodeInput.value = '';
           renderCart();
+          updateCartCounter(); // Update counter after checkout
           alert('¡Movimiento registrado con éxito!');
         } else {
           alert(data.error || 'Error al finalizar la operación.');
@@ -1023,3 +1032,72 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// ===================================
+// CART PANEL - Animation and Counter Styles
+// ===================================
+// Add CSS for wiggle animation
+const cartStyles = `
+  @keyframes wiggle {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+    75% { transform: rotate(-3deg); }
+    100% { transform: rotate(0deg); }
+  }
+  
+  .cart-wiggle {
+    animation: wiggle 0.5s ease-in-out;
+  }
+`;
+
+// Inject styles into the page
+if (!document.getElementById('cart-animation-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'cart-animation-styles';
+  styleSheet.textContent = cartStyles;
+  document.head.appendChild(styleSheet);
+}
+
+// ===================================
+// CART PANEL - Counter and Animation Functions
+// ===================================
+function updateCartCounter() {
+  const cart = getCart();
+  const counter = document.getElementById('cart-counter');
+  const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+  
+  if (counter) {
+    if (totalItems > 0) {
+      counter.style.display = 'flex';
+      counter.textContent = totalItems > 99 ? '99+' : totalItems.toString();
+    } else {
+      counter.style.display = 'none';
+    }
+  }
+}
+
+function triggerCartWiggle() {
+  const cartBtn = document.getElementById('slideout-btn');
+  if (cartBtn) {
+    cartBtn.classList.remove('cart-wiggle');
+    // Force reflow
+    cartBtn.offsetHeight;
+    cartBtn.classList.add('cart-wiggle');
+    
+    // Remove class after animation
+    setTimeout(() => {
+      cartBtn.classList.remove('cart-wiggle');
+    }, 500);
+  }
+}
+
+function getCart() {
+  try {
+    return JSON.parse(localStorage.getItem('cart_items') || '{}');
+  } catch { 
+    return {}; 
+  }
+}
+
+// ===================================

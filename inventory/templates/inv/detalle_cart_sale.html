@@ -1,35 +1,74 @@
+{% extends 'inv/base.html' %}
 {% load static %}
 {% load number_filters %}
+{% block body %}
 
-<h3>Detalle de Venta #{{ sale.id }}</h3>
-<p>Usuario: {{ sale.user.username }}</p>
-<p>Código documento: {{ sale.cart_code }}</p>
-<p>Fecha: {{ sale.created_at|date:"d-m-Y H:i" }}</p>
-<table class="table">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Producto</th>
-      <th>Cantidad</th>
-      <th>Precio unitario</th>
-      <th>Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for item in items %}
-    <tr>
-      <td>{{ item.producto.id }}</td>
-      <td>{{ item.producto.name }}</td>
-      <td>{{ item.quantity }}</td>
-      <td>${{ item.price_at_sale }}</td>
-      <td>${{ item.quantity|mul:item.price_at_sale }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-  <tfoot>
-    <tr>
-      <th colspan="4" class="text-end">Total general:</th>
-      <th>${{ sale.total|comma_miles }}</th>
-    </tr>
-  </tfoot>
-</table>
+<div class="center-content">
+  <ul class="list-group detalle-boleta">
+    <li class="list-group-item">
+      <span class="label">N° Venta :</span>
+      <span class="dots"></span>
+      <span class="value">#{{ sale.id }}</span>
+    </li>
+    <li class="list-group-item">
+      <span class="label">Código documento :</span>
+      <span class="dots"></span>
+      <span class="value">{{ sale.cart_code }}</span>
+    </li>
+    <li class="list-group-item">
+      <span class="label">Usuario :</span>
+      <span class="dots"></span>
+      <span class="value">{{ sale.user.username }}</span>
+    </li>
+    <li class="list-group-item">
+      <span class="label">Fecha :</span>
+      <span class="dots"></span>
+      <span class="value">{{ sale.created_at|date:"d/m/Y H:i" }}</span>
+    </li>
+    <li class="list-group-item">
+      <span class="label">Total Items :</span>
+      <span class="dots"></span>
+      <span class="value">{{ sale.total_units }}</span>
+    </li>
+    
+    <!-- Separator line -->
+    <li class="list-group-item" style="border-top: 1px dashed #999; margin: 1rem 0; padding: 0.5rem 0;">
+      <span style="width: 100%; text-align: center; font-weight: bold;">DETALLE DE PRODUCTOS</span>
+    </li>
+    
+    <!-- Products table within receipt -->
+    <li class="list-group-item" style="padding: 0;">
+      <table style="width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 0.8rem; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid #999;">
+            <th style="text-align: left; padding: 0.3rem 0; font-weight: bold;">PRODUCTO</th>
+            <th style="text-align: center; padding: 0.3rem 0; font-weight: bold;">CANT</th>
+            <th style="text-align: right; padding: 0.3rem 0; font-weight: bold;">PRECIO</th>
+            <th style="text-align: right; padding: 0.3rem 0; font-weight: bold;">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr style="border-bottom: 1px dotted #ccc;">
+            <td style="padding: 0.3rem 0; text-align: left;">{{ item.producto.name }} (#{{ item.producto.id }})</td>
+            <td style="padding: 0.3rem 0; text-align: center;">{{ item.quantity }}</td>
+            <td style="padding: 0.3rem 0; text-align: right;">${{ item.price_at_sale|comma_miles }}</td>
+            <td style="padding: 0.3rem 0; text-align: right;">${{ item.quantity|mul:item.price_at_sale|comma_miles }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </li>
+    
+    <!-- Total section -->
+    <li class="list-group-item" style="border-top: 2px solid #333; margin: 1rem 0; padding: 0.8rem 0;">
+      <span class="label" style="font-weight: bold; font-size: 1.1em;">TOTAL GENERAL :</span>
+      <span class="dots"></span>
+      <span class="value" style="font-weight: bold; font-size: 1.2em;">${{ sale.total|comma_miles }}</span>
+    </li>
+    
+    <button type="button" class="btn-login" onclick="window.location.href='{% url 'historial' %}';">Volver</button>
+  </ul>
+</div>
+
+{% endblock %}
