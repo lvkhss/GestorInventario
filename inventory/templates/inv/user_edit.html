@@ -155,15 +155,12 @@
 
     <div class="add-product-group">
       <div class="add-product-btn-wrap">
-        {% if user_obj.pk == user.pk %}
-          <button type="button" class="registro-btn" onclick="history.back()">Volver</button>
+  
+
+          <button type="button" class="add-product-btn" onclick="history.back()">
             Cancelar
           </button>
-        {% else %}
-          <button type="button" class="add-product-btn" onclick="window.location.href='{% url 'users_view' %}'">
-            Cancelar
-          </button>
-        {% endif %}
+
         <button type="submit" class="add-product-btn">
           Actualizar Usuario
         </button>
