@@ -25,6 +25,11 @@ class ProductType(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            self.is_active = True
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
