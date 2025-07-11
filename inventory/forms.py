@@ -7,6 +7,12 @@ import re
 
 class ProductoForm(forms.ModelForm):
     """Dynamic form for the new unified Producto model"""
+    product_type = forms.ModelChoiceField(
+        queryset=ProductType.objects.all(),
+        required=True,
+        label="Tipo de producto"
+    )
+
     class Meta:
         model = Producto
         fields = ['name', 'product_type', 'price', 'stock', 'codigo_barras']
@@ -21,7 +27,7 @@ class ProductoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # CRITICAL: Only show existing active product types - NO creation allowed
-        self.fields['product_type'].queryset = ProductType.objects.filter(is_active=True)
+        self.fields['product_type'].queryset = ProductType.objects.all()
         self.fields['product_type'].empty_label = "-- Seleccione un tipo --"
         
         # Make sure the field cannot create new objects
@@ -92,6 +98,11 @@ class ProductTypeForm(forms.ModelForm):
             'description': 'Descripción',
             'is_active': 'Activo'
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self.fields['is_active'].initial = True
     
     def clean_name(self):
         name = self.cleaned_data.get('name')
